@@ -129,8 +129,8 @@ Astro 6  +  Starlight  +  MDX  +  Pagefind  +  Vercel
 ### Instalación
 
 ```bash
-git clone https://github.com/zackness/aprende-pic18.git
-cd aprende-pic18
+git clone https://github.com/Zackness/AprendePIC18.git
+cd AprendePIC18
 npm install
 ```
 
