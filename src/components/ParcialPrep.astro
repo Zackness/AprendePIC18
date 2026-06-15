@@ -84,7 +84,9 @@ function tutorialHref(practiceSlug: string) {
 	<section class="parcial-prep__section">
 		<h2>{isEn ? '3. Take the partial exam below' : '3. Presenta el examen del parcial abajo'}</h2>
 		<p class="parcial-prep__hint">
-			{isEn ? 'Minimum 70% to pass. Sign in with CALETAS to save progress.' : 'Minimo 70% para aprobar. Inicia sesion en CALETAS para guardar el progreso.'}
+			{isEn
+				? 'Minimum 70% to pass. A CALETAS account is required to take this exam and save your result.'
+				: 'Minimo 70% para aprobar. Cuenta CALETAS obligatoria para presentar este examen y guardar el resultado.'}
 		</p>
 	</section>
 </div>

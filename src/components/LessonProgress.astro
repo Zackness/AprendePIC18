@@ -1,5 +1,5 @@
 ---
-import { getQuizBySlug } from '../data/quizzes';
+import { getQuizBySlug, isQuizAuthRequired } from '../data/quizzes';
 
 interface Props {
 	slug: string;
@@ -10,6 +10,7 @@ const { slug, locale = 'es' } = Astro.props;
 const isEn = locale === 'en';
 const quiz = getQuizBySlug(slug);
 const totalQuestions = quiz?.questions.length ?? 0;
+const authRequired = isQuizAuthRequired(slug);
 ---
 
 <aside class="lesson-progress" data-lesson-progress data-lesson-slug={slug}>
@@ -25,9 +26,13 @@ const totalQuestions = quiz?.questions.length ?? 0;
 	{
 		totalQuestions > 0 && (
 			<p class="lesson-progress__quiz-hint">
-				{isEn
-					? `Complete the interactive exam (${totalQuestions} questions) at the end to pass this lesson.`
-					: `Completa el examen interactivo (${totalQuestions} preguntas) al final para aprobar esta clase.`}
+				{authRequired
+					? isEn
+						? `Sign in with CALETAS to take the exam (${totalQuestions} questions) and save your result.`
+						: `Inicia sesion en CALETAS para presentar el examen (${totalQuestions} preguntas) y guardar tu resultado.`
+					: isEn
+						? `Complete the interactive exam (${totalQuestions} questions) at the end. Progress is saved in your browser; sign in with CALETAS to sync everything to your account.`
+						: `Completa el examen interactivo (${totalQuestions} preguntas) al final. El progreso se guarda en el navegador; inicia sesion en CALETAS para sincronizar todo en tu cuenta.`}
 			</p>
 		)
 	}

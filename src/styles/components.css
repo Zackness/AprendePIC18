@@ -1040,6 +1040,15 @@
 	color: var(--ap-amber-400);
 }
 
+.interactive-quiz__body {
+	min-height: 12rem;
+	position: relative;
+}
+
+.interactive-quiz__content-wrap {
+	position: relative;
+}
+
 .interactive-quiz__login-hint {
 	background: rgba(34, 211, 238, 0.06);
 	border: 1px solid rgba(34, 211, 238, 0.2);
@@ -1047,6 +1056,106 @@
 	margin-top: 1rem;
 	padding: 0.85rem 1rem;
 	text-align: center;
+}
+
+.interactive-quiz--locked .interactive-quiz__body {
+	filter: blur(0);
+}
+
+.interactive-quiz--locked .interactive-quiz__content-wrap {
+	filter: blur(7px);
+	pointer-events: none;
+	user-select: none;
+}
+
+.interactive-quiz__auth-overlay {
+	align-items: center;
+	display: flex;
+	inset: 0;
+	justify-content: center;
+	padding: 1.5rem 1rem;
+	position: absolute;
+	z-index: 2;
+}
+
+.interactive-quiz__auth-overlay[hidden] {
+	display: none !important;
+}
+
+.interactive-quiz__auth-modal {
+	background: rgba(12, 18, 32, 0.96);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 1rem;
+	box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+	max-width: 22rem;
+	padding: 2rem 1.75rem 1.5rem;
+	text-align: center;
+	width: 100%;
+}
+
+.interactive-quiz__auth-lock {
+	align-items: center;
+	background: rgba(245, 158, 11, 0.12);
+	border: 1px solid rgba(245, 158, 11, 0.35);
+	border-radius: 0.75rem;
+	color: var(--ap-amber-400);
+	display: inline-flex;
+	height: 3rem;
+	justify-content: center;
+	margin: 0 auto 1rem;
+	width: 3rem;
+}
+
+.interactive-quiz__auth-title {
+	color: var(--sl-color-white);
+	font-size: 1.35rem;
+	font-weight: 800;
+	margin: 0 0 0.45rem;
+}
+
+.interactive-quiz__auth-subtitle {
+	color: var(--sl-color-gray-3);
+	font-size: 0.9rem;
+	line-height: 1.45;
+	margin: 0 0 1.35rem;
+}
+
+.interactive-quiz__auth-actions {
+	display: flex;
+	gap: 0.65rem;
+	justify-content: center;
+}
+
+.interactive-quiz__auth-btn {
+	align-items: center;
+	border: 1px solid transparent;
+	border-radius: 0.65rem;
+	display: inline-flex;
+	flex: 1;
+	font-size: 0.92rem;
+	font-weight: 700;
+	gap: 0.45rem;
+	justify-content: center;
+	min-height: 2.75rem;
+	padding: 0.55rem 0.85rem;
+	text-decoration: none;
+	transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.interactive-quiz__auth-btn:hover {
+	filter: brightness(1.06);
+	transform: translateY(-1px);
+}
+
+.interactive-quiz__auth-btn--google {
+	background: #fff;
+	color: #1f2937;
+}
+
+.interactive-quiz__auth-btn--github {
+	background: #2d333b;
+	border-color: rgba(255, 255, 255, 0.12);
+	color: #fff;
 }
 
 .interactive-quiz__login-btn {

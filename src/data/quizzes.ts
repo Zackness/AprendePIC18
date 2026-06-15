@@ -17,6 +17,21 @@ export interface PageQuiz {
 	questions: QuizQuestion[];
 }
 
+/**
+ * Solo los examenes de "Comienza aqui" (introduccion) se pueden intentar sin cuenta;
+ * el progreso se guarda en el navegador hasta iniciar sesion en CALETAS.
+ * Todos los demas (fundamentos, parciales, practicas, etc.) requieren cuenta.
+ */
+export const quizAuthOptionalSlugs = new Set([
+	'introduccion/pic18f4550',
+	'introduccion/comparaciones',
+]);
+
+export function isQuizAuthRequired(slug: string): boolean {
+	const normalized = slug.replace(/^\/+|\/+$/g, '').replace(/^en\//, '');
+	return !quizAuthOptionalSlugs.has(normalized);
+}
+
 /** Banco de examenes por slug de pagina (sin prefijo /en/) */
 export const pageQuizzes: PageQuiz[] = [
 	{

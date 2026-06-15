@@ -3,6 +3,7 @@
  * Flujo similar a Zeno Notes: redirect a caleta.top → callback con token JWT.
  */
 
+import { isQuizAuthRequired } from '../data/quizzes';
 const STORAGE_TOKEN = 'aprende-pic18-caleta-token';
 const STORAGE_USER = 'aprende-pic18-caleta-user';
 const STORAGE_PROGRESS = 'aprende-pic18-progress-local';
@@ -44,7 +45,7 @@ export function isLoggedIn(): boolean {
 	return Boolean(getToken() && getUser()?.id);
 }
 
-export function buildLoginUrl(returnPath?: string): string {
+function buildConnectUrl(returnPath?: string): string {
 	const redirectUri = `${SITE_ORIGIN}/auth/callback`;
 	const state = btoa(
 		JSON.stringify({
@@ -57,6 +58,22 @@ export function buildLoginUrl(returnPath?: string): string {
 		state,
 	});
 	return `${CALETA_ORIGIN}/aprende-pic18/connect?${params}`;
+}
+
+export function buildLoginUrl(returnPath?: string): string {
+	return buildConnectUrl(returnPath);
+}
+
+/** OAuth directo (Google) con retorno al flujo connect de AprendePIC18 */
+export function buildCaletaSocialLoginUrl(provider: 'google', returnPath?: string): string {
+	const callbackURL = encodeURIComponent(buildConnectUrl(returnPath));
+	return `${CALETA_ORIGIN}/api/auth/sign-in/social/${provider}?callbackURL=${callbackURL}`;
+}
+
+/** Login CALETAS (email u otros proveedores en la pagina de acceso) */
+export function buildCaletaLoginPageUrl(returnPath?: string): string {
+	const connectUrl = buildConnectUrl(returnPath);
+	return `${CALETA_ORIGIN}/login?callbackUrl=${encodeURIComponent(connectUrl)}`;
 }
 
 export function logout() {
@@ -84,6 +101,8 @@ function saveLocalProgress(data: Record<string, unknown>) {
 }
 
 export function saveQuizResult(slug: string, result: QuizResult) {
+	if (isQuizAuthRequired(slug) && !isLoggedIn()) return;
+
 	const data = loadLocalProgress();
 	if (!data.quizzes) data.quizzes = {};
 	(data.quizzes as Record<string, QuizResult>)[slug] = {
@@ -93,7 +112,11 @@ export function saveQuizResult(slug: string, result: QuizResult) {
 	saveLocalProgress(data);
 
 	if (isLoggedIn()) {
-		syncProgressToCaleta(data).catch(() => {});
+		syncProgressToCaleta({
+			...data,
+			checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
+			studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+		}).catch(() => {});
 	}
 }
 
@@ -144,18 +167,40 @@ export async function fetchProgressFromCaleta() {
 
 function mergeRemoteProgress(remote: Record<string, unknown>) {
 	const local = loadLocalProgress();
-	const merged = { ...local, ...remote };
-	if (remote.quizzes && local.quizzes) {
-		merged.quizzes = { ...(remote.quizzes as object), ...(local.quizzes as object) };
+	const merged: Record<string, unknown> = { ...remote, ...local };
+
+	const remoteQuizzes = (remote.quizzes as Record<string, QuizResult> | undefined) || {};
+	const localQuizzes = (local.quizzes as Record<string, QuizResult> | undefined) || {};
+	if (Object.keys(remoteQuizzes).length || Object.keys(localQuizzes).length) {
+		merged.quizzes = { ...remoteQuizzes, ...localQuizzes };
 	}
+
 	saveLocalProgress(merged);
 
-	if (remote.checklists) {
-		localStorage.setItem(STORAGE_CHECKLISTS, JSON.stringify(remote.checklists));
-	}
-	if (remote.studyPath) {
-		localStorage.setItem(STORAGE_STUDY_PATH, JSON.stringify(remote.studyPath));
-	}
+	const localChecklists = JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}');
+	const remoteChecklists = (remote.checklists as Record<string, unknown>) || {};
+	localStorage.setItem(
+		STORAGE_CHECKLISTS,
+		JSON.stringify({ ...remoteChecklists, ...localChecklists }),
+	);
+
+	const localStudyPath = JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}');
+	const remoteStudyPath = (remote.studyPath as Record<string, unknown>) || {};
+	localStorage.setItem(
+		STORAGE_STUDY_PATH,
+		JSON.stringify({ ...remoteStudyPath, ...localStudyPath }),
+	);
+}
+
+/** Sube progreso local (quizzes opcionales, ruta, checklists) a CALETAS tras iniciar sesion */
+export async function pushLocalProgressToCaleta() {
+	if (!isLoggedIn()) return null;
+	await fetchProgressFromCaleta().catch(() => null);
+	return syncProgressToCaleta({
+		...loadLocalProgress(),
+		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
+		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+	});
 }
 
 export function handleAuthCallback() {
@@ -185,7 +230,13 @@ export function handleAuthCallback() {
 	}
 
 	fetchProgressFromCaleta()
-		.then(() => syncProgressToCaleta())
+		.then(() =>
+			syncProgressToCaleta({
+				...loadLocalProgress(),
+				checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
+				studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+			}),
+		)
 		.finally(() => {
 			window.history.replaceState({}, '', returnTo);
 			window.location.href = returnTo;
@@ -204,6 +255,19 @@ export function initCaletaAuth() {
 		});
 	});
 
+	document.querySelectorAll('[data-caleta-login-social]').forEach((el) => {
+		if (el.getAttribute('data-auth-init') === '1') return;
+		el.setAttribute('data-auth-init', '1');
+		el.addEventListener('click', (e) => {
+			e.preventDefault();
+			const provider = el.getAttribute('data-caleta-login-social');
+			window.location.href =
+				provider === 'google'
+					? buildCaletaSocialLoginUrl('google')
+					: buildCaletaLoginPageUrl();
+		});
+	});
+
 	document.querySelectorAll('[data-caleta-logout]').forEach((el) => {
 		if (el.getAttribute('data-auth-init') === '1') return;
 		el.setAttribute('data-auth-init', '1');
@@ -216,7 +280,14 @@ export function initCaletaAuth() {
 	updateAuthUI();
 
 	if (isLoggedIn()) {
-		fetchProgressFromCaleta().catch(() => {});
+		pushLocalProgressToCaleta().catch(() => {});
+	}
+}
+
+function onAuthChange() {
+	updateAuthUI();
+	if (isLoggedIn()) {
+		pushLocalProgressToCaleta().catch(() => {});
 	}
 }
 
@@ -236,6 +307,6 @@ function updateAuthUI() {
 }
 
 if (typeof window !== 'undefined') {
-	window.addEventListener('aprende-auth-change', updateAuthUI);
+	window.addEventListener('aprende-auth-change', onAuthChange);
 	window.addEventListener('aprende-quiz-complete', updateAuthUI);
 }

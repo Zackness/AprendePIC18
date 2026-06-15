@@ -30,8 +30,8 @@ export default defineConfig({
 			},
 			social: [
 				{ icon: 'github', label: 'zackness', href: 'https://github.com/zackness' },
-				{ icon: 'instagram', label: 'zackness', href: 'https://instagram.com/zackness' },
-				{ icon: 'tiktok', label: 'zackness', href: 'https://tiktok.com/@zackness' },
+				{ icon: 'instagram', label: 'zackness_ofc', href: 'https://instagram.com/zackness_ofc' },
+				{ icon: 'tiktok', label: 'zackness_ofc', href: 'https://tiktok.com/@zackness_ofc' },
 				{ icon: 'external', label: 'StartupVen', href: 'https://startupven.com' },
 				{ icon: 'external', label: 'CALETAS', href: 'https://caleta.top' },
 			],
