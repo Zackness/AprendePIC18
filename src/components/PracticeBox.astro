@@ -1,0 +1,14 @@
+---
+interface Props {
+	title: string;
+	level?: string;
+}
+
+const { title, level = 'Basico' } = Astro.props;
+---
+
+<section class="practice-box">
+	<p class="practice-box__eyebrow">Practica · {level}</p>
+	<h3>{title}</h3>
+	<slot />
+</section>

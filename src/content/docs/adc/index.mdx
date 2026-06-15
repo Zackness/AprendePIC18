@@ -1,0 +1,81 @@
+---
+title: Convertidor Analogico-Digital (ADC)
+description: ADC de 10 bits, 13 canales, ADCON y Practica 7 del curso UNEXPO.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="adc" />
+
+El PIC18F4550 integra un ADC de **10 bits** con **13 canales** analogicos.
+
+<Figure
+	src="/images/adc/canales-analogicos.svg"
+	alt="Mapa de canales analogicos AN0 a AN12 en puertos A, B y E"
+	caption="Distribucion de los 13 canales ADC. RA4 no es analogico."
+	credit="Tema 9 CAD — basado en datasheet PIC18F4550"
+/>
+
+<Figure
+	src="/images/pdf/adc/page-3.png"
+	alt="Figura 9.1: funciones basicas en un sistema de medida"
+	caption="Cadena sensor → procesador → comunicacion. El ADC digitaliza la senal analogica del sensor."
+	credit="Tema 9 — Convertidor A/D · UNEXPO"
+/>
+
+<Figure
+	src="/images/pdf/adc/page-5.png"
+	alt="Figuras 9.2 y 9.3: acondicionamiento de senal y caracteristica de transferencia del ADC"
+	caption="Acondicionador de senal antes del ADC y curva de cuantizacion (aproximaciones sucesivas)."
+	credit="Tema 9 — Convertidor A/D · UNEXPO"
+/>
+
+<AIExplain title="Voltaje digital">
+Con Vref=5V y 10 bits, 1 LSB ≈ 4,88 mV. Resultado en ADRESH:ADRESL segun formato ADFM.
+</AIExplain>
+
+## Canales analogicos
+
+| Puerto | Pines |
+| --- | --- |
+| A | RA0/AN0, RA1/AN1, RA2/AN2, RA3/AN3, RA5/AN4 |
+| B | RB0/AN12, RB1/AN10, RB2/AN8, RB3/AN9, RB4/AN11 |
+| E | RE0/AN5, RE1/AN6, RE2/AN7 |
+
+**Nota:** RA4 no es analogico.
+
+## Registros
+
+- `ADCON0` — canal, GO/DONE, ADON
+- `ADCON1` — configuracion digital/analogico (PCFG)
+- `ADCON2` — reloj de conversion y formato (ADFM)
+- `ADRESH`, `ADRESL` — resultado
+
+## Pasos de conversion
+
+1. Configurar entradas analogicas (`ADCON1`)
+2. Configurar pines como entrada (`TRIS`)
+3. Seleccionar canal y encender ADC (`ADCON0`)
+4. Esperar tiempo de adquisicion (TACQ)
+5. Iniciar conversion (`GO/DONE = 1`)
+6. Esperar `GO/DONE = 0`
+7. Leer `ADRESH:ADRESL`
+
+```asm
+CONFIGURAR_ADC:
+        MOVLW   B'00001110'   ; AN0 analogico, resto digital
+        MOVWF   ADCON1
+        MOVLW   B'00000001'
+        MOVWF   TRISA        ; RA0 entrada
+        RETURN
+```
+
+<PracticeBox title="Practica 7 - Convertidor AD" level="Laboratorio">
+Lee un potenciometro o sensor analogico, convierte el valor y muestralo en LCD o LEDs. Usa cristal 20 MHz: selecciona 16 Tosc en ADCS (101 en ADCON2).
+</PracticeBox>
+
+<TopicQuiz slug="adc" />

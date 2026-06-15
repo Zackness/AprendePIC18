@@ -1,0 +1,36 @@
+---
+title: USB en PIC18F4550
+description: Introduccion al modulo USB Full-Speed del PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<LessonProgress slug="comunicacion/usb" />
+
+
+
+El PIC18F4550 es conocido por integrar **USB 2.0 Full Speed** (12 Mbps), lo que lo diferencia de muchos PIC sin USB.
+
+<AIExplain title="Aplicacion tipica">
+Dispositivos HID (teclado, mouse emulado), CDC (puerto serial virtual) y almacenamiento masivo con stack USB de Microchip.
+</AIExplain>
+
+## Caracteristicas
+
+- Transceptor integrado
+- Buffers DMA internos
+- Interrupciones USB dedicadas
+- Requiere stack de firmware (USB Framework de Microchip)
+
+## Consideraciones
+
+- Config bits especificos para USB
+- Oscilador preciso (cristal 20 MHz comun en el curso)
+- Resistencias y capacitor en D+/D- segun datasheet
+- Mas complejo que UART; tipicamente se usa C con MCC o ejemplos de Microchip
+
+Para el parcial teorico basta con saber que el PIC18F4550 tiene modulo USB y puede generar interrupciones USB.
+
+<TopicQuiz slug="comunicacion/usb" />

@@ -1,0 +1,71 @@
+---
+title: Interrupciones
+description: ISR, vectores, INTCON, prioridades y fuentes de interrupcion del PIC18F4550.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="interrupciones" />
+
+Las interrupciones permiten atender eventos sin polling continuo. Son obligatorias en practicas como teclado matricial y altamente valoradas en el parcial.
+
+<Figure
+	src="/images/interrupciones/flujo-isr.svg"
+	alt="Diagrama de flujo de una interrupcion desde el evento hasta RETFIE"
+	caption="Secuencia completa: detectar evento, guardar contexto, ejecutar ISR, limpiar bandera y retornar con RETFIE."
+	credit="Tema 6 Interrupciones — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+<AIExplain title="Flujo de una ISR">
+1. Detectar evento → 2. Guardar contexto → 3. Saltar al vector → 4. Ejecutar ISR → 5. Limpiar bandera → 6. RETFIE
+</AIExplain>
+
+## Vectores en PIC18F4550
+
+```asm
+        ORG     0x0000
+        GOTO    INICIO
+        ORG     0x0008
+        GOTO    ATENDER_INTERRUPCIONES_H
+        ORG     0x0018
+        GOTO    ATENDER_INTERRUPCIONES_L
+```
+
+## Fuentes principales
+
+1. **Externas:** INT0 (RB0), INT1 (RB1), INT2 (RB2)
+2. **Puerto B:** RB4-RB7 (cambio de estado)
+3. **Timers:** TMR0, TMR1, TMR2, TMR3 overflow
+4. **CCP:** Captura, comparacion, PWM
+5. **ADC:** ADIF al completar conversion
+6. **Serial:** USART, SPI, I2C
+7. **USB**
+
+## Registros clave
+
+- `INTCON.GIE` — habilitacion global
+- `INTCON.PEIE` — interrupciones perifericas
+- `PIE1/PIE2` — habilitar por periferico
+- `PIR1/PIR2` — banderas de interrupcion
+
+## ISR minima para Timer0
+
+```asm
+ATENDER_TIMER0:
+        BCF     T0CON, TMR0ON
+        BCF     INTCON, TMR0IF
+        ; recargar TMR0H/TMR0L
+        ; codigo de la tarea
+        BSF     T0CON, TMR0ON
+        RETFIE
+```
+
+<Exercise title="Por que se debe limpiar TMR0IF antes de salir de la ISR?">
+Si no limpias la bandera, el PIC reentra inmediatamente a la interrupcion creyendo que el evento sigue pendiente.
+</Exercise>
+
+<TopicQuiz slug="interrupciones" />

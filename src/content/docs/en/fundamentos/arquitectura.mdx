@@ -1,0 +1,46 @@
+---
+title: Basic architecture
+description: Internal blocks, memory, and execution cycle of the PIC18F4550.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/arquitectura" locale="en" />
+
+
+
+
+The PIC18F4550 uses a **Harvard-style architecture**, where program memory and data memory are separated. This allows the microcontroller to fetch instructions and handle data through different spaces.
+
+<AIExplain title="Remember this">
+Program and data do not live in the same place. Code goes in Flash; temporary variables go in RAM; persistent data can go in EEPROM.
+</AIExplain>
+
+## Important elements
+
+| Element | Function |
+| --- | --- |
+| `WREG` | Working register. Many operations go through it. |
+| `STATUS` | Stores flags such as zero, carry, and negative. |
+| `BSR` | Selects the memory bank to access registers. |
+| `PC` | Program counter. Points to the next instruction. |
+| `SFR` | Special function registers used to control peripherals. |
+| `GPR` | General purpose registers used as variables. |
+
+## Mental execution cycle
+
+1. The PIC reads an instruction from program memory.
+2. It decodes it.
+3. It executes the operation.
+4. It updates registers, flags, or peripherals.
+5. It moves to the next instruction unless there is a jump or interrupt.
+
+## Exam-style question
+
+**Why is it important to distinguish SFR and GPR?**
+
+Because SFRs control internal hardware such as ports, timers, and interrupts; GPRs are working memory used as program variables.
+
+<TopicQuiz slug="fundamentos/arquitectura" locale="en" />

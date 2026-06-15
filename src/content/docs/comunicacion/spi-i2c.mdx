@@ -1,0 +1,65 @@
+---
+title: SPI e I2C (MSSP)
+description: Modulo MSSP del PIC18F4550 para comunicacion sincrona SPI e I2C.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="comunicacion/spi-i2c" />
+
+
+
+El modulo **MSSP** (Master Synchronous Serial Port) soporta SPI e I2C.
+
+## SPI (Serial Peripheral Interface)
+
+- Maestro genera reloj (SCK)
+- Lineas: SDO, SDI, SCK, SS (chip select)
+- Full duplex, sincrono
+- Usado con EEPROM seriales, displays, sensores
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p205.png"
+	alt="Formas de onda SPI en modo maestro del PIC18F4550"
+	caption="Formas de onda SPI (modo maestro): relación entre SCK, SDO, SDI y los bits CKP, CKE y SMP."
+	credit="Microchip PIC18F4550 Datasheet — FIGURE 19-3"
+/>
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p208.png"
+	alt="Tabla de modos SPI y registros MSSP"
+	caption="Modos SPI estandar (CKP/CKE) y registros asociados: SSPCON1, SSPSTAT, SSPBUF."
+	credit="Microchip PIC18F4550 Datasheet — TABLE 19-1 y 19-2"
+/>
+
+## I2C (Inter-Integrated Circuit)
+
+- Dos lineas: SDA (dato), SCL (reloj)
+- Modos: Master, Multi-Master, Slave
+- Direccionamiento de dispositivos con 7 u 8 bits
+- Usado con sensores, RTC, memorias
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p217.png"
+	alt="Timing I2C en modo esclavo del PIC18F4550"
+	caption="Timing I2C en modo esclavo: secuencia de dirección, lectura/escritura y ACK."
+	credit="Microchip PIC18F4550 Datasheet — FIGURE 19-8"
+/>
+
+<AIExplain title="Diferencia clave">
+SPI es mas rapido y simple (mas pines). I2C usa menos pines y permite multiples esclavos en el mismo bus.
+</AIExplain>
+
+## Registros MSSP
+
+- `SSPCON1`, `SSPCON2` — control
+- `SSPSTAT` — estado
+- `SSPBUF` — buffer de datos
+- `SSPADD` — direccion I2C (modo esclavo)
+
+Consulta el Tema 10 y el datasheet para tablas de configuracion detalladas.
+
+<TopicQuiz slug="comunicacion/spi-i2c" />

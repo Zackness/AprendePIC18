@@ -1,0 +1,69 @@
+---
+title: Timer 0
+description: Configuracion, formula de tiempo y ejemplos del Timer0 en PIC18F4550.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="timers/timer0" />
+
+
+
+
+Timer0 puede funcionar como temporizador (reloj interno Fosc/4) o contador (pulsos externos en RA4/T0CKI).
+
+<AIExplain title="Formula del curso">
+`Tiempo = (4/Fosc) * N * Pre-divisor` donde N = 256-TMR0L (8 bit) o N = 65536-TMR0H:TMR0L (16 bit).
+</AIExplain>
+
+<Figure
+	src="/images/timers/t0con.svg"
+	alt="Mapa de bits del registro T0CON del Timer 0"
+	caption="Bits clave de T0CON: TMR0ON habilita el timer, T08BIT selecciona 8 u 16 bits, PS2:PS0 el pre-escalador."
+	credit="Tema 8 Temporizadores — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+## Registro T0CON
+
+| Bit | Nombre | Funcion |
+| --- | --- | --- |
+| 7 | TMR0ON | 1 = Timer activo |
+| 6 | T08BIT | 1 = modo 8 bit |
+| 5 | T0CS | 0 = interno, 1 = externo |
+| 4 | T0SE | Flanco activo externo |
+| 3 | PSA | 0 = pre-escalador al Timer0 |
+| 2-0 | PS2:PS0 | Pre-divisor 1:2 a 1:256 |
+
+## Ejemplo: 2 segundos con cristal 20 MHz
+
+Con 16 bit y pre-divisor 1:256, TMR0H:TMR0L = 26474 (0x676A).
+
+```asm
+CONFIGURAR_TIMER_0:
+        MOVLW   B'00000111'
+        MOVWF   T0CON
+        MOVLW   B'01100111'
+        MOVWF   TMR0H
+        MOVLW   B'01101010'
+        MOVWF   TMR0L
+        RETURN
+
+RETARDO_TMR0_2S:
+        BCF     INTCON, TMR0IF
+        BSF     T0CON, TMR0ON
+ESPERA:
+        BTFSS   INTCON, TMR0IF
+        GOTO    ESPERA
+        BCF     T0CON, TMR0ON
+        RETURN
+```
+
+<Exercise title="Calcula el tiempo maximo en 8 bit con Fosc=20MHz y pre-divisor 1:256">
+Tiempo = (4/20MHz) * 256 * 256 = 13,1072 ms segun el Tema 8 del el curso de Microcontroladores (UNEXPO).
+</Exercise>
+
+<TopicQuiz slug="timers/timer0" />

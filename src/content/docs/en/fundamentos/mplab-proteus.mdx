@@ -1,0 +1,56 @@
+---
+title: MPLAB v8, MPLAB X, Proteus, and board
+description: Tools used to write, simulate, and test PIC18F4550 code.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AIExplain from '../../../../components/AIExplain.astro';
+
+<LessonProgress slug="fundamentos/mplab-proteus" locale="en" />
+
+
+
+This course focuses mainly on **MPLAB v8** because it is often more compatible with classic MPASM and academic project workflows. **MPLAB X** will also be explained so you understand the modern environment.
+
+<AIExplain title="Real workflow">
+You write assembly in MPLAB, compile a `.hex` file, load it into Proteus for simulation, and finally burn it into a physical board if you have the hardware.
+</AIExplain>
+
+<Tabs>
+	<TabItem label="MPLAB v8">
+		1. Create a project with the wizard.
+		2. Select `PIC18F4550`.
+		3. Use MPASM as the assembler tool.
+		4. Add the `.asm` file.
+		5. Build and generate the `.hex` file.
+	</TabItem>
+	<TabItem label="MPLAB X">
+		1. Create a standalone project.
+		2. Select the device family and `PIC18F4550`.
+		3. Configure a compatible toolchain.
+		4. Add assembly code.
+		5. Build and review errors in the output panel.
+	</TabItem>
+	<TabItem label="Proteus">
+		1. Place the PIC18F4550.
+		2. Connect crystal, power, and components.
+		3. Load the `.hex` file in the PIC properties.
+		4. Set the clock frequency.
+		5. Run the simulation and observe the pins.
+	</TabItem>
+	<TabItem label="Physical board">
+		1. Check power supply.
+		2. Verify oscillator, MCLR, and connections.
+		3. Program the microcontroller.
+		4. Measure outputs with a multimeter or LED.
+		5. Compare real behavior against Proteus.
+	</TabItem>
+</Tabs>
+
+## About AI-generated images
+
+The site will leave room for AI-generated diagrams when useful: architecture visuals, LED wiring, interrupt flow, or memory maps. Each image must be technically reviewed before use, because a beautiful but incorrect image can confuse more than it helps.
+
+<TopicQuiz slug="fundamentos/mplab-proteus" locale="en" />

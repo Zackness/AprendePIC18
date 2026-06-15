@@ -1,0 +1,19 @@
+---
+title: Partial I preparation
+description: Review and interactive exam for Partial I — UNEXPO Topics 1, 2, and 3.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-1" locale="en" />
+
+## When to take this partial
+
+After completing **courses 1, 2, and 3** on the [study path](/en/ruta-de-estudio/#c04): PIC concepts, architecture/registers, and MPASM assembly.
+
+<ParcialPrep parcial={getParcialById('p1')} locale="en" />
+
+<TopicQuiz slug="parcial/parcial-1" locale="en" />

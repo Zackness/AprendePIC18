@@ -1,0 +1,41 @@
+---
+title: Theory exam guide
+description: Base questions and answers to review PIC18F4550 theory.
+---
+
+## Essential questions
+
+### What is the PIC18F4550?
+
+It is an 8-bit microcontroller that integrates CPU, memory, and peripherals such as digital ports, timers, ADC, PWM, serial communication, and USB.
+
+### What is the difference between a microcontroller and a microprocessor?
+
+A microcontroller integrates CPU, memory, and peripherals in one chip. A microprocessor usually needs external components and can run more complex operating systems.
+
+### What is a register?
+
+It is a special memory location used to store data or control internal hardware. For example, `TRISB` configures the direction of PORTB pins.
+
+### What does `TRISx` do?
+
+It defines whether port pins are inputs or outputs. In general, `1` means input and `0` means output.
+
+### What is the difference between `PORTx` and `LATx`?
+
+`PORTx` is used to read the real state of the pins. `LATx` stores the output value written to the port latch.
+
+### Why are interrupts used?
+
+To handle important events without constantly asking if they occurred. An interrupt temporarily changes the program flow.
+
+## Quick checklist
+
+- Harvard architecture.
+- Flash memory, RAM, and EEPROM.
+- SFR and GPR registers.
+- `WREG`, `STATUS`, `BSR`.
+- `TRIS`, `PORT`, `LAT`.
+- Timers and interrupts.
+- ADC and PWM.
+- Build flow: `.asm` to `.hex`.

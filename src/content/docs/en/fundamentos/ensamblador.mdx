@@ -1,0 +1,59 @@
+---
+title: PIC18 assembly
+description: MPASM basics for writing PIC18F4550 programs.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+
+<LessonProgress slug="fundamentos/ensamblador" locale="en" />
+
+
+
+Assembly translates hardware-close instructions into machine code. On PIC18, courses often use **MPASM**, especially when they work with **MPLAB v8**.
+
+<AIExplain title="Do not study it as magic">
+Each assembly line should answer a specific question: move data, change a bit, compare, jump, call a subroutine, or configure a register.
+</AIExplain>
+
+## Common structure
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+
+        CONFIG  FOSC = HS
+        CONFIG  WDT = OFF
+        CONFIG  LVP = OFF
+
+        ORG     0x0000
+        GOTO    start
+
+start:
+        ; Main code
+        GOTO    start
+
+        END
+```
+
+## Basic instructions
+
+| Instruction | Idea |
+| --- | --- |
+| `MOVLW k` | Loads a literal into `WREG`. |
+| `MOVWF f` | Copies `WREG` into register `f`. |
+| `CLRF f` | Clears a register. |
+| `BSF f,b` | Sets bit `b` of register `f` to 1. |
+| `BCF f,b` | Clears bit `b` of register `f` to 0. |
+| `BTFSC f,b` | Skips the next instruction if the bit is 0. |
+| `BTFSS f,b` | Skips the next instruction if the bit is 1. |
+| `GOTO label` | Unconditional jump. |
+| `CALL sub` | Calls a subroutine. |
+| `RETURN` | Returns from a subroutine. |
+
+## Key idea
+
+In assembly you do not say “turn on an LED.” You say: configure the pin as output, write a `1` to the correct latch, and keep the program running.
+
+<TopicQuiz slug="fundamentos/ensamblador" locale="en" />

@@ -1,0 +1,19 @@
+---
+title: Preparacion Parcial I
+description: Repaso y examen interactivo para el Parcial I — Temas 1, 2 y 3 del curso UNEXPO.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-1" />
+
+## Cuando presentar este parcial
+
+Despues de completar los cursos **1, 2 y 3** de la [ruta de estudio](/ruta-de-estudio/#c04): conceptos del PIC, arquitectura/registros y ensamblador MPASM.
+
+<ParcialPrep parcial={getParcialById('p1')} locale="es" />
+
+<TopicQuiz slug="parcial/parcial-1" locale="es" />

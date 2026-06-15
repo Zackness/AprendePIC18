@@ -1,0 +1,58 @@
+---
+title: Guia teorica para parcial
+description: Preguntas y respuestas base para repasar teoria del PIC18F4550.
+---
+
+## Preguntas esenciales
+
+### Que es el PIC18F4550?
+
+Es un microcontrolador de 8 bits que integra CPU, memoria y perifericos como puertos digitales, timers, ADC, PWM, comunicacion serial y USB.
+
+### Que diferencia hay entre microcontrolador y microprocesador?
+
+El microcontrolador integra CPU, memoria y perifericos en un chip. El microprocesador normalmente necesita componentes externos y puede ejecutar sistemas operativos mas complejos.
+
+### Que es un registro?
+
+Es una posicion de memoria especial usada para guardar datos o controlar hardware interno. Por ejemplo, `TRISB` configura la direccion de los pines del puerto B.
+
+### Que hace `TRISx`?
+
+Define si los pines de un puerto son entradas o salidas. En general, `1` significa entrada y `0` significa salida.
+
+### Que diferencia hay entre `PORTx` y `LATx`?
+
+`PORTx` se usa para leer el estado real de los pines. `LATx` guarda el valor de salida escrito hacia el latch del puerto.
+
+### Por que se usan interrupciones?
+
+Para atender eventos importantes sin estar preguntando constantemente si ocurrieron. Una interrupcion cambia temporalmente el flujo del programa.
+
+## Checklist rapido
+
+- Arquitectura Harvard vs Von Neumann
+- Memoria Flash (32 KB), RAM (2 KB), EEPROM (256 B)
+- Registros SFR y GPR, bancos de memoria (`BSR`)
+- `WREG`, `STATUS`, `BSR`, `PC`, pila
+- `TRIS`, `PORT`, `LAT` en todos los puertos
+- Timer0: formula `Tiempo = (4/Fosc)*N*Pre-divisor`
+- Interrupciones: GIE, PEIE, vectores 0x08 y 0x18, ISR, RETFIE
+- INT0 (RB0), RB4-RB7 cambio de estado
+- ADC 10 bits: ADCON0/1/2, 13 canales
+- PWM: Timer2, PR2, CCP1CON, CCPR1L
+- EUSART: TXSTA, RCSTA, SPBRG, RC6/RC7
+- SPI/I2C via MSSP
+- USB integrado en PIC18F4550
+- LCD HD44780, teclado matricial
+- Sistema minimo: cristal 20 MHz, MCLR, 5 V
+- Flujo: `.asm` → MPASM → `.hex` → programador PICkit
+- Palabra de configuracion (`CONFIG`)
+
+## Errores comunes en el parcial
+
+1. Confundir `PORT` con `LAT` al escribir salidas.
+2. No limpiar banderas de interrupcion antes de `RETFIE`.
+3. Olvidar habilitar GIE despues de configurar interrupciones.
+4. Calcular mal TMR0 con cristal de 20 MHz.
+5. No configurar pines analogicos en ADCON1 antes de usar ADC.

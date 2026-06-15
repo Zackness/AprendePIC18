@@ -1,0 +1,55 @@
+---
+title: AprendePIC18
+description: Curso bilingue para dominar el PIC18F4550 desde teoria de parcial hasta practica real en ensamblador.
+template: splash
+hero:
+  tagline: Documentacion, curso y laboratorio para estudiar el PIC18F4550 sin sufrir con PDFs eternos. Plataforma web por zackness · Mantenido por StartupVen · Ecosistema CALETAS.
+  image:
+    alt: Microcontrolador PIC18F4550
+    file: ./assets/hero-chip.svg
+  actions:
+    - text: Empezar la ruta
+      link: /ruta-de-estudio/
+      icon: right-arrow
+    - text: Tutoriales con checklist
+      link: /tutoriales/
+      icon: approve-check
+    - text: Ver primer LED
+      link: /practicas/primer-led/
+      icon: seti:asm
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../components/AIExplain.astro';
+
+## Aprende como curso, consulta como documentacion
+
+AprendePIC18 es una plataforma web desarrollada por **zackness**, mantenida por **[StartupVen](https://startupven.com)** y parte del ecosistema **[CALETAS](https://caleta.top)**, que organiza el material del curso de **Microcontroladores** de la **Ingeniería Mecatrónica** de la **UNEXPO** para estudiar el **PIC18F4550**: ensamblador, registros, MPLAB, Proteus, placa fisica y preparacion para parcial.
+
+<AIExplain title="Objetivo del proyecto">
+La meta no es reemplazar el datasheet. La meta es traducirlo a una ruta de estudio clara: primero entiendes el concepto, luego ves el registro, despues haces una practica y finalmente resuelves preguntas tipo parcial.
+</AIExplain>
+
+<CardGrid stagger>
+	<Card title="Basado en ensamblador" icon="seti:asm">
+		El contenido principal se enfoca en MPASM y programacion de bajo nivel para entender realmente el microcontrolador.
+	</Card>
+	<Card title="Bilingue" icon="earth">
+		Cada modulo nace en espanol e ingles para estudiar, repasar vocabulario tecnico y compartir el recurso.
+	</Card>
+	<Card title="Teoria + practica" icon="rocket">
+		Incluye explicaciones, registros, ejemplos de codigo, Proteus, placa fisica y ejercicios tipo examen.
+	</Card>
+	<Card title="Ecosistema CALETAS" icon="open-book">
+		Desplegado en [caleta.top](https://caleta.top) y mantenido por [StartupVen](https://startupven.com). Plataforma web por [zackness](https://zackness.pages.dev).
+	</Card>
+</CardGrid>
+
+## Mapa rapido
+
+1. Empieza con [Ruta de estudio](/ruta-de-estudio/) y [Ecosistema CALETAS](/sobre/ecosistema/).
+2. Fundamentos: [arquitectura](/fundamentos/arquitectura/), [bits y hex](/fundamentos/bits-hex/), [registros](/fundamentos/registros/), [ensamblador](/fundamentos/ensamblador/).
+3. Perifericos: [GPIO](/gpio/), [timers](/timers/timer0/), [interrupciones](/interrupciones/), [ADC](/adc/), [PWM](/pwm/), [serial](/comunicacion/uart/).
+4. Laboratorio: [8 practicas UNEXPO](/practicas/operaciones-matematicas/) y [proyectos](/proyectos/control-nivel/).
+5. Parcial: [guia teorica](/parcial/guia-teorica/), [ejercicios](/parcial/ejercicios/), [glosario](/referencia/glosario/).

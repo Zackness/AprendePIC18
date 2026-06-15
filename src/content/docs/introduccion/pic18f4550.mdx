@@ -1,0 +1,66 @@
+---
+title: Que es el PIC18F4550
+description: Introduccion al microcontrolador PIC18F4550 y sus bloques principales.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="introduccion/pic18f4550" />
+
+
+
+
+El **PIC18F4550** es un microcontrolador de 8 bits de Microchip. Integra CPU, memoria, puertos de entrada/salida y perifericos en un solo chip. Es popular en cursos porque obliga a entender la maquina por dentro: registros, bits, puertos, interrupciones y temporizadores.
+
+<Figure
+	src="/images/pdf/pinout/page-4.png"
+	alt="Diagrama de pines PDIP de 40 pines del PIC18F4550"
+	caption="Pinout PDIP de 40 pines del PIC18F4550 (RA, RB, RC, RD, RE, oscilador, MCLR y perifericos)."
+	credit="Microchip PIC18F4550 Datasheet DS39632E"
+/>
+
+<AIExplain title="Idea central">
+Un PIC no ejecuta un sistema operativo como una Raspberry Pi. Ejecuta directamente el programa que grabas en su memoria Flash. Por eso cada instruccion, registro y bit importa.
+</AIExplain>
+
+## Bloques basicos
+
+<CardGrid>
+	<Card title="CPU de 8 bits" icon="cpu">
+		Ejecuta instrucciones del set PIC18. Trabaja con registros como `WREG`, `STATUS`, `BSR` y el contador de programa.
+	</Card>
+	<Card title="Memoria Flash" icon="document">
+		Guarda el programa. Cuando grabas el `.hex`, este contenido queda almacenado aqui.
+	</Card>
+	<Card title="RAM" icon="seti:config">
+		Guarda variables temporales, contadores, banderas y datos durante la ejecucion.
+	</Card>
+	<Card title="EEPROM" icon="database">
+		Memoria no volatil para datos que deben conservarse aunque el circuito se apague.
+	</Card>
+	<Card title="Puertos I/O" icon="puzzle">
+		Pines configurables como entradas o salidas digitales mediante registros como `TRISx`, `PORTx` y `LATx`.
+	</Card>
+	<Card title="Perifericos" icon="rocket">
+		Timers, ADC, PWM, USART, USB, interrupciones y otros modulos internos.
+	</Card>
+</CardGrid>
+
+## Por que se estudia en ensamblador
+
+El ensamblador permite ver lo que normalmente oculta un lenguaje de alto nivel. En lugar de escribir una funcion abstracta, modificas registros y bits directamente. Esto ayuda a entender preguntas de teoria como:
+
+1. Que diferencia hay entre `PORTB` y `LATB`.
+2. Por que un pin debe configurarse con `TRISB` antes de usarlo.
+3. Como una interrupcion altera el flujo normal del programa.
+4. Que relacion existe entre frecuencia de reloj, ciclos de instruccion y temporizadores.
+
+## En una frase
+
+El PIC18F4550 es una computadora pequena y dedicada, donde tu programa controla directamente el hardware.
+
+<TopicQuiz slug="introduccion/pic18f4550" />

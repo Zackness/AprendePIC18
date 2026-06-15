@@ -1,0 +1,19 @@
+---
+title: Preparacion Parcial II
+description: Repaso y examen interactivo para el Parcial II — Temas 4 y 5 del curso UNEXPO.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-2" />
+
+## Cuando presentar este parcial
+
+Despues de los cursos **5 y 6** de la [ruta de estudio](/ruta-de-estudio/#c07): MPLAB/Proteus, GPIO, primer LED y **Practica 1** de operaciones matematicas.
+
+<ParcialPrep parcial={getParcialById('p2')} locale="es" />
+
+<TopicQuiz slug="parcial/parcial-2" locale="es" />

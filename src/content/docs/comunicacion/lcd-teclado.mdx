@@ -1,0 +1,65 @@
+---
+title: LCD HD44780 y teclado matricial
+description: Pantalla LCD 16x2, controlador HD44780 y teclado 4x4 con interrupciones RB4-RB7.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="comunicacion/lcd-teclado" />
+
+
+
+## LCD 16x2 con HD44780
+
+| Pin | Funcion |
+| --- | --- |
+| VSS, VDD | Alimentacion |
+| Vo | Contraste (potenciometro 10K) |
+| RS | 0=comando, 1=dato |
+| R/W | 0=escritura, 1=lectura |
+| E | Enable (pulso) |
+| D0-D7 | Bus de datos (4 u 8 bit) |
+
+<Figure
+	src="/images/comunicacion/lcd-4bit.svg"
+	alt="Conexion LCD 16x2 en modo 4 bit al puerto D del PIC18F4550"
+	caption="Practica 2: datos en RD4-RD7, RS y E en RD2-RD3. Teclado matricial en puerto B con interrupciones."
+	credit="Practica 2 y Tema 7.1 — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+<Figure
+	src="/images/pdf/lcd-teclado/page-3.png"
+	alt="Esquema del modulo LCD HD44780 y conexiones al PIC"
+	caption="Modulo LCD 16x2: pines de datos, control RS/E y contraste con potenciometro."
+	credit="Clase Tema 7.1 — Modulo LCD · UNEXPO"
+/>
+
+### Direcciones DDRAM (16x2)
+
+- Linea 1: 0x80 - 0x8F (visible 16 chars)
+- Linea 2: 0xC0 - 0xCF
+
+### Comandos esenciales
+
+- Clear Display: `0x01`
+- Cursor Home: `0x02`
+- Function Set 4-bit: `0x28`
+- Display ON: `0x0C`
+
+<PracticeBox title="Practica 2 UNEXPO" level="Laboratorio">
+LCD: bus de datos en RD4-RD7 (4 bit), RS y E en RD2-RD3. Teclado: filas RB0-RB3, columnas RB4-RB7 con interrupciones. Muestra en LCD lo tecleado.
+</PracticeBox>
+
+## Teclado matricial 4x4
+
+Escaneo por filas/columnas. Al presionar una tecla se conecta una fila con una columna. Las interrupciones RB4-RB7 detectan cambios en columnas sin polling continuo.
+
+## Macros MPASM
+
+La Practica 2 pide investigar macros: bloques reutilizables con `MACRO`/`ENDM` para simplificar rutinas LCD.
+
+<TopicQuiz slug="comunicacion/lcd-teclado" />

@@ -1,0 +1,60 @@
+---
+title: Study path
+description: School-style guided path to master the PIC18F4550 — theory, lab, and exam aligned with the UNEXPO course.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../components/AIExplain.astro';
+import StudyPath from '../../../components/StudyPath.astro';
+
+<StudyPath locale="en" />
+
+<AIExplain title="Why a path instead of reading everything at once">
+The PIC18F4550 is easier to study in layers. This path follows the **Microcontrollers** course order (UNEXPO · Mechatronics) and is based on class topics, lab practices, exam exercises, and the course Microchip datasheet.
+</AIExplain>
+
+## Shortcuts by goal
+
+<CardGrid>
+	<Card title="Partial I (T1–T3)" icon="approve-check">
+		After courses 1–3: [Partial I prep](/en/parcial/parcial-1/) with interactive exam.
+	</Card>
+	<Card title="Partial II (T4–T5)" icon="approve-check">
+		After GPIO and Practice 1: [Partial II prep](/en/parcial/parcial-2/).
+	</Card>
+	<Card title="Partial III (T6–T9 PWM)" icon="approve-check">
+		After interrupts, LCD, timers, and PWM: [Partial III](/en/parcial/parcial-3/) and [exercises](/en/parcial/ejercicios/).
+	</Card>
+	<Card title="Partial IV (ADC + serial)" icon="approve-check">
+		After ADC and UART: [Partial IV](/en/parcial/parcial-4/) and [final project](/en/parcial/proyecto-final/).
+	</Card>
+	<Card title="From scratch" icon="document">
+		Start at course 1 and follow the order. Each partial appears right after its topics and labs.
+	</Card>
+	<Card title="Quick review" icon="setting">
+		[Glossary](/en/referencia/glosario/), [register guide](/en/referencia/guia-registros/), and [theory guide](/en/parcial/guia-teorica/).
+	</Card>
+</CardGrid>
+
+## Golden rule
+
+Do not memorize full tables at first. The key exam skill is answering:
+
+**What do I want to control → which register configures it → which bit must I modify**
+
+## Course reference material
+
+AprendePIC18 content is aligned with these UNEXPO course materials:
+
+| Type | Files |
+| --- | --- |
+| Theory | Topic 1, Topics 2-3, Topics 6-10, PIC instructions |
+| Lab | Practices 1, 2, 3, 6, 7, 8 |
+| Exam | Ejercicios II parcial 20252 |
+| Reference | PIC18LF4455-I-PT.PDF (datasheet) |
+
+AprendePIC18 turns that material into navigable pages, diagrams, and interactive tutorials.
+
+## Interactive tutorials
+
+Complement the path with [Interactive tutorials](/en/tutoriales/): path progress and tutorial progress are saved separately in your browser.

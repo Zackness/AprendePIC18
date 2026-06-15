@@ -1,0 +1,40 @@
+---
+title: Main PIC18F4550 registers
+description: SFR, GPR, memory banks and key registers from the UNEXPO course.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/registros" locale="en" />
+
+
+
+
+**SFR** control hardware; **GPR** store variables. The `BSR` register selects the active memory bank.
+
+## CPU registers
+
+| Register | Function |
+| --- | --- |
+| `WREG` | Working accumulator |
+| `STATUS` | Flags: Z, C, DC, OV, N |
+| `BSR` | Bank select |
+| `PC` | Program counter |
+
+## Port registers
+
+| Register | Function |
+| --- | --- |
+| `TRISx` | Direction: 1=input, 0=output |
+| `PORTx` | Read pin levels |
+| `LATx` | Write output latch |
+
+## Exam question
+
+**What is the difference between reading PORTB and writing LATB?**
+
+`PORTB` reflects electrical pin levels. `LATB` sets the output value without reading the physical pin.
+
+<TopicQuiz slug="fundamentos/registros" locale="en" />

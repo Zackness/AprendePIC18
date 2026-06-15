@@ -1,0 +1,21 @@
+---
+title: Preparacion Parcial III
+description: Repaso y examen interactivo para el Parcial III — Temas 6, 7, 8 y 9 PWM.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-3" />
+
+## Cuando presentar este parcial
+
+Despues de los cursos **8 al 11** de la [ruta de estudio](/ruta-de-estudio/#c12): interrupciones, LCD/teclado, timers, PWM y practicas 2, 3 y 6.
+
+<ParcialPrep parcial={getParcialById('p3')} locale="es" />
+
+Consulta tambien el [banco de ejercicios](/parcial/ejercicios/) del II parcial para practicar calculos de timers y registros.
+
+<TopicQuiz slug="parcial/parcial-3" locale="es" />

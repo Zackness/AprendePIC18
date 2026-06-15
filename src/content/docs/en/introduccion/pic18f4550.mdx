@@ -1,0 +1,66 @@
+---
+title: What is the PIC18F4550
+description: Introduction to the PIC18F4550 microcontroller and its main blocks.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="introduccion/pic18f4550" locale="en" />
+
+
+
+
+The **PIC18F4550** is an 8-bit microcontroller from Microchip. It integrates CPU, memory, input/output ports, and peripherals in a single chip. It is popular in courses because it forces you to understand the machine from the inside: registers, bits, ports, interrupts, and timers.
+
+<Figure
+	src="/images/pdf/pinout/page-4.png"
+	alt="40-pin PDIP pin diagram of the PIC18F4550"
+	caption="40-pin PDIP pinout for the PIC18F4550 (ports RA–RE, oscillator, MCLR, and peripherals)."
+	credit="Microchip PIC18F4550 Datasheet DS39632E"
+/>
+
+<AIExplain title="Core idea">
+A PIC does not run an operating system like a Raspberry Pi. It directly executes the program you store in its Flash memory. That is why every instruction, register, and bit matters.
+</AIExplain>
+
+## Basic blocks
+
+<CardGrid>
+	<Card title="8-bit CPU" icon="cpu">
+		Executes instructions from the PIC18 instruction set. It works with registers like `WREG`, `STATUS`, `BSR`, and the program counter.
+	</Card>
+	<Card title="Flash memory" icon="document">
+		Stores the program. When you burn the `.hex` file, its content is stored here.
+	</Card>
+	<Card title="RAM" icon="seti:config">
+		Stores temporary variables, counters, flags, and data while the program runs.
+	</Card>
+	<Card title="EEPROM" icon="database">
+		Non-volatile memory for data that must remain saved even when the circuit is powered off.
+	</Card>
+	<Card title="I/O ports" icon="puzzle">
+		Pins configurable as digital inputs or outputs through registers like `TRISx`, `PORTx`, and `LATx`.
+	</Card>
+	<Card title="Peripherals" icon="rocket">
+		Timers, ADC, PWM, USART, USB, interrupts, and other internal modules.
+	</Card>
+</CardGrid>
+
+## Why study it in assembly
+
+Assembly lets you see what a high-level language usually hides. Instead of writing an abstract function, you directly modify registers and bits. This helps answer theory questions such as:
+
+1. What is the difference between `PORTB` and `LATB`?
+2. Why must a pin be configured with `TRISB` before using it?
+3. How does an interrupt change the normal program flow?
+4. What is the relationship between clock frequency, instruction cycles, and timers?
+
+## In one sentence
+
+The PIC18F4550 is a small dedicated computer where your program directly controls the hardware.
+
+<TopicQuiz slug="introduccion/pic18f4550" locale="en" />

@@ -1,0 +1,54 @@
+---
+title: PIC vs Arduino, ESP32 y Raspberry Pi
+description: Comparacion clara entre el PIC18F4550 y plataformas populares.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import CompareTable from '../../../components/CompareTable.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<LessonProgress slug="introduccion/comparaciones" />
+
+
+
+Comparar el PIC18F4550 con Arduino, ESP32 y Raspberry Pi ayuda a entender que no todas las placas resuelven el mismo problema.
+
+<AIExplain title="Diferencia clave">
+Arduino y ESP32 tambien usan microcontroladores. Raspberry Pi usa un microprocesador capaz de correr Linux. El PIC18F4550 se estudia mas cerca del hardware: registros, bits e instrucciones.
+</AIExplain>
+
+<CompareTable rows={[
+	{
+		name: 'PIC18F4550',
+		role: 'Microcontrolador de 8 bits',
+		strength: 'Control directo de hardware, bajo nivel, ideal para aprender arquitectura y registros.',
+		limit: 'Menos memoria, menos abstracciones y desarrollo mas manual.',
+	},
+	{
+		name: 'Arduino UNO',
+		role: 'Placa educativa con microcontrolador AVR',
+		strength: 'Muy facil para empezar, muchas librerias y comunidad enorme.',
+		limit: 'Oculta detalles internos si solo se usa el framework Arduino.',
+	},
+	{
+		name: 'ESP32',
+		role: 'Microcontrolador moderno con Wi-Fi y Bluetooth',
+		strength: 'Potente, conectado, ideal para IoT y proyectos modernos.',
+		limit: 'Arquitectura mas compleja para estudiar desde cero.',
+	},
+	{
+		name: 'Raspberry Pi',
+		role: 'Computadora de placa reducida',
+		strength: 'Corre Linux, sirve para vision, servidores, Python y aplicaciones completas.',
+		limit: 'No es ideal para aprender registros de microcontrolador a bajo nivel.',
+	},
+]} />
+
+## Como explicarlo en un parcial
+
+Un **microcontrolador** integra CPU, memoria y perifericos en un chip para controlar dispositivos. Un **microprocesador** normalmente necesita memoria y perifericos externos, y puede ejecutar sistemas operativos completos.
+
+El PIC18F4550 es buena herramienta academica porque permite ver como se configura el hardware desde registros, sin depender de librerias de alto nivel.
+
+<TopicQuiz slug="introduccion/comparaciones" />

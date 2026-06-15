@@ -1,0 +1,58 @@
+---
+title: Bits, bytes, hexadecimal y mascaras
+description: Operaciones binarias, notacion hexadecimal y mascaras de bits para el PIC18F4550.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/bits-hex" />
+
+
+
+
+En el PIC18F4550 casi todo se configura modificando bits individuales dentro de registros de 8 bits. Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio.
+
+<AIExplain title="Regla practica">
+Un byte = 8 bits. En ensamblador MPASM escribes valores con `B'10101010'` (binario) o `0xAA` (hexadecimal). Para encender el bit 3 usas `BSF`; para apagarlo `BCF`.
+</AIExplain>
+
+## Conversion rapida
+
+| Decimal | Binario | Hex |
+| --- | --- | --- |
+| 0 | 00000000 | 0x00 |
+| 15 | 00001111 | 0x0F |
+| 170 | 10101010 | 0xAA |
+| 255 | 11111111 | 0xFF |
+
+## Mascaras de bits
+
+Una mascara selecciona que bits quieres modificar sin alterar el resto:
+
+```asm
+; Encender solo RB0 sin tocar otros pines
+BSF     LATB, 0
+
+; Leer solo el nibble alto de PORTB
+MOVF    PORTB, W
+ANDLW   B'11110000'
+```
+
+## Operaciones logicas en la ALU
+
+El PIC18F4550 puede realizar AND, OR, XOR, complemento y rotaciones. La Practica 1 del laboratorio exige rutinas para suma, resta, multiplicacion, division por software, OR, AND, XOR, complemento y rotacion sin acarreo.
+
+<Exercise title="Convierte 0xC3 a binario y marca los bits activos">
+0xC3 = 11000011. Bits 0, 1, 6 y 7 estan en alto. Explica que hace `BCF PORTB, 6` si PORTB valia 0xC3.
+</Exercise>
+
+## Errores comunes
+
+- Confundir `TRIS` (direccion) con `LAT` (salida escrita).
+- Olvidar que `1` en TRIS = entrada, `0` = salida.
+- Usar decimal cuando el informe de laboratorio pide binario o hex en el informe.
+
+<TopicQuiz slug="fundamentos/bits-hex" />

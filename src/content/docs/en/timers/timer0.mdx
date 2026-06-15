@@ -1,0 +1,17 @@
+---
+title: Timer 0
+description: Timer0 configuration, timing formula and examples.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="timers/timer0" locale="en" />
+
+
+
+
+Formula: `Time = (4/Fosc) * N * Prescaler`. For 2 s @ 20 MHz, 16-bit, prescaler 1:256: TMR0H:TMR0L = 26474.
+
+<TopicQuiz slug="timers/timer0" locale="en" />

@@ -1,0 +1,14 @@
+---
+import InteractiveQuiz from './InteractiveQuiz.astro';
+import { getQuizBySlug } from '../data/quizzes';
+
+interface Props {
+	slug: string;
+	locale?: 'es' | 'en';
+}
+
+const { slug, locale = 'es' } = Astro.props;
+const quiz = getQuizBySlug(slug);
+---
+
+{quiz ? <InteractiveQuiz quiz={quiz} locale={locale} /> : null}

@@ -1,0 +1,63 @@
+---
+title: GPIO - TRIS, PORT y LAT
+description: Puertos digitales del PIC18F4550, entradas, salidas y configuracion de pines.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="gpio" />
+
+Los puertos GPIO permiten leer sensores, botones y controlar LEDs, displays y actuadores. En el PIC18F4550 cada puerto tiene tres registros clave.
+
+<AIExplain title="Trio fundamental">
+`TRISx` configura direccion. `LATx` escribe salidas. `PORTx` lee el estado de los pines.
+</AIExplain>
+
+<Figure
+	src="/images/gpio/led-rb0.svg"
+	alt="Circuito de LED conectado a RB0 con resistencia limitadora"
+	caption="Ejemplo de salida digital: TRISB,0=0 y LATB,0=1 encienden el LED."
+	credit="Practica LED — UNEXPO"
+/>
+
+## Registros por puerto
+
+| Puerto | Pines | TRIS | PORT | LAT | Notas |
+| --- | --- | --- | --- | --- | --- |
+| A | RA0-RA5 | TRISA | PORTA | LATA | RA4 no es analogico |
+| B | RB0-RB7 | TRISB | PORTB | LATB | RB0=INT0, RB4-RB7 interrupciones |
+| C | RC0-RC7 | TRISC | PORTC | LATC | RC6/RC7 = UART |
+| D | RD0-RD7 | TRISD | PORTD | LATD | Usado en practicas LCD |
+| E | RE0-RE2 | TRISE | PORTE | LATE | Entradas analogicas |
+
+## Configurar salida
+
+```asm
+        CLRF    LATB
+        BCF     TRISB, 0    ; RB0 salida
+        BSF     LATB, 0     ; RB0 alto
+```
+
+## Configurar entrada
+
+```asm
+        BSF     TRISB, 3    ; RB3 entrada
+        BTFSS   PORTB, 3    ; Lee RB3
+        GOTO    pin_bajo
+```
+
+<PracticeBox title="Practica 1 UNEXPO" level="Laboratorio">
+Puerto B y D como operandos (switches), puerto C y E para LEDs de resultado, RA0 como pulsador para cambiar operacion. Implementa suma, resta, multiplicacion, OR, AND, XOR, complemento, rotacion y division por software.
+</PracticeBox>
+
+## Errores comunes
+
+- Escribir en PORTx en lugar de LATx para salidas.
+- No configurar ADCON1 cuando usas pines analogicos como digitales.
+- Olvidar resistencias limitadoras en LEDs (330 o 220 ohm).
+
+<TopicQuiz slug="gpio" />

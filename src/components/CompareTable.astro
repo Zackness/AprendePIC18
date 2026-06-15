@@ -1,0 +1,37 @@
+---
+interface Row {
+	name: string;
+	role: string;
+	strength: string;
+	limit: string;
+}
+
+interface Props {
+	rows: Row[];
+}
+
+const { rows } = Astro.props;
+---
+
+<div class="compare-table" role="region" aria-label="Comparacion de plataformas">
+	<table>
+		<thead>
+			<tr>
+				<th>Plataforma</th>
+				<th>Rol</th>
+				<th>Fortaleza</th>
+				<th>Limite</th>
+			</tr>
+		</thead>
+		<tbody>
+			{rows.map((row) => (
+				<tr>
+					<td><strong>{row.name}</strong></td>
+					<td>{row.role}</td>
+					<td>{row.strength}</td>
+					<td>{row.limit}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+</div>

@@ -1,0 +1,73 @@
+---
+title: UART / EUSART
+description: Comunicacion serial asincrona, baudios y registros TXSTA, RCSTA en PIC18F4550.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comunicacion/uart" />
+
+
+
+
+El PIC18F4550 incluye EUSART para comunicacion serial asincrona full-duplex.
+
+<AIExplain title="Pines">
+RC6/TX = transmision. RC7/RX = recepcion. Velocidad en baudios configurada con SPBRG y BAUDCON.
+</AIExplain>
+
+## Conceptos (Tema 10)
+
+- **Baudios:** bits por segundo
+- **Asincrono:** sin linea de reloj compartida; usa bit de inicio y parada
+- **NRZ:** alto=1 (5V), bajo=0 (0V)
+
+<Figure
+	src="/images/comunicacion/trama-uart.svg"
+	alt="Estructura de trama UART con bit de inicio, 8 bits de datos y bit de parada"
+	caption="Trama asincrona NRZ: linea idle en alto, bit start en bajo, datos D0-D7 y bit stop en alto."
+	credit="Diagrama didactico AprendePIC18"
+/>
+
+<Figure
+	src="/images/pdf/spi-i2c/page-7.png"
+	alt="Trama de transmision asincrona EUSART del material del curso"
+	caption="Trama asincrona EUSART: estado inactivo, bit de arranque, datos y bit de parada."
+	credit="Tema 10 — Comunicacion serial · UNEXPO"
+/>
+
+## Registros principales
+
+| Registro | Funcion |
+| --- | --- |
+| TXSTA | Control transmision (TXEN, BRGH, SYNC) |
+| RCSTA | Control recepcion (SPEN, CREN, RX9) |
+| SPBRG / SPBRGH | Generador de baudios |
+| BAUDCON | BRG16, deteccion auto-baud |
+| TXREG | Dato a transmitir |
+| RCREG | Dato recibido |
+
+## Configuracion basica 9600 baudios @ 20MHz
+
+```asm
+; SPBRG = (Fosc/(16*baud)) - 1 para BRGH=1
+; Aproximadamente SPBRG = 129 para 9600 baud
+        BSF     RCSTA, SPEN
+        BCF     TXSTA, SYNC
+        BSF     TXSTA, BRGH
+        MOVLW   D'129'
+        MOVWF   SPBRG
+        BSF     TXSTA, TXEN
+        BSF     RCSTA, CREN
+```
+
+## Errores comunes
+
+- No habilitar SPEN antes de usar los pines seriales.
+- Olvidar limpiar FERR/OERR leyendo RCREG.
+- Baudios incorrectos entre PC y PIC.
+
+<TopicQuiz slug="comunicacion/uart" />

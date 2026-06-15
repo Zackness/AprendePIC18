@@ -1,0 +1,124 @@
+---
+import { parcialesBlocks, type ParcialBlock } from '../data/parciales';
+
+interface Props {
+	parcial?: ParcialBlock;
+	locale?: 'es' | 'en';
+}
+
+const { parcial, locale = 'es' } = Astro.props;
+if (!parcial) return null;
+const isEn = locale === 'en';
+
+function pageHref(slug: string) {
+	const path = slug.endsWith('/') ? slug : `${slug}/`;
+	return isEn ? `/en/${path}` : `/${path}`;
+}
+
+function tutorialHref(practiceSlug: string) {
+	const map: Record<string, string> = {
+		'practicas/operaciones-matematicas': 'practica-1',
+		'practicas/teclado-lcd': 'practica-2',
+		'practicas/frecuencimetro': 'practica-3',
+		'practicas/motor-paso-a-paso': 'practica-6',
+		'practicas/convertidor-ad': 'practica-7',
+		'practicas/comunicacion-serial': 'practica-8',
+	};
+	const t = map[practiceSlug];
+	return t ? pageHref(`tutoriales/${t}`) : pageHref(practiceSlug);
+}
+---
+
+<div class="parcial-prep">
+	<p class="parcial-prep__topics">
+		<strong>{isEn ? 'Course topics' : 'Temas del curso'}:</strong>{' '}
+		{isEn ? parcial.topicsEn : parcial.topicsEs}
+	</p>
+
+	<p class="parcial-prep__desc">{isEn ? parcial.descriptionEn : parcial.descriptionEs}</p>
+
+	{
+		parcial.sourceDocs && parcial.sourceDocs.length > 0 && (
+			<p class="parcial-prep__docs">
+				<strong>{isEn ? 'Reference material' : 'Material de referencia'}:</strong>{' '}
+				{parcial.sourceDocs.join(' · ')}
+			</p>
+		)
+	}
+
+	<section class="parcial-prep__section">
+		<h2>{isEn ? '1. Review these lessons' : '1. Repasa estas clases'}</h2>
+		<p class="parcial-prep__hint">
+			{isEn
+				? 'Complete each page and pass its interactive exam before taking this partial.'
+				: 'Completa cada pagina y aprueba su examen interactivo antes de presentar este parcial.'}
+		</p>
+		<ul class="parcial-prep__list">
+			{parcial.reviewSlugs.map((slug) => (
+				<li>
+					<a href={pageHref(slug)}>{slug}</a>
+				</li>
+			))}
+		</ul>
+	</section>
+
+	{
+		parcial.practiceSlugs && parcial.practiceSlugs.length > 0 && (
+			<section class="parcial-prep__section">
+				<h2>{isEn ? '2. Lab practices' : '2. Practicas de laboratorio'}</h2>
+				<ul class="parcial-prep__list">
+					{parcial.practiceSlugs.map((slug) => (
+						<li>
+							<a href={pageHref(slug)}>{slug}</a>
+							{' · '}
+							<a href={tutorialHref(slug)} class="parcial-prep__tutorial">
+								{isEn ? 'step-by-step tutorial' : 'tutorial paso a paso'}
+							</a>
+						</li>
+					))}
+				</ul>
+			</section>
+		)
+	}
+
+	<section class="parcial-prep__section">
+		<h2>{isEn ? '3. Take the partial exam below' : '3. Presenta el examen del parcial abajo'}</h2>
+		<p class="parcial-prep__hint">
+			{isEn ? 'Minimum 70% to pass. Sign in with CALETAS to save progress.' : 'Minimo 70% para aprobar. Inicia sesion en CALETAS para guardar el progreso.'}
+		</p>
+	</section>
+</div>
+
+<style>
+	.parcial-prep {
+		margin: 1.5rem 0 2rem;
+		padding: 1.25rem 1.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		background: var(--sl-color-gray-7, var(--sl-color-bg-nav));
+	}
+	.parcial-prep__topics,
+	.parcial-prep__desc,
+	.parcial-prep__docs {
+		margin: 0 0 0.75rem;
+	}
+	.parcial-prep__section {
+		margin-top: 1.25rem;
+	}
+	.parcial-prep__section h2 {
+		font-size: 1.05rem;
+		margin: 0 0 0.5rem;
+	}
+	.parcial-prep__hint {
+		font-size: 0.9rem;
+		opacity: 0.85;
+		margin: 0 0 0.5rem;
+	}
+	.parcial-prep__list {
+		margin: 0;
+		padding-left: 1.25rem;
+	}
+	.parcial-prep__tutorial {
+		font-size: 0.9rem;
+	}
+</style>

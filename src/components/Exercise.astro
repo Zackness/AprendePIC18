@@ -1,0 +1,37 @@
+---
+interface Props {
+	title: string;
+	difficulty?: string;
+}
+
+const { title, difficulty = 'Parcial' } = Astro.props;
+---
+
+<section class="exercise-box">
+	<p class="exercise-box__eyebrow">Ejercicio · {difficulty}</p>
+	<h3>{title}</h3>
+	<slot />
+</section>
+
+<style>
+	.exercise-box {
+		background: linear-gradient(180deg, rgba(20, 33, 61, 0.06), rgba(252, 163, 17, 0.06));
+		border: 1px dashed rgba(252, 163, 17, 0.45);
+		border-radius: 1rem;
+		margin: 1.5rem 0;
+		padding: 1rem 1.15rem;
+	}
+
+	.exercise-box__eyebrow {
+		color: var(--sl-color-text-accent);
+		font-size: 0.82rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		margin: 0 0 0.45rem;
+		text-transform: uppercase;
+	}
+
+	.exercise-box h3 {
+		margin-top: 0;
+	}
+</style>

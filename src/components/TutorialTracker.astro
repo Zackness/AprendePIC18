@@ -1,0 +1,208 @@
+---
+import { courseUnits, practiceTutorials, exerciseTutorialItems } from '../data/tutorials';
+
+interface Props {
+	locale?: 'es' | 'en';
+	showPractices?: boolean;
+	showExercises?: boolean;
+}
+
+const { locale = 'es', showPractices = true, showExercises = true } = Astro.props;
+const isEn = locale === 'en';
+
+function label(item: { labelEs: string; labelEn: string }) {
+	return isEn ? item.labelEn : item.labelEs;
+}
+
+function href(item: { hrefEs: string; hrefEn: string }) {
+	return isEn ? item.hrefEn : item.hrefEs;
+}
+---
+
+<div class="tutorial-tracker">
+	{
+		courseUnits.map((unit) => (
+			<details class="tutorial-unit" open>
+				<summary class="tutorial-unit__summary">
+					<span class="tutorial-unit__title">{isEn ? unit.titleEn : unit.titleEs}</span>
+					<span class="tutorial-unit__badge" data-unit-badge={unit.id} />
+				</summary>
+				<p class="tutorial-unit__desc">{isEn ? unit.descriptionEn : unit.descriptionEs}</p>
+				<ul class="tutorial-unit__list" data-unit-list={unit.id}>
+					{unit.items.map((item) => (
+						<li>
+							<label class="tutorial-unit__item">
+								<input
+									type="checkbox"
+									data-tracker-id={`course-${unit.id}-${item.id}`}
+									aria-label={label(item)}
+								/>
+								<span class="tutorial-unit__check" />
+								<a href={href(item)}>{label(item)}</a>
+							</label>
+						</li>
+					))}
+				</ul>
+			</details>
+		))
+	}
+
+	{
+		showPractices && (
+			<details class="tutorial-unit" open>
+				<summary class="tutorial-unit__summary">
+					<span class="tutorial-unit__title">
+						{isEn ? 'Unit 5 — Lab practice tutorials' : 'Unidad 5 — Tutoriales de practicas'}
+					</span>
+					<span class="tutorial-unit__badge" data-unit-badge="practices" />
+				</summary>
+				<p class="tutorial-unit__desc">
+					{isEn
+						? 'Step-by-step guides from Practice 0 to 9.'
+						: 'Guias paso a paso desde la practica 0 hasta la 9.'}
+				</p>
+				<ul class="tutorial-unit__list" data-unit-list="practices">
+					{practiceTutorials.map((p) => (
+						<li>
+							<label class="tutorial-unit__item">
+								<input
+									type="checkbox"
+									data-tracker-id={`practice-${p.id}`}
+									aria-label={isEn ? p.titleEn : p.titleEs}
+								/>
+								<span class="tutorial-unit__check" />
+								<a href={isEn ? `/en/tutoriales/${p.slug}/` : `/tutoriales/${p.slug}/`}>
+									{isEn ? p.titleEn : p.titleEs}
+								</a>
+							</label>
+						</li>
+					))}
+				</ul>
+			</details>
+		)
+	}
+
+	{
+		showExercises && (
+			<details class="tutorial-unit" open>
+				<summary class="tutorial-unit__summary">
+					<span class="tutorial-unit__title">
+						{isEn ? 'Unit 6 — Exercise practice' : 'Unidad 6 — Practica de ejercicios'}
+					</span>
+					<span class="tutorial-unit__badge" data-unit-badge="exercises" />
+				</summary>
+				<ul class="tutorial-unit__list" data-unit-list="exercises">
+					{exerciseTutorialItems.map((item) => (
+						<li>
+							<label class="tutorial-unit__item">
+								<input
+									type="checkbox"
+									data-tracker-id={`exercise-${item.id}`}
+									aria-label={label(item)}
+								/>
+								<span class="tutorial-unit__check" />
+								<a href={href(item)}>{label(item)}</a>
+							</label>
+						</li>
+					))}
+				</ul>
+			</details>
+		)
+	}
+
+	<div class="tutorial-tracker__footer">
+		<div class="tutorial-tracker__bar" aria-hidden="true">
+			<div class="tutorial-tracker__fill" data-global-fill />
+		</div>
+		<p data-global-progress class="tutorial-tracker__global" />
+		<button type="button" class="tutorial-tracker__reset" data-reset-tracker>
+			{isEn ? 'Reset progress' : 'Reiniciar progreso'}
+		</button>
+	</div>
+</div>
+
+<script>
+	function initTracker() {
+		const STORAGE_KEY = 'aprende-pic18-checklists';
+
+		function loadAll() {
+			try {
+				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+			} catch {
+				return {};
+			}
+		}
+
+		function saveAll(data) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+		}
+
+		const inputs = document.querySelectorAll<HTMLInputElement>('[data-tracker-id]');
+		const all = loadAll();
+		const flat = all['tutorial-tracker'] || {};
+
+		inputs.forEach((input) => {
+			const id = input.getAttribute('data-tracker-id');
+			if (id && flat[id]) input.checked = true;
+			input.addEventListener('change', () => {
+				const id = input.getAttribute('data-tracker-id');
+				if (!id) return;
+				const data = loadAll();
+				if (!data['tutorial-tracker']) data['tutorial-tracker'] = {};
+				data['tutorial-tracker'][id] = input.checked;
+				saveAll(data);
+				updateGlobal();
+			});
+		});
+
+		function updateUnitBadges() {
+			document.querySelectorAll('[data-unit-list]').forEach((list) => {
+				const unitId = list.getAttribute('data-unit-list');
+				const badge = document.querySelector(`[data-unit-badge="${unitId}"]`);
+				const unitInputs = list.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+				const done = [...unitInputs].filter((i) => i.checked).length;
+				const total = unitInputs.length;
+				if (badge) badge.textContent = `${done}/${total}`;
+			});
+		}
+
+		function updateGlobal() {
+			const total = inputs.length;
+			const done = [...inputs].filter((i) => i.checked).length;
+			const pct = total ? Math.round((done / total) * 100) : 0;
+			const fill = document.querySelector<HTMLElement>('[data-global-fill]');
+			const label = document.querySelector('[data-global-progress]');
+			const isEn = document.documentElement.lang?.startsWith('en');
+			if (fill) fill.style.width = `${pct}%`;
+			if (label) {
+				label.textContent = isEn
+					? `Overall progress: ${done}/${total} (${pct}%)`
+					: `Progreso total: ${done}/${total} (${pct}%)`;
+			}
+			updateUnitBadges();
+		}
+
+		document.querySelector('[data-reset-tracker]')?.addEventListener('click', () => {
+			const isEn = document.documentElement.lang?.startsWith('en');
+			const msg = isEn
+				? 'Reset all checklist progress?'
+				: 'Reiniciar todo el progreso de las listas?';
+			if (!confirm(msg)) return;
+			localStorage.removeItem(STORAGE_KEY);
+			inputs.forEach((i) => (i.checked = false));
+			document.querySelectorAll('.checklist__input').forEach((i) => {
+				(i as HTMLInputElement).checked = false;
+			});
+			document.querySelectorAll('[data-progress]').forEach((el) => {
+				el.textContent = '';
+			});
+			updateGlobal();
+		});
+
+		updateGlobal();
+	}
+
+	initTracker();
+	document.addEventListener('astro:page-load', initTracker);
+	window.addEventListener('aprende-checklist-update', initTracker);
+</script>

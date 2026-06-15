@@ -1,0 +1,53 @@
+---
+import Checklist from './Checklist.astro';
+import Figure from './Figure.astro';
+import { practiceTutorials, type PracticeTutorial } from '../data/tutorials';
+
+interface Props {
+	slug: string;
+	locale?: 'es' | 'en';
+}
+
+const { slug, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const practice = practiceTutorials.find((p) => p.slug === slug);
+
+if (!practice) {
+	throw new Error(`Practice tutorial not found: ${slug}`);
+}
+
+const steps = isEn ? practice.stepsEn : practice.stepsEs;
+const docHref = isEn ? practice.docHrefEn : practice.docHrefEs;
+const checklistItems = steps.map((step, i) => ({
+	id: `step-${i + 1}`,
+	label: step,
+}));
+---
+
+<div class="practice-tutorial">
+	<p class="practice-tutorial__intro">
+		{
+			isEn
+				? `Follow each step and check it off. Your progress is saved in this browser.`
+				: `Sigue cada paso y marcalo al completarlo. Tu progreso se guarda en este navegador.`
+		}
+	</p>
+
+	{
+		practice.figures?.map((fig) => (
+			<Figure
+				src={fig.src}
+				alt={isEn ? fig.altEn : fig.altEs}
+				caption={isEn ? fig.captionEn : fig.captionEs}
+				credit={fig.credit}
+			/>
+		))
+	}
+
+	<Checklist id={`practice-${practice.slug}`} title={isEn ? 'Steps' : 'Pasos'} items={checklistItems} />
+
+	<p class="practice-tutorial__doc">
+		{isEn ? 'Related documentation: ' : 'Documentacion relacionada: '}
+		<a href={docHref}>{isEn ? 'Read module' : 'Leer modulo'}</a>
+	</p>
+</div>

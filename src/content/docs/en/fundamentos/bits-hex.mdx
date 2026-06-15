@@ -1,0 +1,45 @@
+---
+title: Bits, bytes, hexadecimal and masks
+description: Binary operations, hexadecimal notation and bit masks for the PIC18F4550.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/bits-hex" locale="en" />
+
+
+
+
+On the PIC18F4550 almost everything is configured by modifying individual bits inside 8-bit registers.
+
+<AIExplain title="Practical rule">
+One byte = 8 bits. In MPASM you write `B'10101010'` or `0xAA`. Use `BSF` to set a bit and `BCF` to clear it.
+</AIExplain>
+
+## Quick conversion
+
+| Decimal | Binary | Hex |
+| --- | --- | --- |
+| 0 | 00000000 | 0x00 |
+| 15 | 00001111 | 0x0F |
+| 170 | 10101010 | 0xAA |
+| 255 | 11111111 | 0xFF |
+
+## Bit masks
+
+```asm
+BSF     LATB, 0
+MOVF    PORTB, W
+ANDLW   B'11110000'
+```
+
+Lab Practice 1 requires routines for add, subtract, multiply, software divide, OR, AND, XOR, complement and rotate.
+
+<Exercise title="Convert 0xC3 to binary">
+0xC3 = 11000011. Bits 0, 1, 6 and 7 are high.
+</Exercise>
+
+<TopicQuiz slug="fundamentos/bits-hex" locale="en" />

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 340" role="img" aria-label="LCD 16x2 conexion 4 bit">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .lcd { fill: #1e293b; stroke: #64748b; stroke-width: 2; }
+      .screen { fill: #a7f3d0; }
+      .pic { fill: #14213d; stroke: #fca311; stroke-width: 2; }
+      .wire { stroke: #475569; stroke-width: 2; }
+      .label { font: 10px sans-serif; fill: #334155; }
+      .small { font: 10px sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+  <text x="360" y="24" text-anchor="middle" class="title">LCD 16x2 HD44780  bus 4 bit (Practica 2)</text>
+  <rect x="420" y="60" width="260" height="120" rx="8" class="lcd"/>
+  <rect x="440" y="80" width="220" height="80" rx="4" class="screen"/>
+  <text x="550" y="130" text-anchor="middle" class="label">16 x 2 � HD44780</text>
+  <rect x="60" y="90" width="120" height="80" rx="10" class="pic"/>
+  <text x="120" y="125" text-anchor="middle" fill="#fca311" font="bold 11px sans-serif">PIC18F4550</text>
+  <text x="120" y="145" text-anchor="middle" fill="#f8fafc" font="9px sans-serif">Puerto D</text>
+  <text x="200" y="100" class="label">RD4-D7 � D4-D7</text>
+  <text x="200" y="120" class="label">RD2 � RS</text>
+  <text x="200" y="140" class="label">RD3 � E</text>
+  <text x="200" y="160" class="label">R/W � GND (solo escritura)</text>
+  <line x1="180" y1="110" x2="420" y2="110" class="wire"/>
+  <line x1="180" y1="130" x2="420" y2="130" class="wire"/>
+  <line x1="180" y1="150" x2="420" y2="150" class="wire"/>
+  <text x="360" y="230" text-anchor="middle" class="label">Teclado 4x4: filas RB0-RB3 � columnas RB4-RB7 (interrupciones)</text>
+  <text x="360" y="260" text-anchor="middle" class="small">DDRAM linea 1: 0x80 � linea 2: 0xC0</text>
+  <text x="360" y="290" text-anchor="middle" class="small">Practica 2 UNEXPO  UNEXPO · Ing. Mecatronica</text>
+</svg>

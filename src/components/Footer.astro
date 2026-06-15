@@ -1,0 +1,22 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+
+const props = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<Default {...props} />
+
+<div class="ecosystem-footer">
+	<p>
+		<strong>AprendePIC18</strong> — plataforma web por
+		<a href="https://zackness.pages.dev" target="_blank" rel="noopener">zackness</a>,
+		mantenido por
+		<a href="https://startupven.com" target="_blank" rel="noopener">StartupVen</a>
+		· ecosistema
+		<a href="https://caleta.top" target="_blank" rel="noopener">CALETAS</a>
+	</p>
+	<p class="ecosystem-footer__meta">
+		Microcontroladores · Ing. Mecatrónica · UNEXPO · © {year}
+	</p>
+</div>

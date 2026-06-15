@@ -1,0 +1,35 @@
+---
+interface Props {
+	locale?: 'es' | 'en';
+}
+
+const { locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const loginTitle = isEn
+	? 'Sign in with CALETAS to save your progress'
+	: 'Inicia sesión en CALETAS para guardar tu progreso';
+---
+
+<div class="caleta-auth" data-caleta-auth>
+	<div class="caleta-auth__guest" data-auth-guest>
+		<a href="#" class="caleta-auth__btn" data-caleta-login title={loginTitle}>
+			<svg class="caleta-auth__btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+				<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+			</svg>
+			{isEn ? 'Sign in' : 'Iniciar sesión'}
+		</a>
+	</div>
+	<div class="caleta-auth__user" data-auth-user hidden>
+		<span class="caleta-auth__avatar" aria-hidden="true">C</span>
+		<span class="caleta-auth__name" data-auth-name>Estudiante</span>
+		<button type="button" class="caleta-auth__logout" data-caleta-logout>
+			{isEn ? 'Logout' : 'Salir'}
+		</button>
+	</div>
+</div>
+
+<script>
+	import { initCaletaAuth } from '../scripts/caleta-auth';
+	initCaletaAuth();
+	document.addEventListener('astro:page-load', initCaletaAuth);
+</script>

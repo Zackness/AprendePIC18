@@ -1,0 +1,342 @@
+---
+import {
+	studyPathCourses,
+	studyPathMeta,
+	getStudyPathStats,
+	levelLabels,
+	lessonTypeLabels,
+} from '../data/study-path';
+import { hrefToQuizSlug } from '../data/quizzes';
+
+interface Props {
+	locale?: 'es' | 'en';
+}
+
+const { locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+	const stats = getStudyPathStats();
+	const STORAGE_KEY = 'aprende-pic18-study-path';
+	const PROGRESS_KEY = 'aprende-pic18-progress-local';
+
+function t(es: string, en: string) {
+	return isEn ? en : es;
+}
+---
+
+<div class="study-path" data-study-path data-locale={locale}>
+	<header class="study-path__hero">
+		<p class="study-path__eyebrow">{t('Escuela PIC18F4550', 'PIC18F4550 School')}</p>
+		<h2 class="study-path__title">{t(studyPathMeta.titleEs, studyPathMeta.titleEn)}</h2>
+		<p class="study-path__subtitle">{t(studyPathMeta.subtitleEs, studyPathMeta.subtitleEn)}</p>
+	</header>
+
+	<div class="study-path__stats">
+		<div class="study-path__stat">
+			<span class="study-path__stat-value">{stats.courses}</span>
+			<span class="study-path__stat-label">{t('cursos', 'courses')}</span>
+		</div>
+		<div class="study-path__stat">
+			<span class="study-path__stat-value">{stats.lessons}</span>
+			<span class="study-path__stat-label">{t('clases', 'classes')}</span>
+		</div>
+		<div class="study-path__stat">
+			<span class="study-path__stat-value">~{stats.hours}h</span>
+			<span class="study-path__stat-label">{t('estimadas', 'estimated')}</span>
+		</div>
+		<div class="study-path__stat study-path__stat--progress">
+			<span class="study-path__stat-value" data-global-pct>0%</span>
+			<span class="study-path__stat-label">{t('completado', 'completed')}</span>
+		</div>
+	</div>
+
+	<div class="study-path__global-bar" aria-hidden="true">
+		<div class="study-path__global-fill" data-global-fill style="width: 0%"></div>
+	</div>
+
+	<p class="study-path__method">
+		<strong>{t('Metodo por clase', 'Method per class')}:</strong>
+		{t(
+			'concepto → registro → ejemplo .ASM → Proteus → placa → pregunta de parcial',
+			'concept → register → .ASM example → Proteus → board → exam question',
+		)}
+	</p>
+
+	<ol class="study-path__courses">
+		{
+			studyPathCourses.map((course) => {
+				const courseMinutes = course.lessons.reduce((n, l) => n + l.minutes, 0);
+				const level = levelLabels[course.level];
+				return (
+					<li
+						class:list={[
+							'study-path__course',
+							course.isParcialCheckpoint && 'study-path__course--parcial',
+						]}
+						id={course.id}
+						data-course={course.id}
+					>
+						<details class="study-path__details" open={course.order <= 2}>
+							<summary class="study-path__summary">
+								<span class="study-path__course-num">{course.order}</span>
+								<span class="study-path__course-head">
+									<span class="study-path__course-title">
+										{course.isParcialCheckpoint && (
+											<span class="study-path__parcial-badge">
+												{t('Parcial', 'Partial')} {course.parcialNumber}
+											</span>
+										)}
+										{t(course.titleEs, course.titleEn)}
+									</span>
+									<span class="study-path__course-meta">
+										<span class={`study-path__level study-path__level--${course.level}`}>
+											{t(level.es, level.en)}
+										</span>
+										<span class="study-path__course-time">
+											{course.lessons.length} {t('clases', 'classes')} · ~
+											{Math.round(courseMinutes / 60) || 1}h
+										</span>
+										<span class="study-path__course-progress" data-course-pct>
+											0%
+										</span>
+									</span>
+								</span>
+							</summary>
+
+							<div class="study-path__body">
+								<p class="study-path__desc">
+									{t(course.descriptionEs, course.descriptionEn)}
+								</p>
+
+								{
+									course.sourceDocs && course.sourceDocs.length > 0 && (
+										<p class="study-path__sources">
+											<strong>{t('Material de referencia', 'Reference material')}:</strong>{' '}
+											{course.sourceDocs.join(' · ')}
+										</p>
+									)
+								}
+
+								<div class="study-path__outcomes">
+									<strong>{t('Que aprenderas', 'What you will learn')}</strong>
+									<ul>
+										{(isEn ? course.outcomesEn : course.outcomesEs).map((o) => (
+											<li>{o}</li>
+										))}
+									</ul>
+								</div>
+
+								<ol class="study-path__lessons">
+									{
+										course.lessons.map((lesson, idx) => {
+											const type = lessonTypeLabels[lesson.type];
+											const quizSlug = hrefToQuizSlug(isEn ? lesson.hrefEn : lesson.hrefEs);
+											return (
+												<li
+													class:list={[
+														'study-path__lesson',
+														lesson.optional && 'study-path__lesson--optional',
+													]}
+													data-quiz-slug={quizSlug || undefined}
+												>
+													<label class="study-path__lesson-label">
+														<input
+															type="checkbox"
+															class="study-path__check"
+															data-lesson-id={lesson.id}
+															data-quiz-slug={quizSlug || undefined}
+															aria-label={t(lesson.titleEs, lesson.titleEn)}
+														/>
+														<span class="study-path__lesson-index">{idx + 1}</span>
+														<span class="study-path__lesson-main">
+															<a
+																href={isEn ? lesson.hrefEn : lesson.hrefEs}
+																class="study-path__lesson-link"
+															>
+																{t(lesson.titleEs, lesson.titleEn)}
+															</a>
+															<span class="study-path__lesson-tags">
+																<span
+																	class={`study-path__type study-path__type--${lesson.type}`}
+																>
+																	{t(type.es, type.en)}
+																</span>
+																{
+																	quizSlug && (
+																		<span class="study-path__quiz-badge" data-quiz-badge>
+																			{t('Examen', 'Exam')}
+																		</span>
+																	)
+																}
+																<span class="study-path__minutes">{lesson.minutes} min</span>
+																{
+																	lesson.optional && (
+																		<span class="study-path__optional">
+																			{t('opcional', 'optional')}
+																		</span>
+																	)
+																}
+															</span>
+															{
+																lesson.sourceDoc && (
+																	<span class="study-path__doc-ref" title={lesson.sourceDoc}>
+																		📄 {lesson.sourceDoc}
+																	</span>
+																)
+															}
+														</span>
+													</label>
+												</li>
+											);
+										})
+									}
+								</ol>
+							</div>
+						</details>
+					</li>
+				);
+			})
+		}
+	</ol>
+
+	<footer class="study-path__footer">
+		<button type="button" class="study-path__reset" data-reset-path>
+			{t('Reiniciar progreso de la ruta', 'Reset path progress')}
+		</button>
+	</footer>
+</div>
+
+<script define:vars={{ STORAGE_KEY, PROGRESS_KEY }}>
+	function initStudyPath() {
+		const root = document.querySelector('[data-study-path]');
+		if (!root) return;
+
+		const isEn = root.getAttribute('data-locale') === 'en';
+		const inputs = root.querySelectorAll('.study-path__check');
+		const globalPct = root.querySelector('[data-global-pct]');
+		const globalFill = root.querySelector('[data-global-fill]');
+		const resetBtn = root.querySelector('[data-reset-path]');
+
+		function loadQuizzes() {
+			try {
+				const progress = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+				return progress.quizzes || {};
+			} catch {
+				return {};
+			}
+		}
+
+		function load() {
+			try {
+				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+			} catch {
+				return {};
+			}
+		}
+
+		function save(data) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
+		}
+
+		function applyQuizProgress() {
+			const quizzes = loadQuizzes();
+			inputs.forEach((input) => {
+				const quizSlug = input.getAttribute('data-quiz-slug');
+				if (!quizSlug) return;
+				const result = quizzes[quizSlug];
+				const badge = input.closest('.study-path__lesson')?.querySelector('[data-quiz-badge]');
+				if (result?.passed) {
+					input.checked = true;
+					input.disabled = true;
+					if (badge) {
+						badge.textContent = isEn ? 'Passed' : 'Aprobado';
+						badge.classList.add('study-path__quiz-badge--passed');
+					}
+				} else if (result?.score) {
+					if (badge) {
+						badge.textContent = `${result.score}%`;
+						badge.classList.add('study-path__quiz-badge--attempt');
+					}
+				}
+			});
+		}
+
+		function updateUI() {
+			const total = inputs.length;
+			const done = [...inputs].filter((i) => i.checked).length;
+			const pct = total ? Math.round((done / total) * 100) : 0;
+
+			if (globalPct) globalPct.textContent = `${pct}%`;
+			if (globalFill) globalFill.style.width = `${pct}%`;
+
+			root.querySelectorAll('[data-course]').forEach((courseEl) => {
+				const courseInputs = courseEl.querySelectorAll('.study-path__check');
+				const courseDone = [...courseInputs].filter((i) => i.checked).length;
+				const courseTotal = courseInputs.length;
+				const coursePct = courseTotal
+					? Math.round((courseDone / courseTotal) * 100)
+					: 0;
+				const badge = courseEl.querySelector('[data-course-pct]');
+				if (badge) badge.textContent = `${coursePct}%`;
+				courseEl.classList.toggle('study-path__course--done', coursePct === 100 && courseTotal > 0);
+			});
+
+			inputs.forEach((input) => {
+				const row = input.closest('.study-path__lesson');
+				if (row) row.classList.toggle('study-path__lesson--done', input.checked);
+			});
+		}
+
+		const saved = load();
+		inputs.forEach((input) => {
+			const id = input.getAttribute('data-lesson-id');
+			if (id && saved[id]) input.checked = true;
+			input.addEventListener('change', () => {
+				if (input.disabled) return;
+				const id = input.getAttribute('data-lesson-id');
+				if (!id) return;
+				const data = load();
+				data[id] = input.checked;
+				save(data);
+				updateUI();
+			});
+		});
+
+		applyQuizProgress();
+		updateUI();
+
+		window.addEventListener('aprende-quiz-complete', () => {
+			applyQuizProgress();
+			const quizzes = loadQuizzes();
+			const data = load();
+			inputs.forEach((input) => {
+				const quizSlug = input.getAttribute('data-quiz-slug');
+				const id = input.getAttribute('data-lesson-id');
+				if (!quizSlug || !id) return;
+				if (quizzes[quizSlug]?.passed) data[id] = true;
+			});
+			save(data);
+			updateUI();
+		});
+
+		window.addEventListener('aprende-auth-change', () => {
+			applyQuizProgress();
+			updateUI();
+		});
+
+		resetBtn?.addEventListener('click', () => {
+			const msg = isEn
+				? 'Reset all study path progress?'
+				: 'Reiniciar todo el progreso de la ruta?';
+			if (!confirm(msg)) return;
+			localStorage.removeItem(STORAGE_KEY);
+			inputs.forEach((i) => {
+				if (!i.disabled) i.checked = false;
+			});
+			updateUI();
+		});
+	}
+
+	initStudyPath();
+	document.addEventListener('astro:page-load', initStudyPath);
+</script>

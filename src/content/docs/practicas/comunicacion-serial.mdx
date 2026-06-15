@@ -1,0 +1,37 @@
+---
+title: Practica 8 - Comunicacion serial
+description: UART entre PIC18F4550 y PC segun Practica 8 del curso.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="practicas/comunicacion-serial" />
+
+
+
+<PracticeBox title="Practica 8 de Laboratorio" level="UNEXPO">
+Establecer comunicacion serial entre el PIC18F4550 y una PC usando EUSART. Enviar y recibir datos (terminal serial).
+</PracticeBox>
+
+<Figure
+	src="/images/pdf/practica-8/page-2.png"
+	alt="Diagrama electronico de la Practica 8 con MAX232 y comunicacion serial"
+	caption="PIC RC6/RC7 con MAX232 hacia conector serial. Incluye LCD y potenciometro en AN0."
+	credit="Practica 8 — Comunicacion serial · UNEXPO"
+/>
+
+## Requisitos
+
+- Configurar EUSART a 9600 o 115200 baudios
+- Pines RC6 (TX) y RC7 (RX)
+- Terminal en PC (PuTTY, Tera Term, Arduino Serial Monitor)
+- Opcional: protocolo simple de comandos
+
+## Evaluacion
+
+Codigo funcional, simulacion o prueba fisica, informe con diagrama y explicacion del calculo de SPBRG.
+
+<TopicQuiz slug="practicas/comunicacion-serial" />

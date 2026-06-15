@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" role="img" aria-label="Boton con pull-up">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .label { font: 12px sans-serif; fill: #1e293b; }
+      .small { font: 10px sans-serif; fill: #475569; }
+      .pic { fill: #14213d; stroke: #fca311; stroke-width: 2; }
+      .res { fill: #fff7ed; stroke: #d97706; stroke-width: 2; }
+      .btn { fill: #e2e8f0; stroke: #475569; stroke-width: 2; }
+      .wire { stroke: #334155; stroke-width: 2; fill: none; }
+      .pwr { stroke: #dc2626; stroke-width: 2; }
+      .gnd { stroke: #64748b; stroke-width: 2; }
+    </style>
+  </defs>
+  <text x="320" y="24" text-anchor="middle" class="title">Pulsador con pull-up (activo en bajo)</text>
+  <rect x="40" y="90" width="130" height="80" rx="10" class="pic"/>
+  <text x="105" y="125" text-anchor="middle" fill="#fca311" font="bold 12px sans-serif">RB0</text>
+  <text x="105" y="145" text-anchor="middle" fill="#f8fafc" font="10px sans-serif">entrada</text>
+  <rect x="250" y="105" width="70" height="22" rx="4" class="res"/>
+  <text x="285" y="120" text-anchor="middle" class="label">10k©</text>
+  <rect x="400" y="95" width="60" height="50" rx="6" class="btn"/>
+  <text x="430" y="125" text-anchor="middle" class="label">NA</text>
+  <line x1="170" y1="130" x2="250" y2="130" class="wire"/>
+  <line x1="320" y1="130" x2="400" y2="130" class="wire"/>
+  <line x1="285" y1="105" x2="285" y2="60" class="pwr"/>
+  <line x1="260" y1="60" x2="310" y2="60" class="pwr"/>
+  <text x="285" y="52" text-anchor="middle" class="small">+5V</text>
+  <line x1="430" y1="145" x2="430" y2="210" class="gnd"/>
+  <line x1="410" y1="210" x2="450" y2="210" class="gnd"/>
+  <text x="320" y="250" text-anchor="middle" class="small">TRISB,0 = 1 · Sin pulsar: RB0 lee 1 · Pulsado: RB0 lee 0</text>
+  <text x="320" y="275" text-anchor="middle" class="small">Usado en practicas y ejercicio de control de nivel (RB7)</text>
+</svg>

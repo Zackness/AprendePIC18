@@ -1,0 +1,55 @@
+---
+title: Guia rapida de registros
+description: Tabla de consulta rapida de registros SFR del PIC18F4550 para el parcial.
+---
+
+## CPU y sistema
+
+| Registro | Bits clave | Uso |
+| --- | --- | --- |
+| WREG | 8 | Acumulador |
+| STATUS | Z,C,DC,OV,N | Banderas ALU |
+| BSR | 0-3 | Banco memoria |
+| INTCON | GIE, PEIE, TMR0IF | Interrupciones globales |
+
+## Puertos
+
+| Registro | Funcion |
+| --- | --- |
+| TRISx | 1=in, 0=out |
+| PORTx | Leer pines |
+| LATx | Escribir salida |
+
+## Timers
+
+| Timer | Control | Contador |
+| --- | --- | --- |
+| Timer0 | T0CON | TMR0L/H |
+| Timer1 | T1CON | TMR1L/H |
+| Timer2 | T2CON | TMR2, PR2 |
+
+## ADC
+
+| Registro | Funcion |
+| --- | --- |
+| ADCON0 | Canal, GO/DONE, ADON |
+| ADCON1 | PCFG analogico/digital |
+| ADCON2 | ADFM, ADCS reloj |
+| ADRESH/L | Resultado 10 bit |
+
+## Serial
+
+| Registro | Funcion |
+| --- | --- |
+| TXSTA | TXEN, BRGH |
+| RCSTA | SPEN, CREN |
+| SPBRG | Baudios |
+| TXREG/RCREG | Datos |
+
+## PWM/CCP
+
+| Registro | Funcion |
+| --- | --- |
+| CCP1CON | Modo CCP/PWM |
+| CCPR1L | Duty cycle |
+| PR2 | Periodo PWM |

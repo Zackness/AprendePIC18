@@ -1,0 +1,56 @@
+---
+title: MPLAB v8, MPLAB X, Proteus y placa
+description: Herramientas usadas para escribir, simular y probar codigo del PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<LessonProgress slug="fundamentos/mplab-proteus" />
+
+
+
+En el curso trabajaremos principalmente con **MPLAB v8** porque suele ser mas compatible con flujos clasicos de MPASM y proyectos academicos. Tambien se explicara **MPLAB X** para que puedas entender el entorno moderno.
+
+<AIExplain title="Flujo real de trabajo">
+Escribes ensamblador en MPLAB, compilas un archivo `.hex`, lo cargas en Proteus para simular y finalmente lo grabas en una placa fisica si tienes el hardware.
+</AIExplain>
+
+<Tabs>
+	<TabItem label="MPLAB v8">
+		1. Crear proyecto con el asistente.
+		2. Seleccionar `PIC18F4550`.
+		3. Usar MPASM como herramienta de ensamblador.
+		4. Agregar archivo `.asm`.
+		5. Compilar y generar `.hex`.
+	</TabItem>
+	<TabItem label="MPLAB X">
+		1. Crear proyecto standalone.
+		2. Seleccionar familia y dispositivo `PIC18F4550`.
+		3. Configurar toolchain compatible.
+		4. Agregar codigo ensamblador.
+		5. Compilar y revisar errores en la salida.
+	</TabItem>
+	<TabItem label="Proteus">
+		1. Colocar el PIC18F4550.
+		2. Conectar cristal, alimentacion y componentes.
+		3. Cargar el `.hex` en las propiedades del PIC.
+		4. Ajustar frecuencia de reloj.
+		5. Ejecutar simulacion y observar pines.
+	</TabItem>
+	<TabItem label="Placa fisica">
+		1. Verificar alimentacion.
+		2. Revisar oscilador, MCLR y conexiones.
+		3. Grabar el microcontrolador.
+		4. Medir salidas con multimetro o LED.
+		5. Comparar comportamiento real contra Proteus.
+	</TabItem>
+</Tabs>
+
+## Sobre imagenes con AI
+
+La web dejara espacio para diagramas generados con AI cuando sean utiles: arquitectura visual, conexion de LED, flujo de interrupcion o mapa de memoria. Cada imagen debe revisarse tecnicamente antes de usarla, porque una imagen bonita pero incorrecta puede confundir mas que ayudar.
+
+<TopicQuiz slug="fundamentos/mplab-proteus" />

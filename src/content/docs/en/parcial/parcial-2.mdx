@@ -1,0 +1,19 @@
+---
+title: Partial II preparation
+description: Review and interactive exam for Partial II — UNEXPO Topics 4 and 5.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-2" locale="en" />
+
+## When to take this partial
+
+After **courses 5 and 6** on the [study path](/en/ruta-de-estudio/#c07): MPLAB/Proteus, GPIO, first LED, and **Practice 1** math operations.
+
+<ParcialPrep parcial={getParcialById('p2')} locale="en" />
+
+<TopicQuiz slug="parcial/parcial-2" locale="en" />

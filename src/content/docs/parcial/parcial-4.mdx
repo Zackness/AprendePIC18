@@ -1,0 +1,25 @@
+---
+title: Preparacion Parcial IV
+description: Repaso y examen interactivo para el Parcial IV — ADC, comunicacion serial y cierre del curso.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-4" />
+
+## Cuando presentar este parcial
+
+Despues de los cursos **13 y 14** de la [ruta de estudio](/ruta-de-estudio/#c15): ADC, UART/serial y practicas 7 y 8.
+
+:::note[Alcance del Parcial IV]
+El profesor puede ajustar el contenido exacto del ultimo parcial. Esta guia cubre **Tema 9 (ADC)**, **Tema 10 (comunicacion serial)** y el proyecto integrador. Si el enunciado oficial difiere, prioriza el PDF del curso.
+:::
+
+<ParcialPrep parcial={getParcialById('p4')} locale="es" />
+
+Luego trabaja el [proyecto final tipo parcial](/parcial/proyecto-final/) y el [tutorial integrador](/tutoriales/practica-9/).
+
+<TopicQuiz slug="parcial/parcial-4" locale="es" />

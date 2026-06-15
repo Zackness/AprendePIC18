@@ -1,0 +1,28 @@
+---
+title: Practice 3 - Frequency meter
+description: Frequency measurement with multiplexed 7-segment displays.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import Figure from '../../../../components/Figure.astro';
+
+<LessonProgress slug="practicas/frecuencimetro" locale="en" />
+
+
+
+<PracticeBox title="Practice 3 — Lab" level="UNEXPO">
+Frequency meter with multiplexed 7-segment displays. Uses timers for measurement window and display refresh.
+</PracticeBox>
+
+<Figure
+	src="/images/pdf/practica-3/page-2.png"
+	alt="Frequency meter circuit with multiplexed displays and PIC18F4550"
+	caption="Schematic: PIC18F4550, 74LS48 decoder, multiplexed displays, and digit-select transistors."
+	credit="Practice 3 — Frequency meter · UNEXPO"
+/>
+
+Use timer as external pulse counter and multiplex displays for visual persistence.
+
+<TopicQuiz slug="practicas/frecuencimetro" locale="en" />

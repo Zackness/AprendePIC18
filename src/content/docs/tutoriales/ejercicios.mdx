@@ -1,0 +1,39 @@
+---
+title: Tutoriales de ejercicios
+description: 'Checklist para practicar ejercicios tipo parcial del PIC18F4550.'
+---
+
+import Checklist from '../../../components/Checklist.astro';
+import { exerciseTutorialItems } from '../../../data/tutorials';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<AIExplain title="Metodo de practica">
+Lee el enunciado, intenta resolver sin mirar codigo, luego revisa la documentacion y marca el ejercicio cuando puedas explicarlo en voz alta.
+</AIExplain>
+
+<Checklist
+	id="ejercicios-parcial"
+	title="Ejercicios recomendados"
+	items={exerciseTutorialItems.map((item) => ({
+		id: item.id,
+		label: item.labelEs,
+		href: item.hrefEs,
+	}))}
+/>
+
+## Pasos extra para cada ejercicio
+
+<Checklist
+	id="ejercicios-metodo"
+	title="Rutina de estudio"
+	items={[
+		{ id: 'm1', label: 'Leer enunciado y dibujar circuito' },
+		{ id: 'm2', label: 'Escribir pseudocodigo preciso' },
+		{ id: 'm3', label: 'Hacer diagrama de flujo' },
+		{ id: 'm4', label: 'Escribir codigo ensamblador modular' },
+		{ id: 'm5', label: 'Simular en Proteus' },
+		{ id: 'm6', label: 'Explicar oralmente sin leer apuntes' },
+	]}
+/>
+
+[Volver al panel de tutoriales](/tutoriales/)

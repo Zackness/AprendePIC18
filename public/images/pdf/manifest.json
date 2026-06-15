@@ -1,0 +1,466 @@
+[
+  {
+    "key": "practica-1",
+    "page": 1,
+    "src": "/images/pdf/practica-1/page-1.png",
+    "credit": "Practica 1 — Operaciones matematicas (UNEXPO)",
+    "bytes": 416548,
+    "mode": "page"
+  },
+  {
+    "key": "practica-1",
+    "page": 2,
+    "src": "/images/pdf/practica-1/page-2.png",
+    "credit": "Practica 1 — Operaciones matematicas (UNEXPO)",
+    "bytes": 390222,
+    "mode": "page"
+  },
+  {
+    "key": "practica-1",
+    "page": 3,
+    "src": "/images/pdf/practica-1/page-3.png",
+    "credit": "Practica 1 — Operaciones matematicas (UNEXPO)",
+    "bytes": 382035,
+    "mode": "page"
+  },
+  {
+    "key": "practica-2",
+    "page": 1,
+    "src": "/images/pdf/practica-2/page-1.png",
+    "credit": "Practica 2 — Teclado y LCD (UNEXPO)",
+    "bytes": 377769,
+    "mode": "page"
+  },
+  {
+    "key": "practica-2",
+    "page": 2,
+    "src": "/images/pdf/practica-2/page-2.png",
+    "credit": "Practica 2 — Teclado y LCD (UNEXPO)",
+    "bytes": 215982,
+    "mode": "page"
+  },
+  {
+    "key": "practica-2",
+    "page": 3,
+    "src": "/images/pdf/practica-2/page-3.png",
+    "credit": "Practica 2 — Teclado y LCD (UNEXPO)",
+    "bytes": 390764,
+    "mode": "page"
+  },
+  {
+    "key": "practica-3",
+    "page": 1,
+    "src": "/images/pdf/practica-3/page-1.png",
+    "credit": "Practica 3 — Frecuencimetro (UNEXPO)",
+    "bytes": 342175,
+    "mode": "page"
+  },
+  {
+    "key": "practica-3",
+    "page": 2,
+    "src": "/images/pdf/practica-3/page-2.png",
+    "credit": "Practica 3 — Frecuencimetro (UNEXPO)",
+    "bytes": 224499,
+    "mode": "page"
+  },
+  {
+    "key": "practica-3",
+    "page": 3,
+    "src": "/images/pdf/practica-3/page-3.png",
+    "credit": "Practica 3 — Frecuencimetro (UNEXPO)",
+    "bytes": 315813,
+    "mode": "page"
+  },
+  {
+    "key": "practica-7",
+    "page": 1,
+    "src": "/images/pdf/practica-7/page-1.png",
+    "credit": "Practica 7 — Convertidor AD (UNEXPO)",
+    "bytes": 398618,
+    "mode": "page"
+  },
+  {
+    "key": "practica-7",
+    "page": 2,
+    "src": "/images/pdf/practica-7/page-2.png",
+    "credit": "Practica 7 — Convertidor AD (UNEXPO)",
+    "bytes": 256901,
+    "mode": "page"
+  },
+  {
+    "key": "practica-7",
+    "page": 3,
+    "src": "/images/pdf/practica-7/page-3.png",
+    "credit": "Practica 7 — Convertidor AD (UNEXPO)",
+    "bytes": 342129,
+    "mode": "page"
+  },
+  {
+    "key": "practica-8",
+    "page": 1,
+    "src": "/images/pdf/practica-8/page-1.png",
+    "credit": "Practica 8 — Comunicacion serial (UNEXPO)",
+    "bytes": 378962,
+    "mode": "page"
+  },
+  {
+    "key": "practica-8",
+    "page": 2,
+    "src": "/images/pdf/practica-8/page-2.png",
+    "credit": "Practica 8 — Comunicacion serial (UNEXPO)",
+    "bytes": 343534,
+    "mode": "page"
+  },
+  {
+    "key": "practica-8",
+    "page": 3,
+    "src": "/images/pdf/practica-8/page-3.png",
+    "credit": "Practica 8 — Comunicacion serial (UNEXPO)",
+    "bytes": 329543,
+    "mode": "page"
+  },
+  {
+    "key": "motor-paso-a-paso",
+    "page": 1,
+    "src": "/images/pdf/motor-paso-a-paso/page-1.png",
+    "credit": "Practica 6 — Motor paso a paso (UNEXPO)",
+    "bytes": 468216,
+    "mode": "page"
+  },
+  {
+    "key": "motor-paso-a-paso",
+    "page": 2,
+    "src": "/images/pdf/motor-paso-a-paso/page-2.png",
+    "credit": "Practica 6 — Motor paso a paso (UNEXPO)",
+    "bytes": 342571,
+    "mode": "page"
+  },
+  {
+    "key": "motor-paso-a-paso",
+    "page": 3,
+    "src": "/images/pdf/motor-paso-a-paso/page-3.png",
+    "credit": "Practica 6 — Motor paso a paso (UNEXPO)",
+    "bytes": 347937,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 199,
+    "src": "/images/pdf/spi-i2c/page-199.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 370237,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 200,
+    "src": "/images/pdf/spi-i2c/page-200.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 368062,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 201,
+    "src": "/images/pdf/spi-i2c/page-201.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 349553,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 202,
+    "src": "/images/pdf/spi-i2c/page-202.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 503647,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 203,
+    "src": "/images/pdf/spi-i2c/page-203.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 352127,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 204,
+    "src": "/images/pdf/spi-i2c/page-204.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 406238,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 205,
+    "src": "/images/pdf/spi-i2c/page-205.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 138920,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 206,
+    "src": "/images/pdf/spi-i2c/page-206.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 386102,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 207,
+    "src": "/images/pdf/spi-i2c/page-207.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 199268,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 208,
+    "src": "/images/pdf/spi-i2c/page-208.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 492645,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 209,
+    "src": "/images/pdf/spi-i2c/page-209.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 399044,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 210,
+    "src": "/images/pdf/spi-i2c/page-210.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 332081,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 217,
+    "src": "/images/pdf/spi-i2c/page-217.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 139780,
+    "mode": "page"
+  },
+  {
+    "key": "spi-i2c",
+    "page": 228,
+    "src": "/images/pdf/spi-i2c/page-228.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet DS39632E",
+    "bytes": 409092,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 4,
+    "src": "/images/pdf/pinout/page-4.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 247214,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 5,
+    "src": "/images/pdf/pinout/page-5.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 317886,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 6,
+    "src": "/images/pdf/pinout/page-6.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 337852,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 7,
+    "src": "/images/pdf/pinout/page-7.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 280154,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 8,
+    "src": "/images/pdf/pinout/page-8.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 35910,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 9,
+    "src": "/images/pdf/pinout/page-9.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 637262,
+    "mode": "page"
+  },
+  {
+    "key": "pinout",
+    "page": 10,
+    "src": "/images/pdf/pinout/page-10.png",
+    "credit": "Microchip PIC18LF4455/4550 Datasheet",
+    "bytes": 614839,
+    "mode": "page"
+  },
+  {
+    "key": "uart",
+    "page": 7,
+    "src": "/images/pdf/uart/page-7.png",
+    "credit": "Tema 10 — Comunicacion serial (UNEXPO)",
+    "bytes": 49495,
+    "mode": "page"
+  },
+  {
+    "key": "uart",
+    "page": 9,
+    "src": "/images/pdf/uart/page-9.png",
+    "credit": "Tema 10 — Comunicacion serial (UNEXPO)",
+    "bytes": 110517,
+    "mode": "page"
+  },
+  {
+    "key": "uart",
+    "page": 10,
+    "src": "/images/pdf/uart/page-10.png",
+    "credit": "Tema 10 — Comunicacion serial (UNEXPO)",
+    "bytes": 234979,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 1,
+    "src": "/images/pdf/lcd-teclado/page-1.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 119792,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 2,
+    "src": "/images/pdf/lcd-teclado/page-2.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 232569,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 3,
+    "src": "/images/pdf/lcd-teclado/page-3.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 378866,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 4,
+    "src": "/images/pdf/lcd-teclado/page-4.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 122216,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 5,
+    "src": "/images/pdf/lcd-teclado/page-5.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 79369,
+    "mode": "page"
+  },
+  {
+    "key": "lcd-teclado",
+    "page": 6,
+    "src": "/images/pdf/lcd-teclado/page-6.png",
+    "credit": "Tema 7 — LCD y teclado (UNEXPO)",
+    "bytes": 160563,
+    "mode": "page"
+  },
+  {
+    "key": "pwm",
+    "page": 1,
+    "src": "/images/pdf/pwm/page-1.png",
+    "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
+    "bytes": 70882,
+    "mode": "page"
+  },
+  {
+    "key": "pwm",
+    "page": 2,
+    "src": "/images/pdf/pwm/page-2.png",
+    "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
+    "bytes": 367900,
+    "mode": "page"
+  },
+  {
+    "key": "pwm",
+    "page": 3,
+    "src": "/images/pdf/pwm/page-3.png",
+    "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
+    "bytes": 164569,
+    "mode": "page"
+  },
+  {
+    "key": "pwm",
+    "page": 4,
+    "src": "/images/pdf/pwm/page-4.png",
+    "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
+    "bytes": 251691,
+    "mode": "page"
+  },
+  {
+    "key": "pwm",
+    "page": 5,
+    "src": "/images/pdf/pwm/page-5.png",
+    "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
+    "bytes": 176644,
+    "mode": "page"
+  },
+  {
+    "key": "adc",
+    "page": 1,
+    "src": "/images/pdf/adc/page-1.png",
+    "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
+    "bytes": 143220,
+    "mode": "page"
+  },
+  {
+    "key": "adc",
+    "page": 2,
+    "src": "/images/pdf/adc/page-2.png",
+    "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
+    "bytes": 672914,
+    "mode": "page"
+  },
+  {
+    "key": "adc",
+    "page": 3,
+    "src": "/images/pdf/adc/page-3.png",
+    "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
+    "bytes": 562471,
+    "mode": "page"
+  },
+  {
+    "key": "adc",
+    "page": 4,
+    "src": "/images/pdf/adc/page-4.png",
+    "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
+    "bytes": 434443,
+    "mode": "page"
+  },
+  {
+    "key": "adc",
+    "page": 5,
+    "src": "/images/pdf/adc/page-5.png",
+    "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
+    "bytes": 318483,
+    "mode": "page"
+  }
+]

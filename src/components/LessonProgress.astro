@@ -1,0 +1,81 @@
+---
+import { getQuizBySlug } from '../data/quizzes';
+
+interface Props {
+	slug: string;
+	locale?: 'es' | 'en';
+}
+
+const { slug, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const quiz = getQuizBySlug(slug);
+const totalQuestions = quiz?.questions.length ?? 0;
+---
+
+<aside class="lesson-progress" data-lesson-progress data-lesson-slug={slug}>
+	<div class="lesson-progress__top">
+		<span class="lesson-progress__label">
+			{isEn ? 'Lesson progress' : 'Progreso de la clase'}
+		</span>
+		<span class="lesson-progress__pct" data-lesson-pct>0%</span>
+	</div>
+	<div class="lesson-progress__bar">
+		<div class="lesson-progress__fill" data-lesson-fill style="width: 0%"></div>
+	</div>
+	{
+		totalQuestions > 0 && (
+			<p class="lesson-progress__quiz-hint">
+				{isEn
+					? `Complete the interactive exam (${totalQuestions} questions) at the end to pass this lesson.`
+					: `Completa el examen interactivo (${totalQuestions} preguntas) al final para aprobar esta clase.`}
+			</p>
+		)
+	}
+</aside>
+
+<script>
+	function initLessonProgress() {
+		document.querySelectorAll('[data-lesson-progress]').forEach((root) => {
+			if (root.getAttribute('data-progress-init') === '1') return;
+			root.setAttribute('data-progress-init', '1');
+
+			const slug = root.getAttribute('data-lesson-slug') || '';
+			const fill = root.querySelector('[data-lesson-fill]');
+			const pctEl = root.querySelector('[data-lesson-pct]');
+
+			function update() {
+				let pct = 0;
+				try {
+					const progress = JSON.parse(localStorage.getItem('aprende-pic18-progress-local') || '{}');
+					const quiz = progress.quizzes?.[slug];
+					if (quiz?.passed) pct = 100;
+					else if (quiz?.score) pct = Math.min(quiz.score, 90);
+				} catch {
+					/* ignore */
+				}
+
+				const scrollPct = Math.min(
+					90,
+					Math.round(
+						(window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1)) *
+							90,
+					),
+				);
+				if (!pct) pct = scrollPct;
+
+				if (fill) fill.style.width = `${pct}%`;
+				if (pctEl) pctEl.textContent = `${pct}%`;
+			}
+
+			update();
+			window.addEventListener('scroll', update, { passive: true });
+			window.addEventListener('aprende-quiz-complete', (e) => {
+				const detail = (e as CustomEvent).detail;
+				if (detail?.slug === slug) update();
+			});
+		});
+	}
+
+	initLessonProgress();
+	document.addEventListener('astro:page-load', initLessonProgress);
+</script>

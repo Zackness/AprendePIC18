@@ -1,0 +1,25 @@
+---
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import Sponsors from './Sponsors.astro';
+
+const { sidebar } = Astro.locals.starlightRoute;
+const locale = Astro.locals.starlightRoute.locale ?? 'es';
+---
+
+<SidebarPersister>
+	<SidebarSublist sublist={sidebar} />
+</SidebarPersister>
+
+<Sponsors locale={locale === 'en' ? 'en' : 'es'} />
+
+<div class="md:sl-hidden">
+	<MobileMenuFooter />
+</div>
+
+<style>
+	:global(.sidebar-content) {
+		gap: 0.75rem;
+	}
+</style>

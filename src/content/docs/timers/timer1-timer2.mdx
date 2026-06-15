@@ -1,0 +1,44 @@
+---
+title: Timer 1 y Timer 2
+description: Temporizadores de 16 bit, CCP y PWM con Timer2 en PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<LessonProgress slug="timers/timer1-timer2" />
+
+
+
+## Timer 1
+
+- 16 bit, registro T1CON
+- Pre-escalador: 1, 2, 4, 8
+- Formula: `Tiempo = (4/Fosc) * (65536-TMR1H:TMR1L) * Pre-divisor`
+- Usado en modo Captura y Comparacion del CCP
+
+## Timer 2
+
+- 8 bit con registro de periodo PR2
+- Pre-escalador: 1, 4, 16
+- Post-escalador para interrupciones
+- **Base del PWM** en modulo CCP
+
+<AIExplain title="PWM usa Timer2">
+El periodo PWM depende de PR2 y el pre-escalador del Timer2. El ciclo util se carga en `CCPR1L` y `CCP1CON<5:4>`.
+</AIExplain>
+
+## Registro T2CON (resumen)
+
+| Bit | Funcion |
+| --- | --- |
+| TMR2ON | Habilita Timer2 |
+| T2CKPS1:0 | Pre-escalador |
+| TOUTPS3:0 | Post-escalador (interrupciones) |
+
+## Timer 3
+
+El PIC18F4550 tambien tiene Timer3 (similar a Timer1). Consulta el datasheet para aplicaciones avanzadas de captura.
+
+<TopicQuiz slug="timers/timer1-timer2" />

@@ -1,0 +1,65 @@
+---
+title: SPI and I2C (MSSP)
+description: MSSP module for synchronous SPI and I2C communication.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
+
+<LessonProgress slug="comunicacion/spi-i2c" locale="en" />
+
+
+
+The **MSSP** (Master Synchronous Serial Port) module supports SPI and I2C.
+
+## SPI (Serial Peripheral Interface)
+
+- Master generates clock (SCK)
+- Lines: SDO, SDI, SCK, SS (chip select)
+- Full duplex, synchronous
+- Used with serial EEPROMs, displays, sensors
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p205.png"
+	alt="SPI master mode waveforms on the PIC18F4550"
+	caption="SPI master waveforms: relationship between SCK, SDO, SDI and CKP, CKE, SMP bits."
+	credit="Microchip PIC18F4550 Datasheet — FIGURE 19-3"
+/>
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p208.png"
+	alt="SPI mode table and MSSP registers"
+	caption="Standard SPI modes (CKP/CKE) and related registers: SSPCON1, SSPSTAT, SSPBUF."
+	credit="Microchip PIC18F4550 Datasheet — TABLE 19-1 and 19-2"
+/>
+
+## I2C (Inter-Integrated Circuit)
+
+- Two wires: SDA (data), SCL (clock)
+- Modes: Master, Multi-Master, Slave
+- 7- or 8-bit device addressing
+- Used with sensors, RTC, memories
+
+<Figure
+	src="/images/pdf/spi-i2c/datasheet-p217.png"
+	alt="I2C slave mode timing on the PIC18F4550"
+	caption="I2C slave timing: address sequence, read/write, and ACK."
+	credit="Microchip PIC18F4550 Datasheet — FIGURE 19-8"
+/>
+
+<AIExplain title="Key difference">
+SPI is faster and simpler (more pins). I2C uses fewer pins and allows multiple slaves on the same bus.
+</AIExplain>
+
+## MSSP registers
+
+- `SSPCON1`, `SSPCON2` — control
+- `SSPSTAT` — status
+- `SSPBUF` — data buffer
+- `SSPADD` — I2C address (slave mode)
+
+See the datasheet for detailed configuration tables.
+
+<TopicQuiz slug="comunicacion/spi-i2c" locale="en" />

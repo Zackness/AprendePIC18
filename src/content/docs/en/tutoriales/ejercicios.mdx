@@ -1,0 +1,39 @@
+---
+title: Exercise tutorials
+description: 'Checklist to practice PIC18F4550 exam-style exercises.'
+---
+
+import Checklist from '../../../../components/Checklist.astro';
+import { exerciseTutorialItems } from '../../../../data/tutorials';
+import AIExplain from '../../../../components/AIExplain.astro';
+
+<AIExplain title="Practice method">
+Read the prompt, try solving without looking at code, then review the docs and check the item when you can explain it out loud.
+</AIExplain>
+
+<Checklist
+	id="ejercicios-parcial"
+	title="Recommended exercises"
+	items={exerciseTutorialItems.map((item) => ({
+		id: item.id,
+		label: item.labelEn,
+		href: item.hrefEn,
+	}))}
+/>
+
+## Extra steps for each exercise
+
+<Checklist
+	id="ejercicios-metodo"
+	title="Study routine"
+	items={[
+		{ id: 'm1', label: 'Read prompt and draw the circuit' },
+		{ id: 'm2', label: 'Write precise pseudocode' },
+		{ id: 'm3', label: 'Create a flowchart' },
+		{ id: 'm4', label: 'Write modular assembly code' },
+		{ id: 'm5', label: 'Simulate in Proteus' },
+		{ id: 'm6', label: 'Explain orally without reading notes' },
+	]}
+/>
+
+[Back to tutorial dashboard](/en/tutoriales/)

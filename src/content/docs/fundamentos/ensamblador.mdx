@@ -1,0 +1,59 @@
+---
+title: Ensamblador para PIC18
+description: Base de MPASM para escribir programas del PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+
+<LessonProgress slug="fundamentos/ensamblador" />
+
+
+
+El ensamblador traduce instrucciones cercanas al hardware a codigo maquina. En PIC18 se suele trabajar con **MPASM**, especialmente en cursos que usan **MPLAB v8**.
+
+<AIExplain title="No lo estudies como magia">
+Cada linea de ensamblador debe responder una pregunta concreta: mover un dato, cambiar un bit, comparar, saltar, llamar una subrutina o configurar un registro.
+</AIExplain>
+
+## Estructura comun
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+
+        CONFIG  FOSC = HS
+        CONFIG  WDT = OFF
+        CONFIG  LVP = OFF
+
+        ORG     0x0000
+        GOTO    inicio
+
+inicio:
+        ; Codigo principal
+        GOTO    inicio
+
+        END
+```
+
+## Instrucciones basicas
+
+| Instruccion | Idea |
+| --- | --- |
+| `MOVLW k` | Carga un literal en `WREG`. |
+| `MOVWF f` | Copia `WREG` a un registro `f`. |
+| `CLRF f` | Limpia un registro. |
+| `BSF f,b` | Coloca en 1 el bit `b` del registro `f`. |
+| `BCF f,b` | Coloca en 0 el bit `b` del registro `f`. |
+| `BTFSC f,b` | Salta la siguiente instruccion si el bit esta en 0. |
+| `BTFSS f,b` | Salta la siguiente instruccion si el bit esta en 1. |
+| `GOTO etiqueta` | Salto incondicional. |
+| `CALL sub` | Llama una subrutina. |
+| `RETURN` | Regresa de una subrutina. |
+
+## Idea clave
+
+En ensamblador no dices “enciende un LED”. Dices: configura el pin como salida, escribe un `1` en el latch correcto y manten el programa corriendo.
+
+<TopicQuiz slug="fundamentos/ensamblador" />

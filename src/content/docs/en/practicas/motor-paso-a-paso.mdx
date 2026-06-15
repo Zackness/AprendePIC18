@@ -1,0 +1,28 @@
+---
+title: Practice 6 - Stepper motor
+description: Stepper motor control with step sequences.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import Figure from '../../../../components/Figure.astro';
+
+<LessonProgress slug="practicas/motor-paso-a-paso" locale="en" />
+
+
+
+<PracticeBox title="Practice 6 — Lab" level="UNEXPO">
+Control a stepper motor with coil energization sequences. May use PWM or timed digital outputs.
+</PracticeBox>
+
+<Figure
+	src="/images/pdf/motor-paso-a-paso/page-2.png"
+	alt="Practice 6 circuit diagram with stepper motor"
+	caption="Schematic: PIC18F4550, LCD, stepper motor module, and control pushbuttons."
+	credit="Practice 6 — Stepper motor · UNEXPO"
+/>
+
+Drive motor phases through ULN2003 or similar. Use timers for step delay.
+
+<TopicQuiz slug="practicas/motor-paso-a-paso" locale="en" />

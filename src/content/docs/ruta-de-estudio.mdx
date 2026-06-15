@@ -1,0 +1,60 @@
+---
+title: Ruta de estudio
+description: Ruta guiada estilo escuela para dominar el PIC18F4550 — teoria, laboratorio y parcial alineados al curso UNEXPO.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../components/AIExplain.astro';
+import StudyPath from '../../components/StudyPath.astro';
+
+<StudyPath locale="es" />
+
+<AIExplain title="Por que una ruta y no leer todo de golpe">
+El PIC18F4550 se estudia mejor por capas. Esta ruta sigue el orden del curso de **Microcontroladores** (UNEXPO · Ing. Mecatronica) y se basa en los temas de clase, practicas de laboratorio, ejercicios de parcial y el datasheet Microchip del curso.
+</AIExplain>
+
+## Atajos por objetivo
+
+<CardGrid>
+	<Card title="Parcial I (T1–T3)" icon="approve-check">
+		Tras los cursos 1–3: [Preparacion Parcial I](/parcial/parcial-1/) con examen interactivo.
+	</Card>
+	<Card title="Parcial II (T4–T5)" icon="approve-check">
+		Tras GPIO y Practica 1: [Preparacion Parcial II](/parcial/parcial-2/).
+	</Card>
+	<Card title="Parcial III (T6–T9 PWM)" icon="approve-check">
+		Tras interrupciones, LCD, timers y PWM: [Parcial III](/parcial/parcial-3/) y [ejercicios](/parcial/ejercicios/).
+	</Card>
+	<Card title="Parcial IV (ADC + serial)" icon="approve-check">
+		Tras ADC y UART: [Parcial IV](/parcial/parcial-4/) y [proyecto final](/parcial/proyecto-final/).
+	</Card>
+	<Card title="Desde cero" icon="document">
+		Empieza en el curso 1 y sigue el orden. Cada parcial aparece justo despues de sus temas y practicas.
+	</Card>
+	<Card title="Repaso rapido" icon="setting">
+		[Glosario](/referencia/glosario/), [guia de registros](/referencia/guia-registros/) y [guia teorica](/parcial/guia-teorica/).
+	</Card>
+</CardGrid>
+
+## Regla de oro
+
+No memorices tablas completas al principio. La habilidad clave del parcial es responder:
+
+**Que quiero controlar → que registro lo configura → que bit debo modificar**
+
+## Material de referencia del curso
+
+El contenido de AprendePIC18 se alinea con estos materiales del curso UNEXPO:
+
+| Tipo | Archivos |
+| --- | --- |
+| Teoria | Tema 1, Tema 2-3, Tema 6-10, instrucciones PIC |
+| Laboratorio | Practica 1, 2, 3, 6, 7, 8 |
+| Parcial | Ejercicios II parcial 20252 |
+| Referencia | PIC18LF4455-I-PT.PDF (datasheet) |
+
+AprendePIC18 traduce ese material a paginas navegables, diagramas y tutoriales interactivos.
+
+## Tutoriales con checklist
+
+Complementa la ruta con [Tutoriales interactivos](/tutoriales/): el progreso de la ruta y el de los tutoriales se guardan por separado en tu navegador.

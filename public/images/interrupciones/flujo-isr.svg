@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 360" role="img" aria-label="Flujo de una interrupcion">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .step { fill: #fff7ed; stroke: #d97706; stroke-width: 2; }
+      .arrow { stroke: #14213d; stroke-width: 2; fill: #14213d; }
+      .label { font: 11px sans-serif; fill: #1e293b; }
+      .small { font: 10px sans-serif; fill: #475569; }
+    </style>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" class="arrow"/>
+    </marker>
+  </defs>
+  <text x="350" y="24" text-anchor="middle" class="title">Flujo de una interrupcion (Tema 6)</text>
+  <rect x="30" y="50" width="120" height="44" rx="8" class="step"/>
+  <text x="90" y="77" text-anchor="middle" class="label">1. Evento</text>
+  <rect x="190" y="50" width="120" height="44" rx="8" class="step"/>
+  <text x="250" y="77" text-anchor="middle" class="label">2. Suspender</text>
+  <rect x="350" y="50" width="120" height="44" rx="8" class="step"/>
+  <text x="410" y="77" text-anchor="middle" class="label">3. Vector</text>
+  <rect x="510" y="50" width="120" height="44" rx="8" class="step"/>
+  <text x="570" y="77" text-anchor="middle" class="label">4. Guardar</text>
+  <line x1="150" y1="72" x2="190" y2="72" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="310" y1="72" x2="350" y2="72" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="470" y1="72" x2="510" y2="72" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="120" y="150" width="140" height="50" rx="8" class="step"/>
+  <text x="190" y="172" text-anchor="middle" class="label">5. Ejecutar ISR</text>
+  <text x="190" y="188" text-anchor="middle" class="small">Limpiar bandera</text>
+  <rect x="300" y="150" width="140" height="50" rx="8" class="step"/>
+  <text x="370" y="172" text-anchor="middle" class="label">6. Restaurar</text>
+  <text x="370" y="188" text-anchor="middle" class="small">Contexto</text>
+  <rect x="480" y="150" width="120" height="50" rx="8" class="step"/>
+  <text x="540" y="180" text-anchor="middle" class="label">7. RETFIE</text>
+  <line x1="570" y1="94" x2="570" y2="120" stroke="#14213d" stroke-width="2"/>
+  <line x1="570" y1="120" x2="190" y2="120" stroke="#14213d" stroke-width="2"/>
+  <line x1="190" y1="120" x2="190" y2="150" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="260" y1="175" x2="300" y2="175" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="440" y1="175" x2="480" y2="175" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="350" y="250" text-anchor="middle" class="label">Vectores PIC18F4550: 0x0008 (alta) � 0x0018 (baja)</text>
+  <text x="350" y="275" text-anchor="middle" class="small">INTCON.GIE habilita interrupciones globalmente</text>
+  <text x="350" y="320" text-anchor="middle" class="small">UNEXPO · Ing. Mecatronica  Tema 6 Interrupciones</text>
+</svg>

@@ -1,0 +1,57 @@
+---
+title: Practica 1 - Operaciones matematicas
+description: Sistema minimo, puertos y operaciones ALU segun Practica 1 UNEXPO del curso de Microcontroladores UNEXPO (Ing. Mecatronica).
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="practicas/operaciones-matematicas" />
+
+
+
+<PracticeBox title="Practica 1 de Laboratorio" level="UNEXPO">
+Sistema minimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en puerto C y E (LEDs). Pulsador RA0 cambia operacion.
+</PracticeBox>
+
+<Figure
+	src="/images/pdf/practica-1/page-2.png"
+	alt="Diagrama electronico de la Practica 1 con PIC18F4550, switches y LEDs"
+	caption="Diagrama electronico: operandos en RB0–RB7 y RD0–RD7, resultado en LEDs de RC/RE, pulsador en RA0."
+	credit="Practica 1 — Operaciones matematicas · UNEXPO"
+/>
+
+## Operaciones requeridas
+
+- Suma, resta, multiplicacion
+- Division por **software**
+- OR, AND, XOR, complemento
+- Rotar sin acarreo
+
+<AIExplain title="Division por software">
+No hay instruccion DIV nativa en PIC18. Implementa restas repetidas o algoritmo de restauracion en una rutina aparte.
+</AIExplain>
+
+## Herramientas
+
+- MPLAB IDE 8.88
+- PICkit 2 o 3
+- Simulador (Proteus recomendado)
+- Datasheet e instrucciones PIC18
+
+## Evaluacion
+
+- Informe pre-laboratorio
+- Codigo .ASM estructurado con comentarios
+- Funcionamiento en fisico
+- Explicacion oral
+
+## Post-laboratorio
+
+1. Diferencia entre operacion por hardware y por software?
+2. Por que no todo el puerto C puede ser salida? (RC6/RC7 son UART por defecto si no se configura)
+
+<TopicQuiz slug="practicas/operaciones-matematicas" />

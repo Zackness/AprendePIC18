@@ -1,0 +1,25 @@
+---
+title: Partial IV preparation
+description: Review and interactive exam for Partial IV — ADC, serial communication, and course wrap-up.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import ParcialPrep from '../../../../components/ParcialPrep.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import { getParcialById } from '../../../../data/parciales';
+
+<LessonProgress slug="parcial/parcial-4" locale="en" />
+
+## When to take this partial
+
+After **courses 13 and 14** on the [study path](/en/ruta-de-estudio/#c15): ADC, UART/serial, and practices 7 and 8.
+
+:::note[Partial IV scope]
+The instructor may adjust the exact scope of the final partial. This guide covers **Topic 9 (ADC)**, **Topic 10 (serial communication)**, and the integrator project. If the official syllabus differs, follow the course PDF.
+:::
+
+<ParcialPrep parcial={getParcialById('p4')} locale="en" />
+
+Then work on the [final partial-style project](/en/parcial/proyecto-final/) and the [integrator tutorial](/en/tutoriales/practica-9/).
+
+<TopicQuiz slug="parcial/parcial-4" locale="en" />

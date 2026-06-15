@@ -1,0 +1,37 @@
+---
+title: Practica 3 - Frecuencimetro
+description: Medicion de frecuencia con displays multiplexados en PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="practicas/frecuencimetro" />
+
+
+
+<PracticeBox title="Practica 3 de Laboratorio" level="UNEXPO">
+Frecuencimetro con displays 7 segmentos multiplexados. Usa timers para ventana de medicion y refresco del display.
+</PracticeBox>
+
+<Figure
+	src="/images/pdf/practica-3/page-2.png"
+	alt="Diagrama del frecuencimetro con displays multiplexados y PIC18F4550"
+	caption="Esquema: PIC18F4550, decodificador 74LS48, displays multiplexados y transistores de seleccion de digito."
+	credit="Practica 3 — Frecuencimetro · UNEXPO"
+/>
+
+## Conceptos clave
+
+- Timer como contador de pulsos externos
+- Multiplexacion de displays para reducir pines
+- Persistencia visual con refresco rapido (~50 Hz por digito)
+- Calculo: frecuencia = conteo / tiempo de ventana
+
+## Relacion con el curso
+
+Combina Timer0/Timer1 en modo contador, GPIO y posiblemente interrupciones para el refresco.
+
+<TopicQuiz slug="practicas/frecuencimetro" />

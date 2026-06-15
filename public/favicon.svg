@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="AprendePIC18">
+  <rect width="128" height="128" rx="28" fill="#0b1220"/>
+  <rect x="24" y="24" width="80" height="80" rx="16" fill="#14213d" stroke="#f59e0b" stroke-width="3"/>
+  <rect x="36" y="36" width="56" height="56" rx="8" fill="#0f172a" stroke="rgba(34,211,238,0.4)" stroke-width="2"/>
+  <text x="64" y="76" text-anchor="middle" fill="#fbbf24" font-family="ui-monospace, monospace" font-size="28" font-weight="700">18</text>
+  <circle cx="24" cy="48" r="5" fill="#22d3ee"/>
+  <circle cx="24" cy="64" r="5" fill="#22d3ee"/>
+  <circle cx="24" cy="80" r="5" fill="#22d3ee"/>
+  <circle cx="104" cy="48" r="5" fill="#f59e0b"/>
+  <circle cx="104" cy="64" r="5" fill="#f59e0b"/>
+  <circle cx="104" cy="80" r="5" fill="#f59e0b"/>
+</svg>

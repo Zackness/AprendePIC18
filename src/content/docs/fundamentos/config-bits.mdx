@@ -1,0 +1,64 @@
+---
+title: Config bits y palabra de configuracion
+description: Fuses, CONFIG y sistema minimo del PIC18F4550 segun Tema 2 del curso.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="fundamentos/config-bits" />
+
+
+
+La palabra de configuracion (config bits o fuses) define el comportamiento del hardware al encender: oscilador, watchdog, MCLR, brown-out, etc.
+
+<AIExplain title="En MPASM">
+Usas directivas `CONFIG` al inicio del programa. El programador graba estos bits en la Flash de configuracion, no en el codigo ejecutable.
+</AIExplain>
+
+## Ejemplo tipico (cristal 20 MHz)
+
+```asm
+        CONFIG  FOSC = HS        ; Oscilador de alta velocidad
+        CONFIG  WDT  = OFF       ; Watchdog deshabilitado
+        CONFIG  LVP  = OFF       ; Low Voltage Programming off
+        CONFIG  MCLRE = ON       ; Pin MCLR habilitado
+        CONFIG  PBADEN = OFF     ; Puertos digitales al inicio
+        CONFIG  BOR  = OFF
+        CONFIG  PWRT = ON
+```
+
+## Sistema minimo
+
+Segun el Tema 2 del el curso de Microcontroladores (UNEXPO), el sistema minimo incluye:
+
+- PIC18F4550
+- Cristal de 20 MHz + condensadores (tipicamente 1 nF cada uno)
+- Reset con pull-up de 10 kΩ en MCLR
+- Alimentacion 5 V (VDD/VSS)
+- Condensador de desacople 10 nF cerca del PIC
+
+<Figure
+	src="/images/arquitectura/sistema-minimo.svg"
+	alt="Diagrama del sistema minimo PIC18F4550 con cristal de 20 MHz y reset"
+	caption="Sistema minimo con cristal, condensadores, MCLR con pull-up de 10 kΩ y alimentacion de 5 V."
+	credit="Tema 2 Arquitectura del PIC — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+<PracticeBox title="Pre-laboratorio Practica 1" level="UNEXPO">
+Investiga la conexion del sistema minimo, explica los puertos del PIC18F4550 y dibuja el diagrama electronico antes de montar en protoboard.
+</PracticeBox>
+
+## Tipos de Reset
+
+1. Reset por hardware (MCLR)
+2. Reset por software
+3. Reset por Watchdog Timer (WDT)
+4. Brown-Out Reset (BOR)
+5. Power-On Reset (POR)
+6. Power-up Timer (PWRT)
+
+<TopicQuiz slug="fundamentos/config-bits" />

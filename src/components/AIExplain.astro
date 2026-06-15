@@ -1,0 +1,14 @@
+---
+interface Props {
+	title?: string;
+}
+
+const { title = 'Explicacion clara' } = Astro.props;
+---
+
+<aside class="ai-explain">
+	<strong>{title}</strong>
+	<div class="ai-explain__body">
+		<slot />
+	</div>
+</aside>

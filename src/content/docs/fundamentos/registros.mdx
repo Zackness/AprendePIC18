@@ -1,0 +1,52 @@
+---
+title: Registros principales del PIC18F4550
+description: SFR, GPR, bancos de memoria y registros clave segun el curso UNEXPO.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/registros" />
+
+
+
+
+Los registros son posiciones de memoria especiales. Los **SFR** (Special Function Registers) controlan hardware; los **GPR** (General Purpose Registers) almacenan variables.
+
+<AIExplain title="Bancos de memoria">
+El PIC18F4550 usa bancos de memoria. El registro `BSR` selecciona el banco activo. Muchos SFR existen en todos los bancos con la misma direccion accesible via `ACCESS`.
+</AIExplain>
+
+## Registros de la CPU
+
+| Registro | Funcion |
+| --- | --- |
+| `WREG` | Acumulador de trabajo. Destino/origen de muchas instrucciones. |
+| `STATUS` | Banderas: Z (cero), C (acarreo), DC (digito), OV (overflow), N (negativo). |
+| `BSR` | Bank Select Register. Selecciona banco 0-15. |
+| `PC` | Program Counter. Apunta a la siguiente instruccion. |
+| `STKPTR` / Pila | Guarda direcciones de retorno en llamadas e interrupciones. |
+
+## Registros de puertos
+
+| Registro | Funcion |
+| --- | --- |
+| `TRISx` | Direccion del puerto: 1=entrada, 0=salida. |
+| `PORTx` | Lee el estado real de los pines. |
+| `LATx` | Escribe el valor de salida al latch. |
+
+## Registros de interrupciones
+
+- `INTCON`, `INTCON2`, `INTCON3`: control global y externas.
+- `PIE1`, `PIE2`: habilitacion de interrupciones perifericas.
+- `PIR1`, `PIR2`: banderas de interrupcion periferica.
+- `IPR1`, `IPR2`: prioridad de interrupciones.
+
+## Pregunta tipo parcial
+
+**Que diferencia hay entre leer PORTB y escribir LATB?**
+
+`PORTB` refleja el nivel electrico en los pines (util para entradas). `LATB` modifica el valor que el puerto intenta colocar en salida, sin leer el pin fisico.
+
+<TopicQuiz slug="fundamentos/registros" />

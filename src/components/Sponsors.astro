@@ -1,0 +1,32 @@
+---
+interface Props {
+	locale?: 'es' | 'en';
+}
+
+const { locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+---
+
+<aside class="sponsors" aria-label={isEn ? 'Sponsored by' : 'Patrocinado por'}>
+	<p class="sponsors__label">{isEn ? 'Sponsored by' : 'Patrocinado por'}</p>
+	<ul class="sponsors__list">
+		<li>
+			<a href="https://zackness.pages.dev" target="_blank" rel="noopener noreferrer">
+				<span class="sponsors__name">zackness</span>
+				<span class="sponsors__role">{isEn ? 'Web platform' : 'Plataforma web'}</span>
+			</a>
+		</li>
+		<li>
+			<a href="https://startupven.com" target="_blank" rel="noopener noreferrer">
+				<span class="sponsors__name">StartupVen</span>
+				<span class="sponsors__role">{isEn ? 'Maintainer' : 'Mantenimiento'}</span>
+			</a>
+		</li>
+		<li>
+			<a href="https://caleta.top" target="_blank" rel="noopener noreferrer">
+				<span class="sponsors__name">CALETAS</span>
+				<span class="sponsors__role">{isEn ? 'Ecosystem' : 'Ecosistema'}</span>
+			</a>
+		</li>
+	</ul>
+</aside>

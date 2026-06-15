@@ -1,0 +1,54 @@
+---
+title: Arquitectura basica
+description: Bloques internos, memoria y ciclo de ejecucion del PIC18F4550.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/arquitectura" />
+
+
+
+
+El PIC18F4550 usa una arquitectura tipo **Harvard**, donde la memoria de programa y la memoria de datos estan separadas. Esto permite que el microcontrolador busque instrucciones y maneje datos usando espacios distintos.
+
+<Figure
+	src="/images/arquitectura/harvard-von-neumann.svg"
+	alt="Comparacion entre arquitectura Von Neumann y Harvard"
+	caption="El PIC18F4550 usa arquitectura Harvard: buses separados para programa (Flash) y datos (RAM)."
+	credit="Basado en Tema 1 — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+<AIExplain title="Para recordar">
+Programa y datos no viven en el mismo lugar. El codigo va en Flash; las variables temporales van en RAM; los datos persistentes pueden ir en EEPROM.
+</AIExplain>
+
+## Elementos importantes
+
+| Elemento | Funcion |
+| --- | --- |
+| `WREG` | Registro de trabajo. Muchas operaciones pasan por el. |
+| `STATUS` | Guarda banderas como cero, acarreo y negativo. |
+| `BSR` | Selecciona banco de memoria para acceder a registros. |
+| `PC` | Contador de programa. Indica la proxima instruccion. |
+| `SFR` | Registros de funcion especial para controlar perifericos. |
+| `GPR` | Registros de proposito general, usados como variables. |
+
+## Ciclo mental de ejecucion
+
+1. El PIC lee una instruccion desde memoria de programa.
+2. La decodifica.
+3. Ejecuta la operacion.
+4. Actualiza registros, banderas o perifericos.
+5. Avanza a la siguiente instruccion, salvo que haya salto o interrupcion.
+
+## Pregunta tipo parcial
+
+**Por que es importante diferenciar SFR y GPR?**
+
+Porque los SFR controlan hardware interno como puertos, timers e interrupciones; los GPR se usan como memoria de trabajo para variables del programa.
+
+<TopicQuiz slug="fundamentos/arquitectura" />

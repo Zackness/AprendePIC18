@@ -1,0 +1,102 @@
+---
+interface CheckItem {
+	id: string;
+	label: string;
+	href?: string;
+}
+
+interface Props {
+	id: string;
+	title?: string;
+	items: CheckItem[];
+}
+
+const { id, title, items } = Astro.props;
+const checklistId = `aprende-pic18-${id}`;
+---
+
+<section class="checklist" data-checklist={checklistId}>
+	{title && <h3 class="checklist__title">{title}</h3>}
+	<ul class="checklist__list">
+		{
+			items.map((item) => (
+				<li class="checklist__item">
+					<label class="checklist__label">
+						<input
+							type="checkbox"
+							class="checklist__input"
+							data-item-id={item.id}
+							aria-label={item.label}
+						/>
+						<span class="checklist__box" aria-hidden="true" />
+						<span class="checklist__text">
+							{item.href ? <a href={item.href}>{item.label}</a> : item.label}
+						</span>
+					</label>
+				</li>
+			))
+		}
+	</ul>
+	<p class="checklist__progress" data-progress aria-live="polite" />
+</section>
+
+<script>
+	function initChecklists() {
+		const STORAGE_KEY = 'aprende-pic18-checklists';
+
+		function loadAll() {
+			try {
+				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+			} catch {
+				return {};
+			}
+		}
+
+		function saveAll(data) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
+		}
+
+		document.querySelectorAll('[data-checklist]').forEach((section) => {
+			const checklistId = section.getAttribute('data-checklist');
+			if (!checklistId) return;
+
+			const inputs = section.querySelectorAll<HTMLInputElement>('.checklist__input');
+			const progressEl = section.querySelector('[data-progress]');
+			const all = loadAll();
+			const saved = all[checklistId] || {};
+
+			function updateProgress() {
+				const total = inputs.length;
+				const done = [...inputs].filter((i) => i.checked).length;
+				const pct = total ? Math.round((done / total) * 100) : 0;
+				if (progressEl) {
+					const isEn = document.documentElement.lang?.startsWith('en');
+					progressEl.textContent = isEn
+						? `${done}/${total} completed (${pct}%)`
+						: `${done}/${total} completados (${pct}%)`;
+				}
+				section.classList.toggle('checklist--done', done === total && total > 0);
+			}
+
+			inputs.forEach((input) => {
+				const itemId = input.getAttribute('data-item-id');
+				if (itemId && saved[itemId]) input.checked = true;
+				input.addEventListener('change', () => {
+					const itemId = input.getAttribute('data-item-id');
+					if (!itemId) return;
+					const data = loadAll();
+					if (!data[checklistId]) data[checklistId] = {};
+					data[checklistId][itemId] = input.checked;
+					saveAll(data);
+					updateProgress();
+				});
+			});
+
+			updateProgress();
+		});
+	}
+
+	initChecklists();
+	document.addEventListener('astro:page-load', initChecklists);
+</script>

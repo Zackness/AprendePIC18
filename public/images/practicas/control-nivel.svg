@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" role="img" aria-label="Control de nivel tanque">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .tank { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+      .water { fill: #60a5fa; }
+      .label { font: 11px sans-serif; fill: #334155; }
+      .small { font: 10px sans-serif; fill: #64748b; }
+      .led { fill: #fca311; stroke: #b45309; }
+    </style>
+  </defs>
+  <text x="350" y="24" text-anchor="middle" class="title">Control de nivel  Ejercicio II Parcial</text>
+  <rect x="280" y="50" width="140" height="180" rx="6" class="tank"/>
+  <rect x="285" y="120" width="130" height="105" class="water"/>
+  <text x="350" y="100" text-anchor="middle" class="label">Tanque</text>
+  <circle cx="230" cy="200" r="10" class="led"/><text x="230" y="225" text-anchor="middle" class="small">Bomba RB6</text>
+  <circle cx="470" cy="200" r="10" class="led"/><text x="470" y="225" text-anchor="middle" class="small">Valvula RB5</text>
+  <text x="300" y="70" class="small">Max RB4</text>
+  <text x="300" y="250" class="small">Min RB3</text>
+  <text x="500" y="80" class="small">Inicio RB7</text>
+  <text x="350" y="270" text-anchor="middle" class="small">Ciclo: bomba ON � nivel max � valvula ON � nivel min � repetir</text>
+  <text x="350" y="292" text-anchor="middle" class="small">Ejercicios II parcial 2025-2  UNEXPO · Ing. Mecatronica</text>
+</svg>

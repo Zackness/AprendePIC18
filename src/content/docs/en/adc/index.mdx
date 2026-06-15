@@ -1,0 +1,72 @@
+---
+title: Analog-to-Digital Converter (ADC)
+description: 10-bit ADC, 13 channels, ADCON registers and Practice 7 from UNEXPO course.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import Figure from '../../../../components/Figure.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="adc" locale="en" />
+
+The PIC18F4550 has a **10-bit** ADC with **13 analog channels**.
+
+<Figure
+	src="/images/adc/canales-analogicos.svg"
+	alt="Analog channel map AN0 to AN12 on ports A, B and E"
+	caption="13 ADC channels distribution. RA4 is not analog."
+	credit="Topic 9 ADC — based on PIC18F4550 datasheet"
+/>
+
+<Figure
+	src="/images/pdf/adc/page-3.png"
+	alt="Figure 9.1: basic functions in a measurement system"
+	caption="Sensor → processor → communication chain. The ADC digitizes the analog sensor signal."
+	credit="Topic 9 — A/D Converter · UNEXPO"
+/>
+
+<Figure
+	src="/images/pdf/adc/page-5.png"
+	alt="Figures 9.2 and 9.3: signal conditioning and ADC transfer characteristic"
+	caption="Signal conditioner before ADC and quantization curve (successive approximation)."
+	credit="Topic 9 — A/D Converter · UNEXPO"
+/>
+
+<AIExplain title="Digital voltage">
+With Vref=5V and 10 bits, 1 LSB ≈ 4.88 mV. Result in ADRESH:ADRESL per ADFM format.
+</AIExplain>
+
+## Analog channels
+
+| Port | Pins |
+| --- | --- |
+| A | RA0/AN0, RA1/AN1, RA2/AN2, RA3/AN3, RA5/AN4 |
+| B | RB0/AN12, RB1/AN10, RB2/AN8, RB3/AN9, RB4/AN11 |
+| E | RE0/AN5, RE1/AN6, RE2/AN7 |
+
+**Note:** RA4 is not analog.
+
+## Registers
+
+- `ADCON0` — channel, GO/DONE, ADON
+- `ADCON1` — digital/analog configuration (PCFG)
+- `ADCON2` — conversion clock and format (ADFM)
+- `ADRESH`, `ADRESL` — result
+
+## Conversion steps
+
+1. Configure analog inputs (`ADCON1`)
+2. Set pins as inputs (`TRIS`)
+3. Select channel and enable ADC (`ADCON0`)
+4. Wait acquisition time (TACQ)
+5. Start conversion (`GO/DONE = 1`)
+6. Wait for `GO/DONE = 0`
+7. Read `ADRESH:ADRESL`
+
+<PracticeBox title="Practice 7 - A/D converter" level="Lab">
+Read a potentiometer or analog sensor, convert the value and display on LCD or LEDs. With 20 MHz crystal, select 16 Tosc in ADCS (101 in ADCON2).
+</PracticeBox>
+
+<TopicQuiz slug="adc" locale="en" />

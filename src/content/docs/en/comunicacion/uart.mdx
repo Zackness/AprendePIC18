@@ -1,0 +1,17 @@
+---
+title: UART / EUSART
+description: Asynchronous serial communication and baud rate setup.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comunicacion/uart" locale="en" />
+
+
+
+
+Pins RC6/TX and RC7/RX. Configure SPBRG, TXSTA (TXEN, BRGH), RCSTA (SPEN, CREN). Typical 9600 baud @ 20 MHz: SPBRG ≈ 129.
+
+<TopicQuiz slug="comunicacion/uart" locale="en" />

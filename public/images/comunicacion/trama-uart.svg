@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 260" role="img" aria-label="Trama UART asincrona">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .bit { fill: #fff7ed; stroke: #d97706; stroke-width: 1.5; }
+      .start { fill: #fecaca; stroke: #dc2626; }
+      .stop { fill: #dbeafe; stroke: #2563eb; }
+      .idle { fill: #f1f5f9; stroke: #94a3b8; }
+      .label { font: 10px sans-serif; fill: #334155; }
+      .small { font: 10px sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+  <text x="350" y="24" text-anchor="middle" class="title">Trama UART asincrona  NRZ (Tema 10)</text>
+  <rect x="40" y="70" width="50" height="50" class="idle"/><text x="65" y="100" text-anchor="middle" class="label">Idle</text>
+  <rect x="95" y="70" width="40" height="50" class="start"/><text x="115" y="100" text-anchor="middle" class="label">Start</text>
+  <rect x="140" y="70" width="35" height="50" class="bit"/><text x="157" y="100" text-anchor="middle" class="label">D0</text>
+  <rect x="180" y="70" width="35" height="50" class="bit"/><text x="197" y="100" text-anchor="middle" class="label">D1</text>
+  <rect x="220" y="70" width="35" height="50" class="bit"/><text x="237" y="100" text-anchor="middle" class="label">D2</text>
+  <rect x="260" y="70" width="35" height="50" class="bit"/><text x="277" y="100" text-anchor="middle" class="label">D3</text>
+  <rect x="300" y="70" width="35" height="50" class="bit"/><text x="317" y="100" text-anchor="middle" class="label">D4</text>
+  <rect x="340" y="70" width="35" height="50" class="bit"/><text x="357" y="100" text-anchor="middle" class="label">D5</text>
+  <rect x="380" y="70" width="35" height="50" class="bit"/><text x="397" y="100" text-anchor="middle" class="label">D6</text>
+  <rect x="420" y="70" width="35" height="50" class="bit"/><text x="437" y="100" text-anchor="middle" class="label">D7</text>
+  <rect x="460" y="70" width="40" height="50" class="stop"/><text x="480" y="100" text-anchor="middle" class="label">Stop</text>
+  <text x="350" y="160" text-anchor="middle" class="label">Pines: RC6/TX (transmision) � RC7/RX (recepcion)</text>
+  <text x="350" y="185" text-anchor="middle" class="small">Registros: TXSTA, RCSTA, SPBRG, TXREG, RCREG</text>
+  <text x="350" y="220" text-anchor="middle" class="small">Linea inactiva en alto � Baudios = bits por segundo</text>
+  <text x="350" y="245" text-anchor="middle" class="small">UNEXPO · Ing. Mecatronica  Tema 10 Comunicacion serial</text>
+</svg>

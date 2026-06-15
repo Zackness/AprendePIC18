@@ -1,0 +1,35 @@
+---
+title: Config bits and configuration word
+description: Fuses, CONFIG directives and minimum system for PIC18F4550.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+
+<LessonProgress slug="fundamentos/config-bits" locale="en" />
+
+
+
+Configuration bits define hardware behavior at power-on: oscillator, watchdog, MCLR, etc.
+
+```asm
+        CONFIG  FOSC = HS
+        CONFIG  WDT  = OFF
+        CONFIG  LVP  = OFF
+        CONFIG  MCLRE = ON
+        CONFIG  PBADEN = OFF
+```
+
+## Minimum system
+
+- PIC18F4550, 20 MHz crystal, 1 nF caps
+- 10 kΩ pull-up on MCLR
+- 5 V supply, 10 nF decoupling cap
+
+<PracticeBox title="Lab Practice 1 pre-lab" level="UNEXPO">
+Research minimum system wiring and draw the schematic before breadboarding.
+</PracticeBox>
+
+<TopicQuiz slug="fundamentos/config-bits" locale="en" />

@@ -1,0 +1,54 @@
+---
+title: PIC vs Arduino, ESP32, and Raspberry Pi
+description: Clear comparison between the PIC18F4550 and popular platforms.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+import CompareTable from '../../../../components/CompareTable.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+
+<LessonProgress slug="introduccion/comparaciones" locale="en" />
+
+
+
+Comparing the PIC18F4550 with Arduino, ESP32, and Raspberry Pi helps explain that not every board solves the same problem.
+
+<AIExplain title="Key difference">
+Arduino and ESP32 also use microcontrollers. Raspberry Pi uses a microprocessor capable of running Linux. The PIC18F4550 is studied closer to the hardware: registers, bits, and instructions.
+</AIExplain>
+
+<CompareTable rows={[
+	{
+		name: 'PIC18F4550',
+		role: '8-bit microcontroller',
+		strength: 'Direct hardware control, low-level learning, ideal for understanding architecture and registers.',
+		limit: 'Less memory, fewer abstractions, and more manual development.',
+	},
+	{
+		name: 'Arduino UNO',
+		role: 'Educational board with an AVR microcontroller',
+		strength: 'Very easy to start with, many libraries, and a huge community.',
+		limit: 'Hides internal details if you only use the Arduino framework.',
+	},
+	{
+		name: 'ESP32',
+		role: 'Modern microcontroller with Wi-Fi and Bluetooth',
+		strength: 'Powerful, connected, ideal for IoT and modern projects.',
+		limit: 'More complex architecture for absolute beginners.',
+	},
+	{
+		name: 'Raspberry Pi',
+		role: 'Single-board computer',
+		strength: 'Runs Linux and works well for vision, servers, Python, and full applications.',
+		limit: 'Not ideal for learning low-level microcontroller registers.',
+	},
+]} />
+
+## How to explain it in an exam
+
+A **microcontroller** integrates CPU, memory, and peripherals in one chip to control devices. A **microprocessor** usually needs external memory and peripherals, and can run full operating systems.
+
+The PIC18F4550 is academically useful because it shows how hardware is configured through registers without relying on high-level libraries.
+
+<TopicQuiz slug="introduccion/comparaciones" locale="en" />

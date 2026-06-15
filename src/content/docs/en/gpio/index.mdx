@@ -1,0 +1,21 @@
+---
+title: GPIO - TRIS, PORT and LAT
+description: Digital ports, inputs, outputs and pin configuration on PIC18F4550.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="gpio" locale="en" />
+
+`TRISx` sets direction. `LATx` writes outputs. `PORTx` reads pins.
+
+```asm
+        BCF     TRISB, 0
+        BSF     LATB, 0
+```
+
+Lab Practice 1 uses ports B/D as inputs and C/E as LED outputs with RA0 as operation selector.
+
+<TopicQuiz slug="gpio" locale="en" />

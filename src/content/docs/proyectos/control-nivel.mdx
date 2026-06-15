@@ -1,0 +1,40 @@
+---
+title: Proyecto - Control de nivel de tanque
+description: Ejercicio tipo II parcial del curso de Microcontroladores UNEXPO (Ing. Mecatronica) con bomba y valvula.
+---
+
+import PracticeBox from '../../../components/PracticeBox.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+
+<PracticeBox title="Ejercicio II Parcial 2025-2" level="Examen">
+Control de nivel: boton inicio activa bomba hasta nivel maximo, luego abre valvula hasta vaciar, ciclo infinito.
+</PracticeBox>
+
+<Figure
+	src="/images/practicas/control-nivel.svg"
+	alt="Diagrama de control de nivel de tanque con bomba, valvula y sensores"
+	caption="Sensores simulados con interruptores. LEDs o salidas indican bomba (RB6) y valvula (RB5)."
+	credit="Ejercicios II parcial 2025-2 — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+/>
+
+## Senales
+
+| Elemento | Apagado/Cerrado | Encendido/Abierto |
+| --- | --- | --- |
+| Sensor vacio | 0V | — |
+| Sensor lleno | — | 5V |
+| Bomba | 0V | 5V |
+| Valvula | 0V | 5V |
+
+## Asignacion de pines (solucion guia)
+
+- RB7: pulsador inicio
+- RB4: sensor maximo
+- RB3: sensor minimo
+- RB6: bomba
+- RB5: valvula
+
+<Exercise title="Elabora pseudocodigo y diagrama de flujo">
+Sigue la estructura del el curso de Microcontroladores (UNEXPO): configurar → esperar pulsador → encender bomba → esperar max → apagar bomba → abrir valvula → esperar min → cerrar valvula → repetir.
+</Exercise>

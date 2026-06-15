@@ -1,0 +1,52 @@
+/**
+ * AprendePIC18 — Design tokens
+ * Ecosistema CALETAS · StartupVen · zackness
+ */
+:root {
+	/* Brand */
+	--ap-navy-950: #060b14;
+	--ap-navy-900: #0b1220;
+	--ap-navy-800: #0f172a;
+	--ap-navy-700: #14213d;
+	--ap-navy-600: #1e293b;
+	--ap-navy-500: #334155;
+
+	--ap-amber-400: #fbbf24;
+	--ap-amber-500: #f59e0b;
+	--ap-amber-600: #d97706;
+	--ap-amber-glow: rgba(245, 158, 11, 0.35);
+
+	--ap-cyan-400: #22d3ee;
+	--ap-cyan-500: #06b6d4;
+	--ap-cyan-glow: rgba(34, 211, 238, 0.2);
+
+	--ap-surface-1: rgba(20, 33, 61, 0.55);
+	--ap-surface-2: rgba(15, 23, 42, 0.72);
+	--ap-border: rgba(148, 163, 184, 0.14);
+	--ap-border-accent: rgba(245, 158, 11, 0.28);
+
+	--ap-radius-sm: 0.5rem;
+	--ap-radius-md: 0.85rem;
+	--ap-radius-lg: 1.15rem;
+	--ap-radius-xl: 1.5rem;
+
+	--ap-shadow-sm: 0 1px 2px rgba(6, 11, 20, 0.4);
+	--ap-shadow-md: 0 12px 40px rgba(6, 11, 20, 0.35);
+	--ap-shadow-glow: 0 0 0 1px var(--ap-border-accent), 0 18px 48px rgba(245, 158, 11, 0.08);
+
+	--ap-font-sans: 'Plus Jakarta Sans', var(--sl-font-system);
+	--ap-font-mono: 'JetBrains Mono', var(--sl-font-system-mono);
+
+	--ap-grid-color: rgba(34, 211, 238, 0.045);
+	--ap-grid-size: 28px;
+}
+
+:root[data-theme='light'] {
+	--ap-surface-1: rgba(255, 255, 255, 0.82);
+	--ap-surface-2: rgba(248, 250, 252, 0.95);
+	--ap-border: rgba(15, 23, 42, 0.1);
+	--ap-border-accent: rgba(217, 119, 6, 0.32);
+	--ap-grid-color: rgba(20, 33, 61, 0.04);
+	--ap-shadow-md: 0 14px 36px rgba(15, 23, 42, 0.08);
+	--ap-shadow-glow: 0 0 0 1px var(--ap-border-accent), 0 16px 40px rgba(217, 119, 6, 0.07);
+}

@@ -1,0 +1,55 @@
+---
+title: AprendePIC18
+description: A bilingual course to master the PIC18F4550 from exam theory to real assembly practice.
+template: splash
+hero:
+  tagline: Documentation, course, and lab for studying the PIC18F4550 without fighting endless PDFs. Web platform by zackness · Maintained by StartupVen · CALETAS ecosystem.
+  image:
+    alt: PIC18F4550 microcontroller
+    file: ../assets/hero-chip.svg
+  actions:
+    - text: Start the path
+      link: /en/ruta-de-estudio/
+      icon: right-arrow
+    - text: Interactive tutorials
+      link: /en/tutoriales/
+      icon: approve-check
+    - text: First LED
+      link: /en/practicas/primer-led/
+      icon: seti:asm
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../components/AIExplain.astro';
+
+## Learn like a course, search like documentation
+
+AprendePIC18 is a web platform built by **zackness**, maintained by **[StartupVen](https://startupven.com)** and part of the **[CALETAS](https://caleta.top)** ecosystem, that organizes the **Microcontrollers** course material from **Mechatronics Engineering** at **UNEXPO** to study the **PIC18F4550**: assembly, registers, MPLAB, Proteus, physical boards, and exam preparation.
+
+<AIExplain title="Project goal">
+The goal is not to replace the datasheet. The goal is to translate it into a clear learning path: first understand the concept, then inspect the register, then build a practice, and finally solve exam-style questions.
+</AIExplain>
+
+<CardGrid stagger>
+	<Card title="Assembly-first" icon="seti:asm">
+		The core content focuses on MPASM and low-level programming so you can really understand the microcontroller.
+	</Card>
+	<Card title="Bilingual" icon="earth">
+		Every module is created in Spanish and English to study, review technical vocabulary, and share the resource.
+	</Card>
+	<Card title="Theory + practice" icon="rocket">
+		Includes explanations, registers, code examples, Proteus, physical boards, and exam-style exercises.
+	</Card>
+	<Card title="CALETAS ecosystem" icon="open-book">
+		Deployed on [caleta.top](https://caleta.top) and maintained by [StartupVen](https://startupven.com). Web platform by [zackness](https://zackness.pages.dev).
+	</Card>
+</CardGrid>
+
+## Quick map
+
+1. Start with [Study path](/en/ruta-de-estudio/) and [CALETAS ecosystem](/en/sobre/ecosistema/).
+2. Foundations: [architecture](/en/fundamentos/arquitectura/), [bits & hex](/en/fundamentos/bits-hex/), [registers](/en/fundamentos/registros/), [assembly](/en/fundamentos/ensamblador/).
+3. Peripherals: [GPIO](/en/gpio/), [timers](/en/timers/timer0/), [interrupts](/en/interrupciones/), [ADC](/en/adc/), [PWM](/en/pwm/), [serial](/en/comunicacion/uart/).
+4. Lab: [8 UNEXPO practices](/en/practicas/operaciones-matematicas/) and [projects](/en/proyectos/control-nivel/).
+5. Exam: [theory guide](/en/parcial/guia-teorica/), [exercises](/en/parcial/ejercicios/), [glossary](/en/referencia/glosario/).

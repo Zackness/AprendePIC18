@@ -1,0 +1,24 @@
+---
+title: Proyecto - Semaforo
+description: Semaforo con LEDs, timers y secuencia de estados en PIC18F4550.
+---
+
+import PracticeBox from '../../../components/PracticeBox.astro';
+
+<PracticeBox title="Proyecto guiado" level="Intermedio">
+Tres LEDs (rojo, amarillo, verde) con secuencia automatica usando Timer0 para los tiempos de cada estado.
+</PracticeBox>
+
+## Estados
+
+1. Rojo: 5 s
+2. Rojo+Amarillo: 2 s
+3. Verde: 5 s
+4. Amarillo: 2 s
+5. Repetir
+
+## Extensiones
+
+- Boton peatonal en RB0 (interrupcion)
+- Modo nocturno (parpadeo amarillo)
+- Contador de segundos en LCD

@@ -1,0 +1,55 @@
+---
+title: Botones, pull-up y antirrebote
+description: Entradas digitales, resistencias pull-up y tecnicas de antirrebote en PIC18F4550.
+---
+
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+
+<LessonProgress slug="gpio/botones" />
+
+
+
+Un boton conectado a tierra necesita pull-up para que el pin lea alto cuando no se presiona. En laboratorio se usan resistencias de 10 kΩ.
+
+<Figure
+	src="/images/gpio/boton-pullup.svg"
+	alt="Esquema de pulsador con resistencia pull-up de 10k a 5V"
+	caption="Pulsador normalmente abierto (NA): sin pulsar el pin lee 1; pulsado lee 0."
+	credit="Material de laboratorio UNEXPO"
+/>
+
+<AIExplain title="Lectura estable">
+El contacto mecanico rebota al presionar. Sin antirrebote puedes leer multiples pulsaciones. Soluciones: retardo por software, timer o interrupciones.
+</AIExplain>
+
+## Conexion tipica
+
+- Pin del PIC como entrada (`TRIS = 1`)
+- Resistencia pull-up a VDD
+- Boton entre pin y GND (activo en bajo)
+
+## Antirrebote por software
+
+```asm
+espera_suelta:
+        BTFSC   PORTB, 0
+        GOTO    espera_suelta
+        CALL    retardo_20ms
+        BTFSC   PORTB, 0
+        GOTO    espera_suelta
+        ; Flanco valido detectado
+```
+
+## Con interrupciones
+
+Para teclado matricial (Practica 2) se usan interrupciones RB4-RB7 al detectar cambio en columnas. Esto libera la CPU del polling constante.
+
+<Exercise title="Explica por que RB7 se usa como pulsador en el ejercicio de control de nivel">
+En la guia de ejercicios del II parcial, RB7 es el boton de inicio. Debe configurarse como entrada y leerse con `BTFSS PORTB, 7` o mediante interrupcion externa segun el diseno.
+</Exercise>
+
+<TopicQuiz slug="gpio/botones" />

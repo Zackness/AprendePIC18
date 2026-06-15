@@ -1,0 +1,230 @@
+---
+import type { PageQuiz } from '../data/quizzes';
+
+interface Props {
+	quiz: PageQuiz;
+	locale?: 'es' | 'en';
+}
+
+const { quiz, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const title = isEn ? quiz.titleEn : quiz.titleEs;
+const questions = quiz.questions.map((q) => ({
+	id: q.id,
+	question: isEn ? q.questionEn : q.questionEs,
+	options: isEn ? q.optionsEn : q.optionsEs,
+	correctIndex: q.correctIndex,
+	explanation: isEn ? q.explanationEn : q.explanationEs,
+}));
+const quizJson = JSON.stringify({ slug: quiz.slug, questions });
+---
+
+<section
+	class="interactive-quiz"
+	data-interactive-quiz
+	data-quiz-slug={quiz.slug}
+	data-quiz-json={quizJson}
+	aria-labelledby={`quiz-title-${quiz.slug.replace(/\//g, '-')}`}
+>
+	<header class="interactive-quiz__header">
+		<span class="interactive-quiz__badge">
+			{isEn ? 'Interactive exam' : 'Examen interactivo'}
+		</span>
+		<h2 class="interactive-quiz__title" id={`quiz-title-${quiz.slug.replace(/\//g, '-')}`}>
+			{title}
+		</h2>
+		{
+			quiz.sourceDoc && (
+				<p class="interactive-quiz__source">
+					{isEn ? 'Based on' : 'Basado en'}: {quiz.sourceDoc}
+				</p>
+			)
+		}
+	</header>
+
+	<div class="interactive-quiz__progress-wrap">
+		<div class="interactive-quiz__progress-bar">
+			<div class="interactive-quiz__progress-fill" data-quiz-progress-fill style="width: 0%"></div>
+		</div>
+		<p class="interactive-quiz__progress-text" data-quiz-progress-text>
+			{isEn ? '0 of 0 answered' : '0 de 0 respondidas'}
+		</p>
+	</div>
+
+	<form class="interactive-quiz__form" data-quiz-form novalidate>
+		{
+			questions.map((q, qi) => (
+				<fieldset class="interactive-quiz__question" data-question-index={qi}>
+					<legend class="interactive-quiz__question-text">{q.question}</legend>
+					<div class="interactive-quiz__options">
+						{q.options.map((opt, oi) => (
+							<label class="interactive-quiz__option">
+								<input
+									type="radio"
+									name={`q-${quiz.slug}-${q.id}`}
+									value={oi}
+									data-option-index={oi}
+								/>
+								<span class="interactive-quiz__option-box" aria-hidden="true" />
+								<span class="interactive-quiz__option-text">{opt}</span>
+							</label>
+						))}
+					</div>
+					<p class="interactive-quiz__feedback" data-feedback hidden />
+				</fieldset>
+			))
+		}
+
+		<div class="interactive-quiz__actions">
+			<button type="submit" class="interactive-quiz__submit">
+				{isEn ? 'Check answers' : 'Comprobar respuestas'}
+			</button>
+			<p class="interactive-quiz__result" data-quiz-result hidden />
+		</div>
+	</form>
+
+	<div class="interactive-quiz__login-hint" data-quiz-login-hint hidden>
+		<p>
+			{isEn
+				? 'Sign in with CALETAS to save your quiz progress and sync across devices.'
+				: 'Inicia sesion en CALETAS para guardar tu progreso del examen y sincronizar entre dispositivos.'}
+		</p>
+		<a href="#" class="interactive-quiz__login-btn" data-caleta-login>
+			{isEn ? 'Sign in with CALETAS' : 'Iniciar sesion en CALETAS'}
+		</a>
+	</div>
+</section>
+
+<script>
+	import { initCaletaAuth, saveQuizResult, isLoggedIn } from '../scripts/caleta-auth';
+
+	function initInteractiveQuizzes() {
+		initCaletaAuth();
+
+		document.querySelectorAll('[data-interactive-quiz]').forEach((root) => {
+			if (root.getAttribute('data-quiz-init') === '1') return;
+			root.setAttribute('data-quiz-init', '1');
+
+			const slug = root.getAttribute('data-quiz-slug') || '';
+			const json = root.getAttribute('data-quiz-json') || '{}';
+			const isEn = document.documentElement.lang?.startsWith('en');
+			let quizData;
+			try {
+				quizData = JSON.parse(json);
+			} catch {
+				return;
+			}
+
+			const form = root.querySelector('[data-quiz-form]');
+			const resultEl = root.querySelector('[data-quiz-result]');
+			const loginHint = root.querySelector('[data-quiz-login-hint]');
+			const progressFill = root.querySelector('[data-quiz-progress-fill]');
+			const progressText = root.querySelector('[data-quiz-progress-text]');
+			const fieldsets = root.querySelectorAll('[data-question-index]');
+			const total = fieldsets.length;
+
+			function updateAnsweredProgress() {
+				let answered = 0;
+				fieldsets.forEach((fs) => {
+					if (fs.querySelector('input[type="radio"]:checked')) answered += 1;
+				});
+				const pct = total ? Math.round((answered / total) * 100) : 0;
+				if (progressFill) progressFill.style.width = `${pct}%`;
+				if (progressText) {
+					progressText.textContent = isEn
+						? `${answered} of ${total} answered`
+						: `${answered} de ${total} respondidas`;
+				}
+			}
+
+			fieldsets.forEach((fs) => {
+				fs.querySelectorAll('input[type="radio"]').forEach((input) => {
+					input.addEventListener('change', updateAnsweredProgress);
+				});
+			});
+
+			updateAnsweredProgress();
+
+			form?.addEventListener('submit', (e) => {
+				e.preventDefault();
+				let correct = 0;
+				let allAnswered = true;
+
+				fieldsets.forEach((fs, qi) => {
+					const q = quizData.questions[qi];
+					const selected = fs.querySelector('input[type="radio"]:checked');
+					const feedback = fs.querySelector('[data-feedback]');
+					fs.classList.remove(
+						'interactive-quiz__question--correct',
+						'interactive-quiz__question--wrong',
+					);
+
+					if (!selected || !q) {
+						allAnswered = false;
+						return;
+					}
+
+					const chosen = Number(selected.getAttribute('data-option-index'));
+					const isCorrect = chosen === q.correctIndex;
+					if (isCorrect) correct += 1;
+
+					fs.classList.add(
+						isCorrect
+							? 'interactive-quiz__question--correct'
+							: 'interactive-quiz__question--wrong',
+					);
+
+					if (feedback) {
+						feedback.hidden = false;
+						if (isCorrect) {
+							feedback.textContent = isEn ? 'Correct!' : 'Correcto!';
+						} else if (q.explanation) {
+							feedback.textContent = q.explanation;
+						} else {
+							feedback.textContent = isEn ? 'Incorrect.' : 'Incorrecto.';
+						}
+					}
+				});
+
+				if (!allAnswered) {
+					if (resultEl) {
+						resultEl.hidden = false;
+						resultEl.className = 'interactive-quiz__result interactive-quiz__result--warn';
+						resultEl.textContent = isEn
+							? 'Answer all questions before checking.'
+							: 'Responde todas las preguntas antes de comprobar.';
+					}
+					return;
+				}
+
+				const score = Math.round((correct / total) * 100);
+				const passed = score >= 70;
+
+				if (resultEl) {
+					resultEl.hidden = false;
+					resultEl.className = `interactive-quiz__result ${passed ? 'interactive-quiz__result--pass' : 'interactive-quiz__result--fail'}`;
+					resultEl.textContent = isEn
+						? `${correct}/${total} correct (${score}%)${passed ? ' — Lesson passed!' : ' — Review the topic and try again.'}`
+						: `${correct}/${total} correctas (${score}%)${passed ? ' — ¡Clase aprobada!' : ' — Repasa el tema e intenta de nuevo.'}`;
+				}
+
+				root.classList.toggle('interactive-quiz--passed', passed);
+
+				saveQuizResult(slug, { score, passed, correct, total });
+
+				if (!isLoggedIn() && loginHint) {
+					loginHint.hidden = false;
+				}
+
+				window.dispatchEvent(
+					new CustomEvent('aprende-quiz-complete', {
+						detail: { slug, score, passed },
+					}),
+				);
+			});
+		});
+	}
+
+	initInteractiveQuizzes();
+	document.addEventListener('astro:page-load', initInteractiveQuizzes);
+</script>

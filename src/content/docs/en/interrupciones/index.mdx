@@ -1,0 +1,14 @@
+---
+title: Interrupts
+description: ISR, vectors, INTCON and interrupt sources on PIC18F4550.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="interrupciones" locale="en" />
+
+Vectors at 0x0008 (high priority) and 0x0018 (low). Always clear flags before RETFIE. Key registers: GIE, PEIE, PIE1/PIR1.
+
+<TopicQuiz slug="interrupciones" locale="en" />

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 280" role="img" aria-label="Senal PWM">
+  <defs>
+    <style>
+      .title { font: bold 15px sans-serif; fill: #14213d; }
+      .axis { stroke: #94a3b8; stroke-width: 1; }
+      .wave { stroke: #fca311; stroke-width: 3; fill: none; }
+      .fill { fill: rgba(252,163,17,0.2); }
+      .label { font: 11px sans-serif; fill: #334155; }
+      .small { font: 10px sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+  <text x="350" y="24" text-anchor="middle" class="title">PWM  periodo y ciclo util (Tema 9 CCP)</text>
+  <line x1="60" y1="200" x2="640" y2="200" class="axis"/>
+  <line x1="60" y1="60" x2="60" y2="200" class="axis"/>
+  <rect x="60" y="80" width="180" height="120" class="fill"/>
+  <polyline points="60,200 60,80 240,80 240,200 420,200 420,80 600,80 600,200" class="wave"/>
+  <line x1="240" y1="60" x2="240" y2="215" stroke="#dc2626" stroke-dasharray="4"/>
+  <line x1="420" y1="60" x2="420" y2="215" stroke="#dc2626" stroke-dasharray="4"/>
+  <text x="150" y="230" text-anchor="middle" class="label">Ciclo util (X%)</text>
+  <text x="330" y="230" text-anchor="middle" class="label">T_PWM (periodo)</text>
+  <text x="510" y="230" text-anchor="middle" class="label">T_PWM</text>
+  <text x="350" y="265" text-anchor="middle" class="small">T_PWM = 4×(PR2+1)×Tosc×Pre-escalador Timer2 · Pin RC2/CCP1</text>
+</svg>

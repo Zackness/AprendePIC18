@@ -1,0 +1,241 @@
+/**
+ * Cliente de autenticacion y progreso CALETAS para AprendePIC18.
+ * Flujo similar a Zeno Notes: redirect a caleta.top → callback con token JWT.
+ */
+
+const STORAGE_TOKEN = 'aprende-pic18-caleta-token';
+const STORAGE_USER = 'aprende-pic18-caleta-user';
+const STORAGE_PROGRESS = 'aprende-pic18-progress-local';
+const STORAGE_CHECKLISTS = 'aprende-pic18-checklists';
+const STORAGE_STUDY_PATH = 'aprende-pic18-study-path';
+
+const CALETA_ORIGIN =
+	import.meta.env.PUBLIC_CALETA_URL?.replace(/\/$/, '') || 'https://caleta.top';
+const SITE_ORIGIN =
+	typeof window !== 'undefined' ? window.location.origin : 'https://pic18.caleta.top';
+
+export type CaletaUser = { id: string; email: string; name: string };
+export type QuizResult = {
+	score: number;
+	passed: boolean;
+	correct: number;
+	total: number;
+	at?: string;
+};
+
+export function getToken(): string | null {
+	try {
+		return localStorage.getItem(STORAGE_TOKEN);
+	} catch {
+		return null;
+	}
+}
+
+export function getUser(): CaletaUser | null {
+	try {
+		const raw = localStorage.getItem(STORAGE_USER);
+		return raw ? JSON.parse(raw) : null;
+	} catch {
+		return null;
+	}
+}
+
+export function isLoggedIn(): boolean {
+	return Boolean(getToken() && getUser()?.id);
+}
+
+export function buildLoginUrl(returnPath?: string): string {
+	const redirectUri = `${SITE_ORIGIN}/auth/callback`;
+	const state = btoa(
+		JSON.stringify({
+			returnTo: returnPath || window.location.pathname + window.location.search,
+			nonce: crypto.randomUUID(),
+		}),
+	);
+	const params = new URLSearchParams({
+		redirect_uri: redirectUri,
+		state,
+	});
+	return `${CALETA_ORIGIN}/aprende-pic18/connect?${params}`;
+}
+
+export function logout() {
+	localStorage.removeItem(STORAGE_TOKEN);
+	localStorage.removeItem(STORAGE_USER);
+	window.dispatchEvent(new CustomEvent('aprende-auth-change'));
+}
+
+function setSession(token: string, user: CaletaUser) {
+	localStorage.setItem(STORAGE_TOKEN, token);
+	localStorage.setItem(STORAGE_USER, JSON.stringify(user));
+	window.dispatchEvent(new CustomEvent('aprende-auth-change'));
+}
+
+function loadLocalProgress(): Record<string, unknown> {
+	try {
+		return JSON.parse(localStorage.getItem(STORAGE_PROGRESS) || '{}');
+	} catch {
+		return {};
+	}
+}
+
+function saveLocalProgress(data: Record<string, unknown>) {
+	localStorage.setItem(STORAGE_PROGRESS, JSON.stringify(data));
+}
+
+export function saveQuizResult(slug: string, result: QuizResult) {
+	const data = loadLocalProgress();
+	if (!data.quizzes) data.quizzes = {};
+	(data.quizzes as Record<string, QuizResult>)[slug] = {
+		...result,
+		at: new Date().toISOString(),
+	};
+	saveLocalProgress(data);
+
+	if (isLoggedIn()) {
+		syncProgressToCaleta(data).catch(() => {});
+	}
+}
+
+export function getQuizResult(slug: string): QuizResult | null {
+	const data = loadLocalProgress();
+	const quizzes = data.quizzes as Record<string, QuizResult> | undefined;
+	return quizzes?.[slug] ?? null;
+}
+
+export async function syncProgressToCaleta(payload?: Record<string, unknown>) {
+	const token = getToken();
+	if (!token) return null;
+
+	const body = payload ?? {
+		...loadLocalProgress(),
+		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
+		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+	};
+
+	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		},
+		body: JSON.stringify({ payload: body }),
+	});
+
+	if (!res.ok) throw new Error('sync failed');
+	return res.json();
+}
+
+export async function fetchProgressFromCaleta() {
+	const token = getToken();
+	if (!token) return null;
+
+	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
+		headers: { Authorization: `Bearer ${token}` },
+	});
+
+	if (!res.ok) return null;
+	const data = await res.json();
+	if (data?.payload) {
+		mergeRemoteProgress(data.payload);
+	}
+	return data;
+}
+
+function mergeRemoteProgress(remote: Record<string, unknown>) {
+	const local = loadLocalProgress();
+	const merged = { ...local, ...remote };
+	if (remote.quizzes && local.quizzes) {
+		merged.quizzes = { ...(remote.quizzes as object), ...(local.quizzes as object) };
+	}
+	saveLocalProgress(merged);
+
+	if (remote.checklists) {
+		localStorage.setItem(STORAGE_CHECKLISTS, JSON.stringify(remote.checklists));
+	}
+	if (remote.studyPath) {
+		localStorage.setItem(STORAGE_STUDY_PATH, JSON.stringify(remote.studyPath));
+	}
+}
+
+export function handleAuthCallback() {
+	const params = new URLSearchParams(window.location.search);
+	const token = params.get('token');
+	const userId = params.get('userId');
+	const email = params.get('email');
+	const name = params.get('name');
+	const state = params.get('state');
+
+	if (!token || !userId) return null;
+
+	setSession(token, {
+		id: userId,
+		email: email || '',
+		name: name || 'Estudiante',
+	});
+
+	let returnTo = '/';
+	if (state) {
+		try {
+			const decoded = JSON.parse(atob(state));
+			if (decoded.returnTo) returnTo = decoded.returnTo;
+		} catch {
+			/* ignore */
+		}
+	}
+
+	fetchProgressFromCaleta()
+		.then(() => syncProgressToCaleta())
+		.finally(() => {
+			window.history.replaceState({}, '', returnTo);
+			window.location.href = returnTo;
+		});
+
+	return returnTo;
+}
+
+export function initCaletaAuth() {
+	document.querySelectorAll('[data-caleta-login]').forEach((el) => {
+		if (el.getAttribute('data-auth-init') === '1') return;
+		el.setAttribute('data-auth-init', '1');
+		el.addEventListener('click', (e) => {
+			e.preventDefault();
+			window.location.href = buildLoginUrl();
+		});
+	});
+
+	document.querySelectorAll('[data-caleta-logout]').forEach((el) => {
+		if (el.getAttribute('data-auth-init') === '1') return;
+		el.setAttribute('data-auth-init', '1');
+		el.addEventListener('click', (e) => {
+			e.preventDefault();
+			logout();
+		});
+	});
+
+	updateAuthUI();
+
+	if (isLoggedIn()) {
+		fetchProgressFromCaleta().catch(() => {});
+	}
+}
+
+function updateAuthUI() {
+	const user = getUser();
+	const loggedIn = isLoggedIn();
+
+	document.querySelectorAll('[data-caleta-auth]').forEach((root) => {
+		const guest = root.querySelector('[data-auth-guest]');
+		const authed = root.querySelector('[data-auth-user]');
+		const nameEl = root.querySelector('[data-auth-name]');
+
+		if (guest) guest.hidden = loggedIn;
+		if (authed) authed.hidden = !loggedIn;
+		if (nameEl && user) nameEl.textContent = user.name;
+	});
+}
+
+if (typeof window !== 'undefined') {
+	window.addEventListener('aprende-auth-change', updateAuthUI);
+	window.addEventListener('aprende-quiz-complete', updateAuthUI);
+}
