@@ -1122,7 +1122,6 @@
 
 .interactive-quiz__auth-actions {
 	display: flex;
-	gap: 0.65rem;
 	justify-content: center;
 }
 
@@ -1131,15 +1130,15 @@
 	border: 1px solid transparent;
 	border-radius: 0.65rem;
 	display: inline-flex;
-	flex: 1;
 	font-size: 0.92rem;
 	font-weight: 700;
-	gap: 0.45rem;
+	gap: 0.55rem;
 	justify-content: center;
 	min-height: 2.75rem;
-	padding: 0.55rem 0.85rem;
+	padding: 0.6rem 1.15rem;
 	text-decoration: none;
 	transition: filter 0.15s ease, transform 0.15s ease;
+	white-space: nowrap;
 }
 
 .interactive-quiz__auth-btn:hover {
@@ -1147,15 +1146,16 @@
 	transform: translateY(-1px);
 }
 
-.interactive-quiz__auth-btn--google {
-	background: #fff;
-	color: #1f2937;
+.interactive-quiz__auth-btn--caleta {
+	background: linear-gradient(135deg, #354b3a, #203324);
+	border-color: rgba(232, 245, 233, 0.2);
+	color: #e8f5e9;
 }
 
-.interactive-quiz__auth-btn--github {
-	background: #2d333b;
-	border-color: rgba(255, 255, 255, 0.12);
-	color: #fff;
+.interactive-quiz__auth-btn-icon {
+	flex-shrink: 0;
+	height: 1.125rem;
+	width: 1.125rem;
 }
 
 .interactive-quiz__login-btn {
