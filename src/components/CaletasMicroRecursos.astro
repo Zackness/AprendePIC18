@@ -1,0 +1,178 @@
+---
+interface Props {
+	locale?: 'es' | 'en';
+	limit?: number;
+}
+
+const { locale = 'es', limit = 24 } = Astro.props;
+const isEn = locale === 'en';
+---
+
+<section
+	class="caleta-recursos"
+	data-caleta-recursos
+	data-limit={limit}
+	aria-labelledby="caleta-recursos-title"
+>
+	<header class="caleta-recursos__header">
+		<h2 class="caleta-recursos__title" id="caleta-recursos-title">
+			{isEn ? 'CALETAS resources for Microcontrollers' : 'Recursos CALETAS de Microcontroladores'}
+		</h2>
+		<p class="caleta-recursos__intro">
+			{isEn
+				? 'Study notes, guides and files shared by students on CALETAS. Click to open each resource in the CALETAS app.'
+				: 'Apuntes, guias y archivos compartidos por estudiantes en CALETAS. Haz clic para abrir cada recurso en la app de CALETAS.'}
+		</p>
+	</header>
+
+	<div class="caleta-recursos__state" data-caleta-recursos-loading>
+		<span class="caleta-recursos__spinner" aria-hidden="true"></span>
+		<p>{isEn ? 'Loading resources from CALETAS…' : 'Cargando recursos desde CALETAS…'}</p>
+	</div>
+
+	<div class="caleta-recursos__state caleta-recursos__state--error" data-caleta-recursos-error hidden>
+		<p data-caleta-recursos-error-text>
+			{isEn
+				? 'Could not load resources right now. Try again later or browse directly on CALETAS.'
+				: 'No se pudieron cargar los recursos ahora. Intenta mas tarde o explora directamente en CALETAS.'}
+		</p>
+		<a
+			href="https://caleta.top/caletas"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="caleta-recursos__cta"
+		>
+			{isEn ? 'Open CALETAS' : 'Abrir CALETAS'}
+		</a>
+	</div>
+
+	<div class="caleta-recursos__state" data-caleta-recursos-empty hidden>
+		<p>
+			{isEn
+				? 'No public resources tagged for Microcontrollers yet. Be the first to share on CALETAS.'
+				: 'Aun no hay recursos publicos etiquetados para Microcontroladores. Se el primero en compartir en CALETAS.'}
+		</p>
+		<a
+			href="https://caleta.top/caletas/crear"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="caleta-recursos__cta"
+		>
+			{isEn ? 'Share a resource' : 'Compartir un recurso'}
+		</a>
+	</div>
+
+	<ul class="caleta-recursos__list" data-caleta-recursos-list hidden></ul>
+
+	<p class="caleta-recursos__foot" data-caleta-recursos-foot hidden>
+		{isEn
+			? 'Resources open on caleta.top. Sign in with your CALETAS account if prompted.'
+			: 'Los recursos se abren en caleta.top. Inicia sesion con tu cuenta CALETAS si te lo pide.'}
+	</p>
+</section>
+
+<script>
+	import {
+		fetchCaletaMicroRecursos,
+		formatRecursoTipo,
+		truncateText,
+	} from '../scripts/caleta-recursos';
+
+	function initCaletaRecursos() {
+		document.querySelectorAll('[data-caleta-recursos]').forEach((root) => {
+			if (root.getAttribute('data-recursos-init') === '1') return;
+			root.setAttribute('data-recursos-init', '1');
+
+			const isEn = document.documentElement.lang?.startsWith('en');
+			const limit = Number(root.getAttribute('data-limit')) || 24;
+			const loading = root.querySelector('[data-caleta-recursos-loading]');
+			const error = root.querySelector('[data-caleta-recursos-error]');
+			const empty = root.querySelector('[data-caleta-recursos-empty]');
+			const list = root.querySelector('[data-caleta-recursos-list]');
+			const foot = root.querySelector('[data-caleta-recursos-foot]');
+
+			function hideAll() {
+				loading?.setAttribute('hidden', '');
+				error?.setAttribute('hidden', '');
+				empty?.setAttribute('hidden', '');
+				list?.setAttribute('hidden', '');
+				foot?.setAttribute('hidden', '');
+			}
+
+			fetchCaletaMicroRecursos(limit)
+				.then(({ recursos }) => {
+					hideAll();
+
+					if (!recursos.length) {
+						empty?.removeAttribute('hidden');
+						return;
+					}
+
+					if (!(list instanceof HTMLUListElement)) return;
+					list.innerHTML = '';
+
+					recursos.forEach((r) => {
+						const li = document.createElement('li');
+						li.className = 'caleta-recursos__item';
+
+						const link = document.createElement('a');
+						link.className = 'caleta-recursos__card';
+						link.href = r.href;
+						link.target = '_blank';
+						link.rel = 'noopener noreferrer';
+
+						const top = document.createElement('div');
+						top.className = 'caleta-recursos__card-top';
+
+						const title = document.createElement('h3');
+						title.className = 'caleta-recursos__card-title';
+						title.textContent = r.titulo;
+
+						const tipo = document.createElement('span');
+						tipo.className = 'caleta-recursos__tipo';
+						tipo.textContent = formatRecursoTipo(r.tipo, isEn);
+
+						top.append(title, tipo);
+
+						const desc = document.createElement('p');
+						desc.className = 'caleta-recursos__card-desc';
+						desc.textContent = truncateText(r.descripcion);
+
+						const meta = document.createElement('p');
+						meta.className = 'caleta-recursos__card-meta';
+						const parts: string[] = [];
+						if (r.materia?.nombre) parts.push(r.materia.nombre);
+						if (r.calificacion > 0) {
+							parts.push(
+								isEn
+									? `${r.calificacion.toFixed(1)} ★`
+									: `${r.calificacion.toFixed(1)} ★`,
+							);
+						}
+						if (r.numVistas > 0) {
+							parts.push(isEn ? `${r.numVistas} views` : `${r.numVistas} vistas`);
+						}
+						meta.textContent = parts.join(' · ');
+
+						const action = document.createElement('span');
+						action.className = 'caleta-recursos__card-action';
+						action.textContent = isEn ? 'Open in CALETAS →' : 'Abrir en CALETAS →';
+
+						link.append(top, desc, meta, action);
+						li.append(link);
+						list.append(li);
+					});
+
+					list.removeAttribute('hidden');
+					foot?.removeAttribute('hidden');
+				})
+				.catch(() => {
+					hideAll();
+					error?.removeAttribute('hidden');
+				});
+		});
+	}
+
+	initCaletaRecursos();
+	document.addEventListener('astro:page-load', initCaletaRecursos);
+</script>
