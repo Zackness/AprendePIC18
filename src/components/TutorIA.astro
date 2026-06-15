@@ -1,0 +1,325 @@
+---
+/** Tutor IA flotante — conectado a CALETAS (requiere login + plan con chat). */
+---
+
+<div class="tutor-ia" data-tutor-ia>
+	<button
+		type="button"
+		class="tutor-ia__fab"
+		data-tutor-toggle
+		aria-expanded="false"
+		aria-controls="tutor-ia-panel"
+		title="Tutor IA"
+	>
+		<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+			<path
+				d="M12 3a7 7 0 0 0-7 7v2.2c0 .8-.3 1.6-.8 2.2L3 16.5V17a2 2 0 0 0 2 2h2.1A7 7 0 0 0 12 21a7 7 0 0 0 4.9-2H19a2 2 0 0 0 2-2v-.5l-1.2-2.1c-.5-.6-.8-1.4-.8-2.2V10a7 7 0 0 0-7-7Z"
+				stroke="currentColor"
+				stroke-width="1.75"
+				stroke-linejoin="round"
+			/>
+			<circle cx="9" cy="11" r="1" fill="currentColor"></circle>
+			<circle cx="12" cy="11" r="1" fill="currentColor"></circle>
+			<circle cx="15" cy="11" r="1" fill="currentColor"></circle>
+		</svg>
+		<span class="tutor-ia__fab-label" data-tutor-fab-label>Tutor IA</span>
+	</button>
+
+	<div class="tutor-ia__panel" id="tutor-ia-panel" data-tutor-panel hidden>
+		<header class="tutor-ia__header">
+			<div>
+				<p class="tutor-ia__eyebrow" data-tutor-eyebrow>CALETAS · AprendePIC18</p>
+				<h2 class="tutor-ia__title" data-tutor-title>Tutor IA</h2>
+			</div>
+			<div class="tutor-ia__header-actions">
+				<button type="button" class="tutor-ia__icon-btn" data-tutor-clear title="Limpiar chat">
+					↺
+				</button>
+				<button type="button" class="tutor-ia__icon-btn" data-tutor-close aria-label="Cerrar">
+					×
+				</button>
+			</div>
+		</header>
+
+		<div class="tutor-ia__gate" data-tutor-gate hidden>
+			<p class="tutor-ia__gate-text" data-tutor-gate-text></p>
+			<a href="#" class="tutor-ia__gate-btn" data-tutor-gate-action hidden></a>
+		</div>
+
+		<div class="tutor-ia__messages" data-tutor-messages hidden></div>
+
+		<form class="tutor-ia__composer" data-tutor-form hidden>
+			<textarea
+				class="tutor-ia__input"
+				data-tutor-input
+				rows="2"
+				placeholder="Pregunta sobre PIC18, ensamblador, prácticas…"
+			></textarea>
+			<button type="submit" class="tutor-ia__send" data-tutor-send disabled>Enviar</button>
+		</form>
+	</div>
+</div>
+
+<script>
+	import { initCaletaAuth, isLoggedIn } from '../scripts/caleta-auth';
+	import {
+		buildTutorLoginUrl,
+		buildTutorSubscribeUrl,
+		clearTutorMessages,
+		fetchTutorAccess,
+		getPageContextForTutor,
+		loadTutorMessages,
+		saveTutorMessages,
+		sendTutorMessage,
+		type TutorMessage,
+	} from '../scripts/caleta-tutor';
+
+	function initTutorIA() {
+		const root = document.querySelector('[data-tutor-ia]');
+		if (!root || root.getAttribute('data-tutor-init') === '1') return;
+		root.setAttribute('data-tutor-init', '1');
+
+		const isEn = document.documentElement.lang?.startsWith('en');
+		const t = (es: string, en: string) => (isEn ? en : es);
+
+		const fab = root.querySelector('[data-tutor-toggle]');
+		const fabLabel = root.querySelector('[data-tutor-fab-label]');
+		const panel = root.querySelector('[data-tutor-panel]');
+		const title = root.querySelector('[data-tutor-title]');
+		const gate = root.querySelector('[data-tutor-gate]');
+		const gateText = root.querySelector('[data-tutor-gate-text]');
+		const gateAction = root.querySelector('[data-tutor-gate-action]');
+		const messagesEl = root.querySelector('[data-tutor-messages]');
+		const form = root.querySelector('[data-tutor-form]');
+		const input = root.querySelector('[data-tutor-input]');
+		const sendBtn = root.querySelector('[data-tutor-send]');
+		const closeBtn = root.querySelector('[data-tutor-close]');
+		const clearBtn = root.querySelector('[data-tutor-clear]');
+
+		if (fabLabel) fabLabel.textContent = t('Tutor IA', 'AI Tutor');
+		if (title) title.textContent = t('Tutor IA — Microcontroladores', 'AI Tutor — Microcontrollers');
+		if (input instanceof HTMLTextAreaElement) {
+			input.placeholder = t(
+				'Pregunta sobre PIC18, ensamblador, prácticas…',
+				'Ask about PIC18, assembly, labs…',
+			);
+		}
+		if (sendBtn) sendBtn.textContent = t('Enviar', 'Send');
+
+		let messages: TutorMessage[] = loadTutorMessages();
+		let canUse = false;
+		let sending = false;
+		let open = false;
+
+		function setOpen(next: boolean) {
+			open = next;
+			if (panel instanceof HTMLElement) panel.hidden = !open;
+			if (fab instanceof HTMLButtonElement) fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (open) refreshAccess();
+		}
+
+		function renderMessages() {
+			if (!(messagesEl instanceof HTMLElement)) return;
+			messagesEl.innerHTML = '';
+			if (!messages.length) {
+				const empty = document.createElement('p');
+				empty.className = 'tutor-ia__empty';
+				empty.textContent = t(
+					'Pregúntame sobre el PIC18F4550, registros, timers, UART o tus prácticas.',
+					'Ask me about the PIC18F4550, registers, timers, UART, or your lab work.',
+				);
+				messagesEl.append(empty);
+				return;
+			}
+			messages.forEach((m) => {
+				const bubble = document.createElement('div');
+				bubble.className = `tutor-ia__bubble tutor-ia__bubble--${m.role}`;
+				bubble.textContent = m.content;
+				messagesEl.append(bubble);
+			});
+			messagesEl.scrollTop = messagesEl.scrollHeight;
+		}
+
+		function showGate(text: string, actionLabel?: string, actionHref?: string, actionClick?: () => void) {
+			gate?.removeAttribute('hidden');
+			messagesEl?.setAttribute('hidden', '');
+			form?.setAttribute('hidden', '');
+			if (gateText) gateText.textContent = text;
+			if (gateAction instanceof HTMLAnchorElement) {
+				if (actionLabel && (actionHref || actionClick)) {
+					gateAction.hidden = false;
+					gateAction.textContent = actionLabel;
+					gateAction.href = actionHref || '#';
+					gateAction.onclick = (e) => {
+						if (actionClick) {
+							e.preventDefault();
+							actionClick();
+						}
+					};
+				} else {
+					gateAction.hidden = true;
+				}
+			}
+		}
+
+		function showChat() {
+			gate?.setAttribute('hidden', '');
+			messagesEl?.removeAttribute('hidden');
+			form?.removeAttribute('hidden');
+			renderMessages();
+		}
+
+		async function refreshAccess() {
+			if (!isLoggedIn()) {
+				canUse = false;
+				showGate(
+					t(
+						'Inicia sesión con tu cuenta CALETAS para usar el Tutor IA.',
+						'Sign in with your CALETAS account to use the AI Tutor.',
+					),
+					t('Iniciar sesión con CALETAS', 'Sign in with CALETAS'),
+					'#',
+					() => {
+						window.location.href = buildTutorLoginUrl();
+					},
+				);
+				return;
+			}
+
+			try {
+				const access = await fetchTutorAccess();
+				if (!access.authenticated) {
+					canUse = false;
+					showGate(
+						t('Inicia sesión con CALETAS para continuar.', 'Sign in with CALETAS to continue.'),
+						t('Iniciar sesión', 'Sign in'),
+						'#',
+						() => {
+							window.location.href = buildTutorLoginUrl();
+						},
+					);
+					return;
+				}
+
+				if (!access.canUseTutor) {
+					canUse = false;
+					if (access.reason === 'plan_no_chat') {
+						showGate(
+							t(
+								`Tu plan (${access.planName || 'actual'}) no incluye Chat IA. Actualiza a CALETA PRO en CALETAS.`,
+								`Your plan (${access.planName || 'current'}) does not include AI Chat. Upgrade to CALETA PRO on CALETAS.`,
+							),
+							t('Ver planes en CALETAS', 'View CALETAS plans'),
+							buildTutorSubscribeUrl(),
+						);
+					} else {
+						showGate(
+							t(
+								'Necesitas un plan activo en CALETAS (con Chat IA) para usar el tutor.',
+								'You need an active CALETAS plan (with AI Chat) to use the tutor.',
+							),
+							t('Suscribirme en CALETAS', 'Subscribe on CALETAS'),
+							buildTutorSubscribeUrl(),
+						);
+					}
+					return;
+				}
+
+				canUse = true;
+				showChat();
+			} catch {
+				canUse = false;
+				showGate(
+					t(
+						'No se pudo verificar tu acceso al Tutor IA. Intenta de nuevo.',
+						'Could not verify AI Tutor access. Try again.',
+					),
+				);
+			}
+		}
+
+		fab?.addEventListener('click', () => setOpen(!open));
+		closeBtn?.addEventListener('click', () => setOpen(false));
+
+		clearBtn?.addEventListener('click', () => {
+			messages = [];
+			clearTutorMessages();
+			renderMessages();
+		});
+
+		input?.addEventListener('input', () => {
+			if (sendBtn instanceof HTMLButtonElement && input instanceof HTMLTextAreaElement) {
+				sendBtn.disabled = !input.value.trim() || sending || !canUse;
+			}
+		});
+
+		form?.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			if (!(input instanceof HTMLTextAreaElement) || sending || !canUse) return;
+			const text = input.value.trim();
+			if (!text) return;
+
+			sending = true;
+			if (sendBtn instanceof HTMLButtonElement) sendBtn.disabled = true;
+			input.value = '';
+
+			const nextMessages: TutorMessage[] = [...messages, { role: 'user', content: text }];
+			messages = nextMessages;
+			saveTutorMessages(messages);
+			renderMessages();
+
+			const typing = document.createElement('div');
+			typing.className = 'tutor-ia__bubble tutor-ia__bubble--assistant tutor-ia__bubble--typing';
+			typing.textContent = t('Pensando…', 'Thinking…');
+			messagesEl?.append(typing);
+			messagesEl?.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+
+			try {
+				const data = await sendTutorMessage({
+					messages: nextMessages,
+					pageContext: getPageContextForTutor(),
+				});
+				messages = [...nextMessages, { role: 'assistant', content: data.message }];
+				saveTutorMessages(messages);
+				renderMessages();
+			} catch (err) {
+				const code = (err as Error & { code?: string }).code;
+				let fallback = t(
+					'No pude responder. Reformula la pregunta o inténtalo de nuevo.',
+					'I could not reply. Rephrase your question or try again.',
+				);
+				if (code === 'login_required') {
+					canUse = false;
+					await refreshAccess();
+					fallback = '';
+				} else if (code === 'no_subscription' || code === 'plan_no_chat') {
+					canUse = false;
+					await refreshAccess();
+					fallback = '';
+				} else if (err instanceof Error && err.message) {
+					fallback = err.message;
+				}
+				if (fallback) {
+					messages = [...nextMessages, { role: 'assistant', content: fallback }];
+					saveTutorMessages(messages);
+					renderMessages();
+				}
+			} finally {
+				sending = false;
+				if (sendBtn instanceof HTMLButtonElement && input instanceof HTMLTextAreaElement) {
+					sendBtn.disabled = !input.value.trim() || !canUse;
+				}
+			}
+		});
+
+		initCaletaAuth();
+		window.addEventListener('aprende-auth-change', () => {
+			if (open) refreshAccess();
+		});
+
+		renderMessages();
+	}
+
+	initTutorIA();
+	document.addEventListener('astro:page-load', initTutorIA);
+</script>

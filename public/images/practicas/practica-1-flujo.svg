@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 920" role="img" aria-label="Diagrama de flujo Practica 1 operaciones matematicas">
+  <rect width="520" height="920" fill="#e2e8f0"/>
+  <defs>
+    <style>
+      .box { fill: #f1f5f9; stroke: #14213d; stroke-width: 2; }
+      .start { fill: #22d3ee; stroke: #0e7490; stroke-width: 2; }
+      .proc { fill: #f1f5f9; stroke: #14213d; stroke-width: 2; }
+      .dec { fill: #fca311; stroke: #b45309; stroke-width: 2; }
+      .io { fill: #cbd5e1; stroke: #334155; stroke-width: 2; }
+      .label { font: 12px sans-serif; fill: #1e293b; }
+      .small { font: 10px sans-serif; fill: #475569; }
+      .arrow { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arr); }
+    </style>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Inicio -->
+  <ellipse cx="260" cy="36" rx="72" ry="24" class="start"/>
+  <text x="260" y="40" text-anchor="middle" class="label">INICIO</text>
+
+  <line x1="260" y1="60" x2="260" y2="78" class="arrow"/>
+
+  <!-- Init -->
+  <rect x="130" y="78" width="260" height="56" rx="6" class="proc"/>
+  <text x="260" y="100" text-anchor="middle" class="label">Inicializar puertos</text>
+  <text x="260" y="118" text-anchor="middle" class="small">TRISB/D entrada, TRISC/E salida, RA0 in</text>
+
+  <line x1="260" y1="134" x2="260" y2="158" class="arrow"/>
+
+  <!-- Bucle label area -->
+  <rect x="130" y="158" width="260" height="44" rx="6" class="io"/>
+  <text x="260" y="178" text-anchor="middle" class="label">Leer oper_a ê PORTB</text>
+  <text x="260" y="194" text-anchor="middle" class="small">oper_b ê PORTD</text>
+
+  <line x1="260" y1="202" x2="260" y2="226" class="arrow"/>
+
+  <!-- Decision modo -->
+  <polygon points="260,226 360,276 260,326 160,276" class="dec"/>
+  <text x="260" y="272" text-anchor="middle" class="label">modo</text>
+  <text x="260" y="288" text-anchor="middle" class="small">0..8</text>
+
+  <!-- Rama izquierda ops (simplificado: un bloque) -->
+  <line x1="260" y1="326" x2="260" y2="350" class="arrow"/>
+  <rect x="105" y="350" width="310" height="72" rx="6" class="proc"/>
+  <text x="260" y="372" text-anchor="middle" class="label">Ejecutar operacion</text>
+  <text x="260" y="390" text-anchor="middle" class="small">suma / resta / mul / div sw / OR / AND</text>
+  <text x="260" y="406" text-anchor="middle" class="small">XOR / complemento / rotar</text>
+
+  <line x1="260" y1="422" x2="260" y2="446" class="arrow"/>
+
+  <rect x="130" y="446" width="260" height="44" rx="6" class="io"/>
+  <text x="260" y="466" text-anchor="middle" class="label">Mostrar resultado</text>
+  <text x="260" y="482" text-anchor="middle" class="small">LATC ê PRODL, LATE ê PRODH</text>
+
+  <line x1="260" y1="490" x2="260" y2="514" class="arrow"/>
+
+  <!-- Pulsador -->
+  <polygon points="260,514 350,554 260,594 170,554" class="dec"/>
+  <text x="260" y="552" text-anchor="middle" class="label">øRA0</text>
+  <text x="260" y="568" text-anchor="middle" class="small">pulsado?</text>
+
+  <line x1="350" y1="554" x2="420" y2="554" class="arrow"/>
+  <text x="378" y="546" class="small">Si</text>
+  <rect x="420" y="532" width="88" height="44" rx="6" class="proc"/>
+  <text x="464" y="552" text-anchor="middle" class="label">modo++</text>
+  <text x="464" y="566" text-anchor="middle" class="small">si &gt;8 í 0</text>
+
+  <!-- Volver al bucle -->
+  <line x1="464" y1="576" x2="464" y2="880" class="arrow"/>
+  <line x1="464" y1="880" x2="80" y2="880" class="arrow"/>
+  <line x1="80" y1="880" x2="80" y2="180" class="arrow"/>
+  <line x1="80" y1="180" x2="130" y2="180" class="arrow"/>
+  <text x="92" y="540" class="small" transform="rotate(-90 92 540)">Bucle principal</text>
+
+  <line x1="260" y1="594" x2="260" y2="640" class="arrow"/>
+  <text x="268" y="620" class="small">No</text>
+  <line x1="260" y1="640" x2="260" y2="880" class="arrow"/>
+  <line x1="260" y1="880" x2="80" y2="880" class="arrow"/>
+
+  <!-- Subrutina division (caja aparte) -->
+  <rect x="28" y="640" width="200" height="120" rx="6" class="box"/>
+  <text x="128" y="662" text-anchor="middle" class="label">division_software</text>
+  <text x="128" y="680" text-anchor="middle" class="small">Si B=0 í 0xFF</text>
+  <text x="128" y="696" text-anchor="middle" class="small">cociente ê 0</text>
+  <text x="128" y="712" text-anchor="middle" class="small">mientras resto e B:</text>
+  <text x="128" y="728" text-anchor="middle" class="small">  resto ê resto - B</text>
+  <text x="128" y="744" text-anchor="middle" class="small">  cociente++</text>
+  <text x="128" y="768" text-anchor="middle" class="small">(modo 3)</text>
+
+  <text x="260" y="908" text-anchor="middle" class="small">Practica 1  UNEXPO ∑ AprendePIC18</text>
+</svg>

@@ -4,15 +4,19 @@ description: Minimum system, ports and ALU operations per UNEXPO lab.
 ---
 
 import LessonProgress from '../../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../../components/PracticeBox.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
 import Figure from '../../../../components/Figure.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
+import LabTextPanel from '../../../../components/LabTextPanel.astro';
+import LabDesignPanel from '../../../../components/LabDesignPanel.astro';
+import TieredExamPanel from '../../../../components/TieredExamPanel.astro';
 
 <LessonProgress slug="practicas/operaciones-matematicas" locale="en" />
 
-
-
-Operands on ports B and D, results on C and E, RA0 selects operation: add, subtract, multiply, software divide, OR, AND, XOR, complement, rotate.
+<PracticeBox title="Lab Practice 1" level="UNEXPO">
+Minimum PIC18F4550 system. Operands on ports B and D (switches). Result on ports C and E (LEDs). RA0 pushbutton changes the active operation.
+</PracticeBox>
 
 <Figure
 	src="/images/pdf/practica-1/page-2.png"
@@ -21,4 +25,45 @@ Operands on ports B and D, results on C and E, RA0 selects operation: add, subtr
 	credit="Practice 1 — Math operations · UNEXPO"
 />
 
-<TopicQuiz slug="practicas/operaciones-matematicas" locale="en" />
+<LabTextPanel practiceSlug="practicas/operaciones-matematicas" kind="pre" locale="en" />
+
+<LabDesignPanel practiceSlug="practicas/operaciones-matematicas" locale="en" />
+
+## Hardware map
+
+| Pin / port | Role in the program |
+| --- | --- |
+| `PORTB` | Operand A (8-bit DIP switch) |
+| `PORTD` | Operand B (8-bit DIP switch) |
+| `LATC` | Result bits 0–7 (LEDs) |
+| `LATE` | Result bits 8–15 (LEDs; multiplication) |
+| `RA0` | Pushbutton — cycles the active operation |
+
+## Included operations
+
+Press **RA0** to cycle modes (wraps to 0 after the last).
+
+<AIExplain title="Software division">
+PIC18 has no native `DIV` instruction. The `division_software` routine uses repeated subtraction to compute the quotient.
+</AIExplain>
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-1-operaciones"
+	filename="practica-1-operaciones.asm"
+	locale="en"
+	note="Requires an active CALETAS subscription. Fill in the header before submitting. Build with MPASM and load the .hex in Proteus or PICkit."
+/>
+
+## Proteus / MPLAB
+
+1. Create an MPASM project for **PIC18F4550** (20 MHz HS crystal).
+2. Use the practice schematic (PDF page 2).
+3. Switches on `RB0–RB7` and `RD0–RD7` with 10 kΩ pull-ups.
+4. LEDs on `RC0–RC7` and `RE0–RE7` with 220–330 Ω resistors.
+5. Pushbutton on `RA0` to ground with pull-up.
+
+<LabTextPanel practiceSlug="practicas/operaciones-matematicas" kind="post" locale="en" />
+
+<TieredExamPanel practiceSlug="practicas/operaciones-matematicas" locale="en" />

@@ -8,7 +8,7 @@
       .small { font: 10px sans-serif; fill: #64748b; }
     </style>
   </defs>
-  <text x="350" y="24" text-anchor="middle" class="title">Registro T0CON  Timer 0 (Tema 8)</text>
+  <text x="350" y="24" text-anchor="middle" class="title">Registro T0CON    Timer 0 (Tema 8)</text>
   <g transform="translate(80,50)">
     <rect x="0" y="0" width="50" height="40" class="bit"/><text x="25" y="25" text-anchor="middle" class="bitname">7 TMR0ON</text>
     <rect x="55" y="0" width="50" height="40" class="bit"/><text x="80" y="25" text-anchor="middle" class="bitname">6 T08BIT</text>
@@ -19,9 +19,9 @@
     <rect x="330" y="0" width="50" height="40" class="bit"/><text x="355" y="20" text-anchor="middle" class="bitname">1 PS1</text>
     <rect x="385" y="0" width="50" height="40" class="bit"/><text x="410" y="20" text-anchor="middle" class="bitname">0 PS0</text>
   </g>
-  <text x="350" y="130" text-anchor="middle" class="desc">Tiempo = (4/Fosc) � N � Pre-divisor</text>
-  <text x="350" y="155" text-anchor="middle" class="desc">N = 256  TMR0L (8 bit) � N = 65536  TMR0H:TMR0L (16 bit)</text>
-  <text x="350" y="190" text-anchor="middle" class="small">TMR0ON=1 habilita � T0CS=0 temporizador interno � PSA=0 usa pre-escalador</text>
-  <text x="350" y="215" text-anchor="middle" class="small">Con Fosc=20MHz, 16bit, pre 1:256 � tiempo max H 3,35 s</text>
-  <text x="350" y="270" text-anchor="middle" class="small">Ejemplo 2 s: TMR0H:TMR0L = 26474  UNEXPO · Ing. Mecatronica</text>
+  <text x="350" y="130" text-anchor="middle" class="desc">Tiempo = (4/Fosc)  × N ×  Pre-divisor</text>
+  <text x="350" y="155" text-anchor="middle" class="desc">N = 256 − TMR0L (8 bit)  N = 65536 − TMR0H:TMR0L (16 bit)</text>
+  <text x="350" y="190" text-anchor="middle" class="small">TMR0ON=1 habilita · T0CS=0 temporizador interno  PSA=0 usa pre-escalador</text>
+  <text x="350" y="215" text-anchor="middle" class="small">Con Fosc=20MHz, 16bit, pre 1:256  tiempo max H 3,35 s</text>
+  <text x="350" y="270" text-anchor="middle" class="small">Ejemplo 2 s: TMR0H:TMR0L = 26474    UNEXPO · Ing. Mecatronica</text>
 </svg>

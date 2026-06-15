@@ -4,14 +4,15 @@ description: Sistema minimo, puertos y operaciones ALU segun Practica 1 UNEXPO d
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import AIExplain from '../../../components/AIExplain.astro';
 import Figure from '../../../components/Figure.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
+import LabTextPanel from '../../../components/LabTextPanel.astro';
+import LabDesignPanel from '../../../components/LabDesignPanel.astro';
+import TieredExamPanel from '../../../components/TieredExamPanel.astro';
 
 <LessonProgress slug="practicas/operaciones-matematicas" />
-
-
 
 <PracticeBox title="Practica 1 de Laboratorio" level="UNEXPO">
 Sistema minimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en puerto C y E (LEDs). Pulsador RA0 cambia operacion.
@@ -24,34 +25,61 @@ Sistema minimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en pu
 	credit="Practica 1 — Operaciones matematicas · UNEXPO"
 />
 
-## Operaciones requeridas
+<LabTextPanel practiceSlug="practicas/operaciones-matematicas" kind="pre" />
 
-- Suma, resta, multiplicacion
-- Division por **software**
-- OR, AND, XOR, complemento
-- Rotar sin acarreo
+<LabDesignPanel practiceSlug="practicas/operaciones-matematicas" />
+
+## Mapa de hardware
+
+| Pin / puerto | Funcion en el programa |
+| --- | --- |
+| `PORTB` | Operando A (DIP switch de 8 bits) |
+| `PORTD` | Operando B (DIP switch de 8 bits) |
+| `LATC` | Resultado bits 0–7 (LEDs) |
+| `LATE` | Resultado bits 8–15 (LEDs; multiplicacion) |
+| `RA0` | Pulsador NA — cambia la operacion activa |
+
+## Operaciones incluidas
+
+Pulsa **RA0** para avanzar entre modos (vuelve a 0 despues del ultimo):
+
+| Modo | Operacion | Instrucciones clave |
+| --- | --- | --- |
+| 0 | Suma | `ADDWF` |
+| 1 | Resta | `SUBWF` |
+| 2 | Multiplicacion | `MULWF` → `PRODH:PRODL` |
+| 3 | Division (software) | Restas repetidas |
+| 4 | OR logico | `IORWF` |
+| 5 | AND logico | `ANDWF` |
+| 6 | XOR logico | `XORWF` |
+| 7 | Complemento | `COMF` (operando A) |
+| 8 | Rotar izq. sin acarreo | `RLNCF` (operando A) |
 
 <AIExplain title="Division por software">
-No hay instruccion DIV nativa en PIC18. Implementa restas repetidas o algoritmo de restauracion en una rutina aparte.
+No hay instruccion `DIV` nativa en PIC18. La rutina `division_software` resta el divisor repetidamente hasta que el dividendo es menor; el cociente cuenta cuantas restas caben.
 </AIExplain>
+
+## Codigo fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-1-operaciones"
+	filename="practica-1-operaciones.asm"
+	note="Requiere suscripcion activa en CALETAS. Completa el membrete (alumno, seccion, fecha) antes de entregar. Compila con MPASM y carga el .hex en Proteus o PICkit."
+/>
+
+## Proteus / MPLAB
+
+1. Crear proyecto MPASM para **PIC18F4550** (cristal HS 20 MHz).
+2. Importar el diagrama de la practica (pagina 2 del PDF).
+3. Switches en `RB0–RB7` y `RD0–RD7` con pull-up 10 kΩ.
+4. LEDs en `RC0–RC7` y `RE0–RE7` con resistencia 220–330 Ω.
+5. Pulsador en `RA0` a tierra con pull-up.
+6. Compilar → `.hex` → simular → verificar cada modo.
 
 ## Herramientas
 
-- MPLAB IDE 8.88
-- PICkit 2 o 3
-- Simulador (Proteus recomendado)
-- Datasheet e instrucciones PIC18
+- MPLAB IDE 8.88 · PICkit 2/3 · Proteus · Datasheet PIC18F4550
 
-## Evaluacion
+<LabTextPanel practiceSlug="practicas/operaciones-matematicas" kind="post" />
 
-- Informe pre-laboratorio
-- Codigo .ASM estructurado con comentarios
-- Funcionamiento en fisico
-- Explicacion oral
-
-## Post-laboratorio
-
-1. Diferencia entre operacion por hardware y por software?
-2. Por que no todo el puerto C puede ser salida? (RC6/RC7 son UART por defecto si no se configura)
-
-<TopicQuiz slug="practicas/operaciones-matematicas" />
+<TieredExamPanel practiceSlug="practicas/operaciones-matematicas" />

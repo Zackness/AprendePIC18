@@ -6,6 +6,7 @@ import SiteTitle from 'virtual:starlight/components/SiteTitle';
 import SocialIcons from './SocialIcons.astro';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 import CaletaUserBar from './CaletaUserBar.astro';
+import TutorIA from './TutorIA.astro';
 
 const shouldRenderSearch =
 	config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
@@ -28,6 +29,8 @@ const locale = Astro.locals.starlightRoute.locale === 'en' ? 'en' : 'es';
 		<LanguageSelect />
 	</div>
 </div>
+
+<TutorIA />
 
 <style>
 	@layer starlight.core {

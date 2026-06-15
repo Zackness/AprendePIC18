@@ -4,6 +4,7 @@ description: Internal blocks, memory, and execution cycle of the PIC18F4550.
 ---
 
 import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
 import LessonProgress from '../../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
@@ -13,6 +14,13 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 
 The PIC18F4550 uses a **Harvard-style architecture**, where program memory and data memory are separated. This allows the microcontroller to fetch instructions and handle data through different spaces.
+
+<Figure
+	src="/images/arquitectura/harvard-von-neumann.svg"
+	alt="Comparison between Von Neumann and Harvard architecture"
+	caption="The PIC18F4550 uses Harvard architecture: separate buses for program (Flash) and data (RAM)."
+	credit="Based on Topic 1 — UNEXPO · Mechatronics Engineering · Microcontrollers"
+/>
 
 <AIExplain title="Remember this">
 Program and data do not live in the same place. Code goes in Flash; temporary variables go in RAM; persistent data can go in EEPROM.

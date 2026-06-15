@@ -1,0 +1,73 @@
+---
+import { getLabGuide } from '../data/lab-guides';
+
+interface Props {
+	practiceSlug: string;
+	kind: 'pre' | 'post';
+	locale?: 'es' | 'en';
+}
+
+const { practiceSlug, kind, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const guide = getLabGuide(practiceSlug);
+
+if (!guide) {
+	throw new Error(`Lab guide not found: ${practiceSlug}`);
+}
+
+const block = kind === 'pre' ? guide.pre : guide.post;
+
+function escapeHtml(s: string): string {
+	return s
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
+
+function formatAnswer(text: string): string {
+	return text
+		.split('\n\n')
+		.map((para) => {
+			if (para.trim().startsWith('|')) {
+				return `<pre class="lab-text-panel__table">${escapeHtml(para)}</pre>`;
+			}
+			const html = escapeHtml(para).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+			return `<p>${html.replace(/\n/g, '<br/>')}</p>`;
+		})
+		.join('');
+}
+---
+
+<section class={`lab-text-panel lab-text-panel--${kind}`} aria-labelledby={`lab-text-${kind}-title`}>
+	<header class="lab-text-panel__header">
+		<h2 class="lab-text-panel__title" id={`lab-text-${kind}-title`}>
+			{isEn ? block.titleEn : block.titleEs}
+		</h2>
+		<p class="lab-text-panel__intro">{isEn ? block.introEn : block.introEs}</p>
+	</header>
+
+	<div class="lab-text-panel__list">
+		{
+			block.items.map((item, index) => (
+				<details class="lab-text-panel__item" open={index === 0}>
+					<summary class="lab-text-panel__summary">
+						<span class="lab-text-panel__q-num">
+							{isEn ? 'Q' : 'P'}
+							{index + 1}
+						</span>
+						<span class="lab-text-panel__question">
+							{isEn ? item.questionEn : item.questionEs}
+						</span>
+					</summary>
+					<div
+						class="lab-text-panel__answer"
+						set:html={formatAnswer(isEn ? item.answerEn : item.answerEs)}
+					/>
+				</details>
+			))
+		}
+	</div>
+
+	<p class="lab-text-panel__note">{isEn ? block.noteEn : block.noteEs}</p>
+</section>

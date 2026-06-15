@@ -184,6 +184,18 @@ export const practiceTutorials: PracticeTutorial[] = [
 		docHrefEs: '/practicas/operaciones-matematicas/',
 		docHrefEn: '/en/practicas/operaciones-matematicas/',
 		ready: true,
+		figures: [
+			{
+				src: '/images/pdf/practica-1/page-2.png',
+				altEs: 'Diagrama electronico de la Practica 1 con PIC18F4550, switches y LEDs',
+				altEn: 'Practice 1 schematic with PIC18F4550, switches and LEDs',
+				captionEs:
+					'Diagrama electronico: operandos en RB0–RB7 y RD0–RD7, resultado en LEDs de RC/RE, pulsador en RA0.',
+				captionEn:
+					'Schematic: operands on RB0–RB7 and RD0–RD7, results on RC/RE LEDs, pushbutton on RA0.',
+				credit: 'Practica 1 — Operaciones matematicas · UNEXPO',
+			},
+		],
 		stepsEs: [
 			'Montar sistema minimo en protoboard',
 			'Conectar switches en puerto B y D (operandos)',

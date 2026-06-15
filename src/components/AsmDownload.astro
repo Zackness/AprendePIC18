@@ -1,0 +1,159 @@
+---
+import CaletasIcon from './icons/CaletasIcon.astro';
+
+interface Props {
+	downloadSlug: string;
+	filename: string;
+	label?: string;
+	note?: string;
+	locale?: 'es' | 'en';
+}
+
+const { downloadSlug, filename, label, note, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const defaultLabel = isEn ? 'Download source (.asm)' : 'Descargar codigo fuente (.asm)';
+---
+
+<aside
+	class="asm-download"
+	data-asm-download
+	data-download-slug={downloadSlug}
+	data-download-filename={filename}
+>
+	<div class="asm-download__locked" data-asm-gate>
+		<div class="asm-download__gate-icon" aria-hidden="true">
+			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+				<rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.75" />
+				<path
+					d="M8 11V8a4 4 0 0 1 8 0v3"
+					stroke="currentColor"
+					stroke-width="1.75"
+					stroke-linecap="round"></path>
+			</svg>
+		</div>
+		<h3 class="asm-download__gate-title" data-asm-gate-title>
+			{isEn ? 'CALETAS subscription required' : 'Suscripcion CALETAS requerida'}
+		</h3>
+		<p class="asm-download__gate-text" data-asm-gate-text>
+			{
+				isEn
+					? 'The reference .ASM for this lab is available to students with an active CALETAS subscription.'
+					: 'El .ASM de referencia de esta practica esta disponible para estudiantes con suscripcion activa en CALETAS.'
+			}
+		</p>
+		<div class="asm-download__gate-actions">
+			<a href="#" class="asm-download__btn asm-download__btn--caleta" data-caleta-login>
+				<CaletasIcon class="asm-download__btn-icon" />
+				<span>{isEn ? 'Sign in with CALETAS' : 'Iniciar sesion con CALETAS'}</span>
+			</a>
+			<a
+				href="https://caleta.top/suscripcion"
+				class="asm-download__btn asm-download__btn--secondary"
+				target="_blank"
+				rel="noopener noreferrer"
+				data-asm-plans
+			>
+				{isEn ? 'View plans' : 'Ver planes'}
+			</a>
+		</div>
+	</div>
+
+	<div class="asm-download__ready" data-asm-ready hidden>
+		<button type="button" class="asm-download__btn" data-asm-trigger>
+			<span class="asm-download__icon" aria-hidden="true">↓</span>
+			{label ?? defaultLabel}
+		</button>
+		<p class="asm-download__plan" data-asm-plan hidden></p>
+	</div>
+
+	{note && <p class="asm-download__note">{note}</p>}
+</aside>
+
+<script>
+	import { initCaletaAuth, isLoggedIn } from '../scripts/caleta-auth';
+	import {
+		downloadLabSource,
+		fetchDownloadAccess,
+		subscriptionPlansUrl,
+	} from '../scripts/caleta-downloads';
+
+	function initAsmDownloads() {
+		initCaletaAuth();
+
+		document.querySelectorAll('[data-asm-download]').forEach((root) => {
+			if (root.getAttribute('data-asm-init') === '1') return;
+			root.setAttribute('data-asm-init', '1');
+
+			const slug = root.getAttribute('data-download-slug') || '';
+			const filename = root.getAttribute('data-download-filename') || 'program.asm';
+			const gate = root.querySelector('[data-asm-gate]');
+			const ready = root.querySelector('[data-asm-ready]');
+			const trigger = root.querySelector('[data-asm-trigger]');
+			const gateTitle = root.querySelector('[data-asm-gate-title]');
+			const gateText = root.querySelector('[data-asm-gate-text]');
+			const planEl = root.querySelector('[data-asm-plan]');
+			const plansLink = root.querySelector('[data-asm-plans]');
+			const isEn = document.documentElement.lang?.startsWith('en');
+
+			if (plansLink instanceof HTMLAnchorElement) {
+				plansLink.href = subscriptionPlansUrl();
+			}
+
+			async function refresh() {
+				const access = await fetchDownloadAccess().catch(() => ({
+					authenticated: isLoggedIn(),
+					canDownload: false,
+					reason: 'no_subscription' as const,
+				}));
+
+				const unlocked = access.canDownload;
+				if (gate) gate.hidden = unlocked;
+				if (ready) ready.hidden = !unlocked;
+
+				if (!unlocked && gateTitle && gateText) {
+					if (!access.authenticated) {
+						gateTitle.textContent = isEn
+							? 'Sign in with CALETAS'
+							: 'Inicia sesion en CALETAS';
+						gateText.textContent = isEn
+							? 'You need a CALETAS account and an active subscription to download the lab source code.'
+							: 'Necesitas cuenta CALETAS y una suscripcion activa para descargar el codigo fuente.';
+					} else {
+						gateTitle.textContent = isEn
+							? 'Active subscription required'
+							: 'Suscripcion activa requerida';
+						gateText.textContent = isEn
+							? 'Your account has no active plan. Subscribe on CALETAS to unlock the .ASM download.'
+							: 'Tu cuenta no tiene un plan activo. Suscripcion en CALETAS para desbloquear la descarga del .ASM.';
+					}
+				}
+
+				if (planEl && access.planName && unlocked) {
+					planEl.hidden = false;
+					planEl.textContent = isEn
+						? `Unlocked with plan: ${access.planName}`
+						: `Desbloqueado con plan: ${access.planName}`;
+				}
+			}
+
+			trigger?.addEventListener('click', async () => {
+				try {
+					await downloadLabSource(slug, filename);
+				} catch {
+					await refresh();
+					alert(
+						isEn
+							? 'Could not download. Check your CALETAS subscription.'
+							: 'No se pudo descargar. Verifica tu suscripcion en CALETAS.',
+					);
+				}
+			});
+
+			refresh();
+			window.addEventListener('aprende-auth-change', () => refresh());
+		});
+	}
+
+	initAsmDownloads();
+	document.addEventListener('astro:page-load', initAsmDownloads);
+</script>

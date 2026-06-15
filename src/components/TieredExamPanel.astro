@@ -1,0 +1,63 @@
+---
+import InteractiveQuiz from './InteractiveQuiz.astro';
+import { getTieredLabExam } from '../data/lab-tiered-quizzes';
+
+interface Props {
+	practiceSlug: string;
+	locale?: 'es' | 'en';
+}
+
+const { practiceSlug, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const exam = getTieredLabExam(practiceSlug);
+
+if (!exam) {
+	throw new Error(`Tiered lab exam not found: ${practiceSlug}`);
+}
+---
+
+<section class="tiered-exams" aria-labelledby="tiered-exams-title">
+	<header class="tiered-exams__header">
+		<h2 class="tiered-exams__title" id="tiered-exams-title">
+			{isEn ? 'Exams by difficulty level' : 'Examenes por nivel de dificultad'}
+		</h2>
+		<p class="tiered-exams__intro">
+			{
+				isEn
+					? 'Open each level when you are ready. Basic is public; intermediate and UNEXPO levels require a CALETAS account to submit answers.'
+					: 'Abre cada nivel cuando estes listo. El basico es publico; intermedio y UNEXPO requieren cuenta CALETAS para calificar respuestas.'
+			}
+		</p>
+	</header>
+
+	<div class="tiered-exams__list">
+		{
+			exam.tiers.map((tier, index) => (
+				<details class="tiered-exams__tier" open={index === 0}>
+					<summary class="tiered-exams__summary">
+						<span class={`tiered-exams__level tiered-exams__level--${tier.tierId}`}>
+							{isEn ? tier.levelEn : tier.levelEs}
+						</span>
+						<span class="tiered-exams__summary-title">
+							{isEn ? tier.titleEn : tier.titleEs}
+						</span>
+						<span class="tiered-exams__count">
+							{tier.questions.length} {isEn ? 'questions' : 'preguntas'}
+						</span>
+					</summary>
+					<div class="tiered-exams__body">
+						<p class="tiered-exams__desc">
+							{isEn ? tier.descriptionEn : tier.descriptionEs}
+						</p>
+						<InteractiveQuiz
+							quiz={tier}
+							locale={locale}
+							authMode={tier.authMode}
+							compact
+						/>
+					</div>
+				</details>
+			))
+		}
+	</div>
+</section>

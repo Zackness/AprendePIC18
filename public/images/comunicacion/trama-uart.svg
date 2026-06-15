@@ -10,7 +10,7 @@
       .small { font: 10px sans-serif; fill: #64748b; }
     </style>
   </defs>
-  <text x="350" y="24" text-anchor="middle" class="title">Trama UART asincrona  NRZ (Tema 10)</text>
+  <text x="350" y="24" text-anchor="middle" class="title">Trama UART asincrona  —  NRZ (Tema 10)</text>
   <rect x="40" y="70" width="50" height="50" class="idle"/><text x="65" y="100" text-anchor="middle" class="label">Idle</text>
   <rect x="95" y="70" width="40" height="50" class="start"/><text x="115" y="100" text-anchor="middle" class="label">Start</text>
   <rect x="140" y="70" width="35" height="50" class="bit"/><text x="157" y="100" text-anchor="middle" class="label">D0</text>
@@ -25,5 +25,5 @@
   <text x="350" y="160" text-anchor="middle" class="label">Pines: RC6/TX (transmision) � RC7/RX (recepcion)</text>
   <text x="350" y="185" text-anchor="middle" class="small">Registros: TXSTA, RCSTA, SPBRG, TXREG, RCREG</text>
   <text x="350" y="220" text-anchor="middle" class="small">Linea inactiva en alto � Baudios = bits por segundo</text>
-  <text x="350" y="245" text-anchor="middle" class="small">UNEXPO · Ing. Mecatronica  Tema 10 Comunicacion serial</text>
+  <text x="350" y="245" text-anchor="middle" class="small">UNEXPO · Ing. Mecatronica  —  Tema 10 Comunicacion serial</text>
 </svg>

@@ -10,7 +10,7 @@
       .small { font: 10px sans-serif; fill: #64748b; }
     </style>
   </defs>
-  <text x="360" y="24" text-anchor="middle" class="title">LCD 16x2 HD44780  bus 4 bit (Practica 2)</text>
+  <text x="360" y="24" text-anchor="middle" class="title">LCD 16x2 HD44780  —  bus 4 bit (Practica 2)</text>
   <rect x="420" y="60" width="260" height="120" rx="8" class="lcd"/>
   <rect x="440" y="80" width="220" height="80" rx="4" class="screen"/>
   <text x="550" y="130" text-anchor="middle" class="label">16 x 2 � HD44780</text>
@@ -26,5 +26,5 @@
   <line x1="180" y1="150" x2="420" y2="150" class="wire"/>
   <text x="360" y="230" text-anchor="middle" class="label">Teclado 4x4: filas RB0-RB3 � columnas RB4-RB7 (interrupciones)</text>
   <text x="360" y="260" text-anchor="middle" class="small">DDRAM linea 1: 0x80 � linea 2: 0xC0</text>
-  <text x="360" y="290" text-anchor="middle" class="small">Practica 2 UNEXPO  UNEXPO · Ing. Mecatronica</text>
+  <text x="360" y="290" text-anchor="middle" class="small">Practica 2 UNEXPO  —  UNEXPO · Ing. Mecatronica</text>
 </svg>

@@ -17,7 +17,7 @@
   <text x="105" y="125" text-anchor="middle" fill="#fca311" font="bold 12px sans-serif">RB0</text>
   <text x="105" y="145" text-anchor="middle" fill="#f8fafc" font="10px sans-serif">entrada</text>
   <rect x="250" y="105" width="70" height="22" rx="4" class="res"/>
-  <text x="285" y="120" text-anchor="middle" class="label">10k©</text>
+  <text x="285" y="120" text-anchor="middle" class="label">10k&#937;</text>
   <rect x="400" y="95" width="60" height="50" rx="6" class="btn"/>
   <text x="430" y="125" text-anchor="middle" class="label">NA</text>
   <line x1="170" y1="130" x2="250" y2="130" class="wire"/>
@@ -27,6 +27,6 @@
   <text x="285" y="52" text-anchor="middle" class="small">+5V</text>
   <line x1="430" y1="145" x2="430" y2="210" class="gnd"/>
   <line x1="410" y1="210" x2="450" y2="210" class="gnd"/>
-  <text x="320" y="250" text-anchor="middle" class="small">TRISB,0 = 1 · Sin pulsar: RB0 lee 1 · Pulsado: RB0 lee 0</text>
+  <text x="320" y="250" text-anchor="middle" class="small">TRISB,0 = 1  Sin pulsar: RB0 lee 1  Pulsado: RB0 lee 0</text>
   <text x="320" y="275" text-anchor="middle" class="small">Usado en practicas y ejercicio de control de nivel (RB7)</text>
 </svg>

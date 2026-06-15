@@ -9,7 +9,7 @@
       .small { font: 10px sans-serif; fill: #64748b; }
     </style>
   </defs>
-  <text x="350" y="24" text-anchor="middle" class="title">PWM  periodo y ciclo util (Tema 9 CCP)</text>
+  <text x="350" y="24" text-anchor="middle" class="title">PWM    periodo y ciclo util (Tema 9 CCP)</text>
   <line x1="60" y1="200" x2="640" y2="200" class="axis"/>
   <line x1="60" y1="60" x2="60" y2="200" class="axis"/>
   <rect x="60" y="80" width="180" height="120" class="fill"/>
@@ -19,5 +19,5 @@
   <text x="150" y="230" text-anchor="middle" class="label">Ciclo util (X%)</text>
   <text x="330" y="230" text-anchor="middle" class="label">T_PWM (periodo)</text>
   <text x="510" y="230" text-anchor="middle" class="label">T_PWM</text>
-  <text x="350" y="265" text-anchor="middle" class="small">T_PWM = 4×(PR2+1)×Tosc×Pre-escalador Timer2 · Pin RC2/CCP1</text>
+  <text x="350" y="265" text-anchor="middle" class="small">T_PWM = 4 Ã— (PR2+1) Ã— Tosc Ã— Pre-escalador Timer2  Pin RC2/CCP1</text>
 </svg>

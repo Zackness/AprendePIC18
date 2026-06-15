@@ -9,7 +9,7 @@
       .led { fill: #fca311; stroke: #b45309; }
     </style>
   </defs>
-  <text x="350" y="24" text-anchor="middle" class="title">Control de nivel  Ejercicio II Parcial</text>
+  <text x="350" y="24" text-anchor="middle" class="title">Control de nivel  —  Ejercicio II Parcial</text>
   <rect x="280" y="50" width="140" height="180" rx="6" class="tank"/>
   <rect x="285" y="120" width="130" height="105" class="water"/>
   <text x="350" y="100" text-anchor="middle" class="label">Tanque</text>
@@ -19,5 +19,5 @@
   <text x="300" y="250" class="small">Min RB3</text>
   <text x="500" y="80" class="small">Inicio RB7</text>
   <text x="350" y="270" text-anchor="middle" class="small">Ciclo: bomba ON � nivel max � valvula ON � nivel min � repetir</text>
-  <text x="350" y="292" text-anchor="middle" class="small">Ejercicios II parcial 2025-2  UNEXPO · Ing. Mecatronica</text>
+  <text x="350" y="292" text-anchor="middle" class="small">Ejercicios II parcial 2025-2  —  UNEXPO · Ing. Mecatronica</text>
 </svg>

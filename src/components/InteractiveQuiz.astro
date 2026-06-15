@@ -1,16 +1,20 @@
 ---
 import type { PageQuiz } from '../data/quizzes';
 import { isQuizAuthRequired } from '../data/quizzes';
+import type { ExamAuthMode } from '../data/lab-tiered-quizzes';
 import CaletasIcon from './icons/CaletasIcon.astro';
 
 interface Props {
 	quiz: PageQuiz;
 	locale?: 'es' | 'en';
+	authMode?: ExamAuthMode;
+	compact?: boolean;
 }
 
-const { quiz, locale = 'es' } = Astro.props;
+const { quiz, locale = 'es', authMode: authModeProp, compact = false } = Astro.props;
 const isEn = locale === 'en';
-const authRequired = isQuizAuthRequired(quiz.slug);
+const authMode: ExamAuthMode =
+	authModeProp ?? (isQuizAuthRequired(quiz.slug) ? 'login' : 'none');
 const title = isEn ? quiz.titleEn : quiz.titleEs;
 const questions = quiz.questions.map((q) => ({
 	id: q.id,
@@ -23,28 +27,32 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 ---
 
 <section
-	class="interactive-quiz"
+	class:list={['interactive-quiz', compact && 'interactive-quiz--compact']}
 	data-interactive-quiz
 	data-quiz-slug={quiz.slug}
-	data-auth-required={authRequired ? '1' : '0'}
+	data-auth-mode={authMode}
 	data-quiz-json={quizJson}
-	aria-labelledby={`quiz-title-${quiz.slug.replace(/\//g, '-')}`}
+	aria-labelledby={compact ? undefined : `quiz-title-${quiz.slug.replace(/\//g, '-')}`}
 >
-	<header class="interactive-quiz__header">
-		<span class="interactive-quiz__badge">
-			{isEn ? 'Interactive exam' : 'Examen interactivo'}
-		</span>
-		<h2 class="interactive-quiz__title" id={`quiz-title-${quiz.slug.replace(/\//g, '-')}`}>
-			{title}
-		</h2>
-		{
-			quiz.sourceDoc && (
-				<p class="interactive-quiz__source">
-					{isEn ? 'Based on' : 'Basado en'}: {quiz.sourceDoc}
-				</p>
-			)
-		}
-	</header>
+	{
+		!compact && (
+			<header class="interactive-quiz__header">
+				<span class="interactive-quiz__badge">
+					{isEn ? 'Interactive exam' : 'Examen interactivo'}
+				</span>
+				<h2 class="interactive-quiz__title" id={`quiz-title-${quiz.slug.replace(/\//g, '-')}`}>
+					{title}
+				</h2>
+				{
+					quiz.sourceDoc && (
+						<p class="interactive-quiz__source">
+							{isEn ? 'Based on' : 'Basado en'}: {quiz.sourceDoc}
+						</p>
+					)
+				}
+			</header>
+		)
+	}
 
 	<div class="interactive-quiz__body">
 		<div class="interactive-quiz__content-wrap">
@@ -91,10 +99,11 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 		</div>
 
 		{
-			authRequired && (
+			authMode !== 'none' && (
 				<div
 					class="interactive-quiz__auth-overlay"
 					data-quiz-auth-gate
+					hidden
 					role="dialog"
 					aria-modal="true"
 					aria-labelledby={`quiz-auth-title-${quiz.slug.replace(/\//g, '-')}`}
@@ -122,18 +131,29 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 						<h3
 							class="interactive-quiz__auth-title"
 							id={`quiz-auth-title-${quiz.slug.replace(/\//g, '-')}`}
+							data-quiz-auth-title
 						>
 							{isEn ? 'Sign in' : 'Inicia sesión'}
 						</h3>
-						<p class="interactive-quiz__auth-subtitle">
+						<p class="interactive-quiz__auth-subtitle" data-quiz-auth-subtitle>
 							{isEn
-								? 'To save your progress and unlock achievements'
-								: 'Para guardar tu progreso y desbloquear logros'}
+								? 'Sign in with CALETAS to submit this exam and save your score.'
+								: 'Inicia sesion en CALETAS para presentar este examen y guardar tu nota.'}
 						</p>
 						<div class="interactive-quiz__auth-actions">
 							<a href="#" class="interactive-quiz__auth-btn interactive-quiz__auth-btn--caleta" data-caleta-login>
 								<CaletasIcon class="interactive-quiz__auth-btn-icon" />
 								<span>{isEn ? 'Sign in with CALETAS' : 'Iniciar sesión con CALETAS'}</span>
+							</a>
+							<a
+								href="https://caleta.top/suscripcion"
+								class="interactive-quiz__auth-btn interactive-quiz__auth-btn--secondary"
+								data-quiz-plans-link
+								target="_blank"
+								rel="noopener noreferrer"
+								hidden
+							>
+								{isEn ? 'View CALETAS plans' : 'Ver planes CALETAS'}
 							</a>
 						</div>
 					</div>
@@ -156,18 +176,59 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 <script>
 	import { initCaletaAuth, saveQuizResult, isLoggedIn } from '../scripts/caleta-auth';
+	import { fetchDownloadAccess, subscriptionPlansUrl } from '../scripts/caleta-downloads';
 
-	function setQuizAuthState(root: Element) {
-		const authRequired = root.getAttribute('data-auth-required') === '1';
-		const loggedIn = isLoggedIn();
+	async function setQuizAuthState(root: Element) {
+		const authMode = root.getAttribute('data-auth-mode') || 'none';
 		const gate = root.querySelector('[data-quiz-auth-gate]');
 		const form = root.querySelector('[data-quiz-form]');
 		const submit = root.querySelector('.interactive-quiz__submit');
+		const authTitle = root.querySelector('[data-quiz-auth-title]');
+		const authSubtitle = root.querySelector('[data-quiz-auth-subtitle]');
+		const plansLink = root.querySelector('[data-quiz-plans-link]');
 		const isEn = document.documentElement.lang?.startsWith('en');
 
-		const locked = authRequired && !loggedIn;
-		root.classList.toggle('interactive-quiz--locked', locked);
+		if (authMode === 'none') {
+			root.classList.remove('interactive-quiz--locked');
+			if (gate) gate.hidden = true;
+			return;
+		}
 
+		let locked = false;
+
+		if (authMode === 'login') {
+			locked = !isLoggedIn();
+		} else if (authMode === 'subscription') {
+			const access = await fetchDownloadAccess().catch(() => ({
+				authenticated: isLoggedIn(),
+				canDownload: false,
+				reason: 'no_subscription' as const,
+			}));
+			locked = !access.canDownload;
+			if (plansLink instanceof HTMLAnchorElement) {
+				plansLink.href = subscriptionPlansUrl();
+				plansLink.hidden = access.canDownload;
+			}
+			if (authTitle && authSubtitle) {
+				if (!access.authenticated) {
+					authTitle.textContent = isEn ? 'Sign in' : 'Inicia sesión';
+					authSubtitle.textContent = isEn
+						? 'Sign in with CALETAS to submit this exam.'
+						: 'Inicia sesion en CALETAS para presentar este examen.';
+				} else {
+					authTitle.textContent = isEn
+						? 'Subscription required'
+						: 'Suscripcion requerida';
+					authSubtitle.textContent = isEn
+						? 'An active CALETAS plan is required for this exam level.'
+						: 'Se requiere un plan activo en CALETAS para este nivel de examen.';
+				}
+			}
+		} else {
+			locked = !isLoggedIn();
+		}
+
+		root.classList.toggle('interactive-quiz--locked', locked);
 		if (gate) gate.hidden = !locked;
 		if (form instanceof HTMLFormElement) {
 			form.querySelectorAll('input, button').forEach((el) => {
@@ -189,7 +250,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 			root.setAttribute('data-quiz-init', '1');
 
 			const slug = root.getAttribute('data-quiz-slug') || '';
-			const authRequired = root.getAttribute('data-auth-required') === '1';
+			const authMode = root.getAttribute('data-auth-mode') || 'none';
 			const json = root.getAttribute('data-quiz-json') || '{}';
 			const isEn = document.documentElement.lang?.startsWith('en');
 			let quizData;
@@ -233,19 +294,34 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 			updateAnsweredProgress();
 
-			form?.addEventListener('submit', (e) => {
+			form?.addEventListener('submit', async (e) => {
 				e.preventDefault();
 
-				if (authRequired && !isLoggedIn()) {
-					setQuizAuthState(root);
-					if (resultEl) {
-						resultEl.hidden = false;
-						resultEl.className = 'interactive-quiz__result interactive-quiz__result--warn';
-						resultEl.textContent = isEn
-							? 'Sign in with CALETAS to submit this exam.'
-							: 'Inicia sesion en CALETAS para presentar este examen.';
+				if (authMode !== 'none') {
+					if (authMode === 'subscription') {
+						const access = await fetchDownloadAccess().catch(() => null);
+						if (!access?.canDownload) {
+							await setQuizAuthState(root);
+							if (resultEl) {
+								resultEl.hidden = false;
+								resultEl.className = 'interactive-quiz__result interactive-quiz__result--warn';
+								resultEl.textContent = isEn
+									? 'An active CALETAS subscription is required.'
+									: 'Se requiere suscripcion activa en CALETAS.';
+							}
+							return;
+						}
+					} else if (!isLoggedIn()) {
+						await setQuizAuthState(root);
+						if (resultEl) {
+							resultEl.hidden = false;
+							resultEl.className = 'interactive-quiz__result interactive-quiz__result--warn';
+							resultEl.textContent = isEn
+								? 'Sign in with CALETAS to submit this exam.'
+								: 'Inicia sesion en CALETAS para presentar este examen.';
+						}
+						return;
 					}
-					return;
 				}
 
 				let correct = 0;
@@ -305,15 +381,15 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 					resultEl.hidden = false;
 					resultEl.className = `interactive-quiz__result ${passed ? 'interactive-quiz__result--pass' : 'interactive-quiz__result--fail'}`;
 					resultEl.textContent = isEn
-						? `${correct}/${total} correct (${score}%)${passed ? ' — Lesson passed!' : ' — Review the topic and try again.'}`
-						: `${correct}/${total} correctas (${score}%)${passed ? ' — ¡Clase aprobada!' : ' — Repasa el tema e intenta de nuevo.'}`;
+						? `${correct}/${total} correct (${score}%)${passed ? ' — Passed!' : ' — Review and try again.'}`
+						: `${correct}/${total} correctas (${score}%)${passed ? ' — ¡Aprobado!' : ' — Repasa e intenta de nuevo.'}`;
 				}
 
 				root.classList.toggle('interactive-quiz--passed', passed);
 
 				saveQuizResult(slug, { score, passed, correct, total });
 
-				if (!authRequired && !isLoggedIn() && loginHint) {
+				if (authMode === 'none' && !isLoggedIn() && loginHint) {
 					loginHint.hidden = false;
 				}
 

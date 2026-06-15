@@ -29,7 +29,9 @@ export const quizAuthOptionalSlugs = new Set([
 
 export function isQuizAuthRequired(slug: string): boolean {
 	const normalized = slug.replace(/^\/+|\/+$/g, '').replace(/^en\//, '');
-	return !quizAuthOptionalSlugs.has(normalized);
+	if (quizAuthOptionalSlugs.has(normalized)) return false;
+	if (normalized.endsWith('/basico')) return false;
+	return true;
 }
 
 /** Banco de examenes por slug de pagina (sin prefijo /en/) */
@@ -639,38 +641,6 @@ export const pageQuizzes: PageQuiz[] = [
 				questionEn: 'For course Practice 8, PC communication is usually via...',
 				optionsEs: ['UART/EUSART (serial)', 'Solo USB HID sin firmware', 'I2C al monitor', 'SPI al teclado'],
 				optionsEn: ['UART/EUSART (serial)', 'USB HID only without firmware', 'I2C to monitor', 'SPI to keyboard'],
-				correctIndex: 0,
-			},
-		],
-	},
-	{
-		slug: 'practicas/operaciones-matematicas',
-		titleEs: 'Practica 1 — Operaciones matematicas',
-		titleEn: 'Practice 1 — Math operations',
-		sourceDoc: 'Practica 1  Operacion matematia.pdf',
-		questions: [
-			{
-				id: 'q1',
-				questionEs: 'En Practica 1, el pulsador que cambia la operacion esta en...',
-				questionEn: 'In Practice 1, the button that changes the operation is on...',
-				optionsEs: ['RA0', 'RB7', 'RC6', 'RD0'],
-				optionsEn: ['RA0', 'RB7', 'RC6', 'RD0'],
-				correctIndex: 0,
-			},
-			{
-				id: 'q2',
-				questionEs: 'La division en PIC18 en esta practica se implementa...',
-				questionEn: 'Division on PIC18 in this practice is implemented...',
-				optionsEs: ['Por software (no hay DIV nativo)', 'Con instruccion DIV', 'Solo en C', 'Por UART'],
-				optionsEn: ['In software (no native DIV)', 'With DIV instruction', 'In C only', 'Via UART'],
-				correctIndex: 0,
-			},
-			{
-				id: 'q3',
-				questionEs: 'Los operandos de entrada estan en los puertos...',
-				questionEn: 'Input operands are on ports...',
-				optionsEs: ['B y D (switches)', 'A y E solamente', 'C y UART', 'Solo RE'],
-				optionsEn: ['B and D (switches)', 'A and E only', 'C and UART', 'RE only'],
 				correctIndex: 0,
 			},
 		],
