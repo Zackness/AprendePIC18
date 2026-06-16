@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 380" role="img" aria-label="Diagrama de flujo primer LED">
+  <rect width="400" height="380" fill="#e2e8f0"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs>
+  <text x="200" y="24" text-anchor="middle" font-size="13" fill="#14213d">Primer LED  RB0</text>
+  <ellipse cx="200" cy="56" rx="72" ry="24" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/><text x="200" y="60" text-anchor="middle" font-size="12">INICIO</text>
+  <line x1="200" y1="80" x2="200" y2="108" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="60" y="108" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="134" text-anchor="middle" font-size="12">CLRF LATB</text>
+  <line x1="200" y1="152" x2="200" y2="180" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="60" y="180" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="206" text-anchor="middle" font-size="12">BCF TRISB,0 (RB0 salida)</text>
+  <line x1="200" y1="224" x2="200" y2="252" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="60" y="252" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="278" text-anchor="middle" font-size="12">BSF LATB,0 (encender LED)</text>
+  <line x1="200" y1="296" x2="200" y2="324" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <path d="M 200 324 L 320 324 L 320 272 L 200 272" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
+  <ellipse cx="200" cy="350" rx="88" ry="24" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/><text x="200" y="354" text-anchor="middle" font-size="12">bucle: GOTO bucle</text>
+</svg>

@@ -4,19 +4,31 @@ description: First assembly program to configure a pin as output and turn on an 
 ---
 
 import LessonProgress from '../../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../../components/PracticeBox.astro';
 import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
+import LabTextPanel from '../../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../../components/TieredExamPanel.astro';
 
 <LessonProgress slug="practicas/primer-led" locale="en" />
-
-
 
 This practice explains the basic idea of digital output: a pin must be configured as an output and then receive a logic value.
 
 <PracticeBox title="Turn on an LED on RB0" level="Beginner">
 Goal: configure `RB0` as output and write a high level to turn on an LED connected correctly with its resistor.
 </PracticeBox>
+
+<Figure
+	src="/images/gpio/led-rb0.svg"
+	alt="LED on RB0 schematic with 330 ohm resistor"
+	caption="Basic wiring: RB0 as output, 220-330 ohm resistor and LED to ground."
+	credit="First LED practice — UNEXPO"
+/>
+
+<LabTextPanel practiceSlug="practicas/primer-led" kind="pre" locale="en" />
+
+<LabDesignChallenge practiceSlug="practicas/primer-led" locale="en" />
 
 <AIExplain title="Concept before code">
 `TRISB` decides whether each PORTB pin is input or output. A bit set to `1` means input; a bit set to `0` means output. To use `RB0` as output, bit 0 of `TRISB` must be `0`.
@@ -57,4 +69,6 @@ loop:
 
 Modify the program so the LED is on `RB1`. Then explain which lines changed and why.
 
-<TopicQuiz slug="practicas/primer-led" locale="en" />
+<LabTextPanel practiceSlug="practicas/primer-led" kind="post" locale="en" />
+
+<TieredExamPanel practiceSlug="practicas/primer-led" locale="en" />

@@ -227,12 +227,18 @@
 
 				canUse = true;
 				showChat();
-			} catch {
+			} catch (err) {
 				canUse = false;
+				const isRedirect =
+					err instanceof Error && err.message === 'caleta_api_redirect';
 				showGate(
 					t(
-						'No se pudo verificar tu acceso al Tutor IA. Intenta de nuevo.',
-						'Could not verify AI Tutor access. Try again.',
+						isRedirect
+							? 'No se pudo conectar con CALETAS (la API respondió con redirección en lugar de datos). Cierra sesión, vuelve a entrar y prueba de nuevo.'
+							: 'No se pudo verificar tu acceso al Tutor IA. Intenta de nuevo.',
+						isRedirect
+							? 'Could not reach CALETAS (the API redirected instead of returning data). Sign out, sign in again and retry.'
+							: 'Could not verify AI Tutor access. Try again.',
 					),
 				);
 			}

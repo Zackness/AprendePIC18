@@ -1,36 +1,40 @@
 ---
-title: Practica 1 - Primer LED
+title: Práctica 1 - Primer LED
 description: Primer programa en ensamblador para configurar un pin como salida y encender un LED.
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import AIExplain from '../../../components/AIExplain.astro';
 import Figure from '../../../components/Figure.astro';
+import LabTextPanel from '../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../components/TieredExamPanel.astro';
 
 <LessonProgress slug="practicas/primer-led" />
 
-
-
-Esta practica busca entender la idea basica de salida digital: un pin debe configurarse como salida y luego recibir un valor logico.
+Esta práctica busca entender la idea básica de salida digital: un pin debe configurarse como salida y luego recibir un valor lógico.
 
 <PracticeBox title="Encender un LED en RB0" level="Inicial">
 Objetivo: configurar `RB0` como salida y escribir un nivel alto para encender un LED conectado correctamente con su resistencia.
 </PracticeBox>
 
-<AIExplain title="Concepto antes del codigo">
+<Figure
+	src="/images/gpio/led-rb0.svg"
+	alt="Esquema electrónico de LED en RB0 con resistencia de 330 ohm"
+	caption="Montaje básico: RB0 como salida, resistencia 220-330 ohm y LED a tierra."
+	credit="Práctica 1 LED — UNEXPO"
+/>
+
+<LabTextPanel practiceSlug="practicas/primer-led" kind="pre" />
+
+<LabDesignChallenge practiceSlug="practicas/primer-led" />
+
+<AIExplain title="Concepto antes del código">
 `TRISB` decide si cada pin del puerto B es entrada o salida. Un bit en `1` significa entrada; un bit en `0` significa salida. Para usar `RB0` como salida, el bit 0 de `TRISB` debe estar en `0`.
 </AIExplain>
 
-<Figure
-	src="/images/gpio/led-rb0.svg"
-	alt="Esquema electronico de LED en RB0 con resistencia de 330 ohm"
-	caption="Montaje basico: RB0 como salida, resistencia 220-330 ohm y LED a tierra."
-	credit="Practica 1 LED — UNEXPO"
-/>
-
-## Codigo base
+## Código base
 
 ```asm
         LIST    P=18F4550
@@ -54,15 +58,17 @@ bucle:
         END
 ```
 
-## Que debes poder explicar
+## Qué debes poder explicar
 
-1. Por que se usa `TRISB`.
-2. Por que `BCF TRISB, 0` convierte `RB0` en salida.
-3. Por que se escribe en `LATB` y no necesariamente en `PORTB`.
-4. Por que el programa termina en un bucle infinito.
+1. Por qué se usa `TRISB`.
+2. Por qué `BCF TRISB, 0` convierte `RB0` en salida.
+3. Por qué se escribe en `LATB` y no necesariamente en `PORTB`.
+4. Por qué el programa termina en un bucle infinito.
 
 ## Ejercicio
 
-Modifica el programa para que el LED este en `RB1`. Luego explica que lineas cambiaron y por que.
+Modifica el programa para que el LED esté en `RB1`. Luego explica qué líneas cambiaron y por qué.
 
-<TopicQuiz slug="practicas/primer-led" />
+<LabTextPanel practiceSlug="practicas/primer-led" kind="post" />
+
+<TieredExamPanel practiceSlug="practicas/primer-led" />

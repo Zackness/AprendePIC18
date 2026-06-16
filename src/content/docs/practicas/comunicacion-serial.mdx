@@ -1,27 +1,32 @@
 ---
-title: Practica 8 - Comunicacion serial
-description: UART entre PIC18F4550 y PC segun Practica 8 del curso.
+title: Práctica 8 - Comunicación serial
+description: UART entre PIC18F4550 y PC según Práctica 8 del curso.
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import Figure from '../../../components/Figure.astro';
+import LabTextPanel from '../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../components/TieredExamPanel.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
 <LessonProgress slug="practicas/comunicacion-serial" />
 
-
-
-<PracticeBox title="Practica 8 de Laboratorio" level="UNEXPO">
-Establecer comunicacion serial entre el PIC18F4550 y una PC usando EUSART. Enviar y recibir datos (terminal serial).
+<PracticeBox title="Práctica 8 de Laboratorio" level="UNEXPO">
+Establecer comunicación serial entre el PIC18F4550 y una PC usando EUSART. Enviar y recibir datos (terminal serial).
 </PracticeBox>
 
 <Figure
 	src="/images/pdf/practica-8/page-2.png"
-	alt="Diagrama electronico de la Practica 8 con MAX232 y comunicacion serial"
-	caption="PIC RC6/RC7 con MAX232 hacia conector serial. Incluye LCD y potenciometro en AN0."
-	credit="Practica 8 — Comunicacion serial · UNEXPO"
+	alt="Diagrama electrónico de la Práctica 8 con MAX232 y comunicación serial"
+	caption="PIC RC6/RC7 con MAX232 hacia conector serial. Incluye LCD y potenciómetro en AN0."
+	credit="Práctica 8 — Comunicación serial · UNEXPO"
 />
+
+<LabTextPanel practiceSlug="practicas/comunicacion-serial" kind="pre" />
+
+<LabDesignChallenge practiceSlug="practicas/comunicacion-serial" />
 
 ## Requisitos
 
@@ -30,8 +35,18 @@ Establecer comunicacion serial entre el PIC18F4550 y una PC usando EUSART. Envia
 - Terminal en PC (PuTTY, Tera Term, Arduino Serial Monitor)
 - Opcional: protocolo simple de comandos
 
-## Evaluacion
+## Evaluación
 
-Codigo funcional, simulacion o prueba fisica, informe con diagrama y explicacion del calculo de SPBRG.
+Código funcional, simulación o prueba física, informe con diagrama y explicación del cálculo de SPBRG.
 
-<TopicQuiz slug="practicas/comunicacion-serial" />
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-8-comunicacion-serial"
+	filename="practica-8-comunicacion-serial.asm"
+	note="Requiere suscripción activa en CALETAS. EUSART a 9600 baudios, mensaje de bienvenida y eco de caracteres."
+/>
+
+<LabTextPanel practiceSlug="practicas/comunicacion-serial" kind="post" />
+
+<TieredExamPanel practiceSlug="practicas/comunicacion-serial" />

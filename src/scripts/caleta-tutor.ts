@@ -37,13 +37,19 @@ export async function fetchTutorAccess(): Promise<TutorAccessResponse> {
 	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/tutor/access`, {
 		method: 'GET',
 		headers: authHeaders(),
+		redirect: 'manual',
 	});
+
+	if (res.type === 'opaqueredirect' || res.status === 301 || res.status === 302 || res.status === 307) {
+		throw new Error('caleta_api_redirect');
+	}
 
 	if (res.status === 401) {
 		return { authenticated: false, canUseTutor: false, reason: 'login_required' };
 	}
 
-	if (!res.ok) {
+	const contentType = res.headers.get('content-type') ?? '';
+	if (!res.ok || !contentType.includes('application/json')) {
 		throw new Error(`Tutor access: ${res.status}`);
 	}
 

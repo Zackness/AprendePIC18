@@ -1,0 +1,283 @@
+---
+import Figure from './Figure.astro';
+import LabDesignPanel from './LabDesignPanel.astro';
+import { getLabGuide } from '../data/lab-guides';
+
+interface Props {
+	practiceSlug: string;
+	locale?: 'es' | 'en';
+}
+
+const { practiceSlug, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const guide = getLabGuide(practiceSlug);
+
+if (!guide) {
+	throw new Error(`Lab design challenge not found: ${practiceSlug}`);
+}
+
+const { design } = guide;
+const pseudoPlaceholder = isEn ? design.pseudoPlaceholderEn : design.pseudoPlaceholderEs;
+const pseudoHint = isEn ? design.pseudoHintEn : design.pseudoHintEs;
+const flowPlaceholder = isEn ? design.flowPlaceholderEn : design.flowPlaceholderEs;
+const flowHints = isEn ? design.flowHintsEn : design.flowHintsEs;
+---
+
+<section
+	class="lab-design-challenge"
+	data-lab-design-challenge
+	data-practice-slug={practiceSlug}
+	data-locale={locale}
+	aria-labelledby="lab-design-challenge-title"
+>
+	<header class="lab-design-challenge__header">
+		<h2 class="lab-design-challenge__title" id="lab-design-challenge-title">
+			{isEn ? 'Design before coding' : 'Diseño antes del código'}
+		</h2>
+		<p class="lab-design-challenge__intro">
+			{
+				isEn
+					? 'The lab sheet asks for pseudocode and a flowchart before the .ASM. Write yours first, then unlock the reference guide.'
+					: 'La guía oficial pide pseudocódigo y diagrama de flujo antes del .ASM. Escribe los tuyos primero; después desbloqueas la guía de referencia.'
+			}
+		</p>
+		<ol class="lab-design-challenge__steps" data-design-step-indicator>
+			<li class="lab-design-challenge__step lab-design-challenge__step--active" data-step="1">
+				{isEn ? '1. Pseudocode' : '1. Pseudocódigo'}
+			</li>
+			<li class="lab-design-challenge__step" data-step="2">
+				{isEn ? '2. Flowchart' : '2. Diagrama de flujo'}
+			</li>
+			<li class="lab-design-challenge__step" data-step="3">
+				{isEn ? '3. Reference' : '3. Guía de referencia'}
+			</li>
+		</ol>
+	</header>
+
+	<!-- Paso 1 -->
+	<div class="lab-design-challenge__panel" data-design-panel="1">
+		<h3 class="lab-design-challenge__panel-title">
+			{isEn ? 'Write your pseudocode' : 'Escribe tu pseudocódigo'}
+		</h3>
+		<p class="lab-design-challenge__hint">{pseudoHint}</p>
+		<textarea
+			class="lab-design-challenge__textarea"
+			data-design-pseudo
+			rows="14"
+			placeholder={pseudoPlaceholder}
+			spellcheck="false"></textarea>
+		<p class="lab-design-challenge__counter" data-pseudo-counter>
+			{isEn ? '0 characters (minimum 80)' : '0 caracteres (mínimo 80)'}
+		</p>
+		<button type="button" class="lab-design-challenge__btn" data-design-pseudo-done disabled>
+			{isEn ? 'I finished my pseudocode →' : 'Terminé mi pseudocódigo →'}
+		</button>
+	</div>
+
+	<!-- Paso 2 -->
+	<div class="lab-design-challenge__panel" data-design-panel="2" hidden>
+		<h3 class="lab-design-challenge__panel-title">
+			{isEn ? 'Describe your flowchart' : 'Describe tu diagrama de flujo'}
+		</h3>
+		<p class="lab-design-challenge__hint">
+			{
+				isEn
+					? 'On paper or here: list each symbol in order. Your report needs ovals, rectangles, diamonds and the main loop.'
+					: 'En papel o aquí: lista cada símbolo en orden. Tu informe necesita óvalos, rectángulos, rombos y el bucle principal.'
+			}
+		</p>
+		<ul class="lab-design-challenge__checklist">
+			{
+				flowHints.map((hint) => (
+					<li>
+						<label class="lab-design-challenge__check">
+							<input type="checkbox" data-flow-check />
+							<span>{hint}</span>
+						</label>
+					</li>
+				))
+			}
+		</ul>
+		<textarea
+			class="lab-design-challenge__textarea"
+			data-design-flow
+			rows="10"
+			placeholder={flowPlaceholder}
+			spellcheck="false"></textarea>
+		<p class="lab-design-challenge__counter" data-flow-counter>
+			{isEn ? '0 characters (minimum 60)' : '0 caracteres (mínimo 60)'}
+		</p>
+		<div class="lab-design-challenge__panel-actions">
+			<button type="button" class="lab-design-challenge__btn lab-design-challenge__btn--ghost" data-design-back="1">
+				{isEn ? '← Back' : '← Volver'}
+			</button>
+			<button type="button" class="lab-design-challenge__btn" data-design-flow-done disabled>
+				{isEn ? 'Unlock reference guide →' : 'Desbloquear guía de referencia →'}
+			</button>
+		</div>
+	</div>
+
+	<!-- Paso 3 -->
+	<div class="lab-design-challenge__panel" data-design-panel="3" hidden>
+		<div class="lab-design-challenge__unlock-banner" data-design-unlock-banner>
+			{
+				isEn
+					? 'Reference unlocked. Compare with your drafts above — do not copy verbatim into your report.'
+					: 'Guía desbloqueada. Compara con tus borradores de arriba; no copies textualmente al informe.'
+			}
+		</div>
+		<div class="lab-design-challenge__draft-review">
+			<details class="lab-design-challenge__draft">
+				<summary>{isEn ? 'My pseudocode draft' : 'Mi borrador de pseudocódigo'}</summary>
+				<pre class="lab-design-challenge__draft-text" data-design-pseudo-review></pre>
+			</details>
+			<details class="lab-design-challenge__draft">
+				<summary>{isEn ? 'My flowchart draft' : 'Mi borrador de diagrama de flujo'}</summary>
+				<pre class="lab-design-challenge__draft-text" data-design-flow-review></pre>
+			</details>
+		</div>
+		<LabDesignPanel practiceSlug={practiceSlug} locale={locale} referenceOnly />
+		<button type="button" class="lab-design-challenge__btn lab-design-challenge__btn--ghost" data-design-back="2">
+			{isEn ? '← Review flowchart step' : '← Revisar paso del diagrama'}
+		</button>
+	</div>
+</section>
+
+<script>
+	import {
+		labKey,
+		loadText,
+		saveText,
+		loadBool,
+		saveBool,
+		MIN_PSEUDO_CHARS,
+		MIN_FLOW_CHARS,
+	} from '../scripts/lab-challenge';
+
+	function initLabDesignChallenges() {
+		document.querySelectorAll('[data-lab-design-challenge]').forEach((root) => {
+			if (root.getAttribute('data-design-init') === '1') return;
+			root.setAttribute('data-design-init', '1');
+
+			const slug = root.getAttribute('data-practice-slug') || '';
+			const isEn = root.getAttribute('data-locale') === 'en';
+			const pseudoKey = labKey(slug, 'pseudo');
+			const flowKey = labKey(slug, 'flow');
+			const pseudoDoneKey = labKey(slug, 'pseudo-done');
+			const flowDoneKey = labKey(slug, 'flow-done');
+
+			const pseudoEl = root.querySelector('[data-design-pseudo]');
+			const flowEl = root.querySelector('[data-design-flow]');
+			const pseudoCounter = root.querySelector('[data-pseudo-counter]');
+			const flowCounter = root.querySelector('[data-flow-counter]');
+			const pseudoDoneBtn = root.querySelector('[data-design-pseudo-done]');
+			const flowDoneBtn = root.querySelector('[data-design-flow-done]');
+			const pseudoReview = root.querySelector('[data-design-pseudo-review]');
+			const flowReview = root.querySelector('[data-design-flow-review]');
+			const flowChecks = root.querySelectorAll('[data-flow-check]');
+			const panels = root.querySelectorAll('[data-design-panel]');
+			const stepIndicators = root.querySelectorAll('[data-design-step-indicator] [data-step]');
+
+			function setStep(n: number) {
+				panels.forEach((p) => {
+					const panel = p as HTMLElement;
+					panel.hidden = panel.getAttribute('data-design-panel') !== String(n);
+				});
+				stepIndicators.forEach((s) => {
+					const el = s as HTMLElement;
+					el.classList.toggle('lab-design-challenge__step--active', el.getAttribute('data-step') === String(n));
+					el.classList.toggle(
+						'lab-design-challenge__step--done',
+						Number(el.getAttribute('data-step')) < n,
+					);
+				});
+			}
+
+			function updatePseudo() {
+				if (!(pseudoEl instanceof HTMLTextAreaElement)) return;
+				const len = pseudoEl.value.trim().length;
+				if (pseudoCounter) {
+					pseudoCounter.textContent = isEn
+						? `${len} characters (minimum ${MIN_PSEUDO_CHARS})`
+						: `${len} caracteres (mínimo ${MIN_PSEUDO_CHARS})`;
+				}
+				if (pseudoDoneBtn instanceof HTMLButtonElement) {
+					pseudoDoneBtn.disabled = len < MIN_PSEUDO_CHARS;
+				}
+				saveText(pseudoKey, pseudoEl.value);
+			}
+
+			function allFlowChecks(): boolean {
+				return Array.from(flowChecks).every((c) => c instanceof HTMLInputElement && c.checked);
+			}
+
+			function updateFlow() {
+				if (!(flowEl instanceof HTMLTextAreaElement)) return;
+				const len = flowEl.value.trim().length;
+				if (flowCounter) {
+					flowCounter.textContent = isEn
+						? `${len} characters (minimum ${MIN_FLOW_CHARS})`
+						: `${len} caracteres (mínimo ${MIN_FLOW_CHARS})`;
+				}
+				if (flowDoneBtn instanceof HTMLButtonElement) {
+					flowDoneBtn.disabled = len < MIN_FLOW_CHARS || !allFlowChecks();
+				}
+				saveText(flowKey, flowEl.value);
+			}
+
+			if (pseudoEl instanceof HTMLTextAreaElement) {
+				pseudoEl.value = loadText(pseudoKey);
+				pseudoEl.addEventListener('input', updatePseudo);
+				updatePseudo();
+			}
+
+			if (flowEl instanceof HTMLTextAreaElement) {
+				flowEl.value = loadText(flowKey);
+				flowEl.addEventListener('input', updateFlow);
+				updateFlow();
+			}
+
+			flowChecks.forEach((c) => c.addEventListener('change', updateFlow));
+
+			pseudoDoneBtn?.addEventListener('click', () => {
+				saveBool(pseudoDoneKey, true);
+				setStep(2);
+			});
+
+			flowDoneBtn?.addEventListener('click', () => {
+				saveBool(flowDoneKey, true);
+				if (pseudoReview && pseudoEl instanceof HTMLTextAreaElement) {
+					pseudoReview.textContent = pseudoEl.value || '(vacío)';
+				}
+				if (flowReview && flowEl instanceof HTMLTextAreaElement) {
+					flowReview.textContent = flowEl.value || '(vacío)';
+				}
+				setStep(3);
+			});
+
+			root.querySelectorAll('[data-design-back]').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const step = btn.getAttribute('data-design-back');
+					if (step) setStep(Number(step));
+				});
+			});
+
+			if (loadBool(flowDoneKey)) {
+				if (pseudoReview && pseudoEl instanceof HTMLTextAreaElement) {
+					pseudoReview.textContent = pseudoEl.value;
+				}
+				if (flowReview && flowEl instanceof HTMLTextAreaElement) {
+					flowReview.textContent = flowEl.value;
+				}
+				setStep(3);
+			} else if (loadBool(pseudoDoneKey)) {
+				setStep(2);
+			} else {
+				setStep(1);
+			}
+		});
+	}
+
+	initLabDesignChallenges();
+	document.addEventListener('astro:page-load', initLabDesignChallenges);
+</script>

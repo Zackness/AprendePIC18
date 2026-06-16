@@ -5,9 +5,11 @@ import { getLabGuide } from '../data/lab-guides';
 interface Props {
 	practiceSlug: string;
 	locale?: 'es' | 'en';
+	/** Solo el bloque de referencia (sin título de sección). */
+	referenceOnly?: boolean;
 }
 
-const { practiceSlug, locale = 'es' } = Astro.props;
+const { practiceSlug, locale = 'es', referenceOnly = false } = Astro.props;
 const isEn = locale === 'en';
 const guide = getLabGuide(practiceSlug);
 
@@ -19,34 +21,43 @@ const { design } = guide;
 const pseudo = isEn ? design.pseudocodeEn : design.pseudocodeEs;
 ---
 
-<section class="lab-design" aria-labelledby="lab-design-title">
-	<h2 class="lab-design__title" id="lab-design-title">
-		{isEn ? 'Design before coding' : 'Diseno antes del codigo'}
-	</h2>
-	<p class="lab-design__intro">
-		{
-			isEn
-				? 'The official lab asks for pseudocode and a flowchart before the .ASM. Use these as a reference model for your report.'
-				: 'La practica oficial pide pseudocodigo y diagrama de flujo antes del .ASM. Usa estos modelos de referencia para tu informe.'
-		}
-	</p>
+<section
+	class:list={['lab-design', referenceOnly && 'lab-design--reference']}
+	aria-labelledby={referenceOnly ? undefined : 'lab-design-title'}
+>
+	{
+		!referenceOnly && (
+			<>
+				<h2 class="lab-design__title" id="lab-design-title">
+					{isEn ? 'Reference guide' : 'Guía de referencia'}
+				</h2>
+				<p class="lab-design__intro">
+					{
+						isEn
+							? 'Compare with your draft. Adapt the wording for your UNEXPO report.'
+							: 'Compara con tu borrador. Adapta la redacción para tu informe UNEXPO.'
+					}
+				</p>
+			</>
+		)
+	}
 
-	<details class="lab-design__block" open>
+	<details class="lab-design__block">
 		<summary class="lab-design__summary">
-			<span class="lab-design__label">{isEn ? 'Pseudocode' : 'Pseudocodigo'}</span>
+			<span class="lab-design__label">{isEn ? 'Reference pseudocode' : 'Pseudocódigo de referencia'}</span>
 		</summary>
 		<pre class="lab-design__code"><code>{pseudo}</code></pre>
 	</details>
 
-	<details class="lab-design__block" open>
+	<details class="lab-design__block">
 		<summary class="lab-design__summary">
-			<span class="lab-design__label">{isEn ? 'Flowchart' : 'Diagrama de flujo'}</span>
+			<span class="lab-design__label">{isEn ? 'Reference flowchart' : 'Diagrama de flujo de referencia'}</span>
 		</summary>
 		<Figure
 			src={design.flowchartSrc}
 			alt={isEn ? design.flowchartAltEn : design.flowchartAltEs}
 			caption={isEn ? design.flowchartCaptionEn : design.flowchartCaptionEs}
-			credit="Practica 1 — UNEXPO · AprendePIC18"
+			credit="Práctica 1 — UNEXPO · AprendePIC18"
 		/>
 	</details>
 </section>

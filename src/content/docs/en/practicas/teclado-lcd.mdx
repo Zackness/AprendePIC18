@@ -4,13 +4,14 @@ description: 16x2 LCD HD44780 and 4x4 matrix keyboard with RB4-RB7 interrupts.
 ---
 
 import LessonProgress from '../../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../../components/PracticeBox.astro';
 import Figure from '../../../../components/Figure.astro';
+import LabTextPanel from '../../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../../components/TieredExamPanel.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
 <LessonProgress slug="practicas/teclado-lcd" locale="en" />
-
-
 
 <PracticeBox title="Lab Practice 2" level="UNEXPO">
 Control a 16x2 LCD and 4x4 matrix keyboard. Display values typed on the keyboard.
@@ -22,6 +23,10 @@ Control a 16x2 LCD and 4x4 matrix keyboard. Display values typed on the keyboard
 	caption="LCD in 4-bit mode (RD2-RD7), 4x4 keyboard on RB0-RB7 with column pull-ups."
 	credit="Practice 2 — Keyboard and LCD · UNEXPO"
 />
+
+<LabTextPanel practiceSlug="practicas/teclado-lcd" kind="pre" locale="en" />
+
+<LabDesignChallenge practiceSlug="practicas/teclado-lcd" locale="en" />
 
 ## Connections
 
@@ -39,8 +44,15 @@ Control a 16x2 LCD and 4x4 matrix keyboard. Display values typed on the keyboard
 - LCD.INC library (4-bit bus) per Topic 7.1
 - Pseudocode and flowchart in report
 
-## Pre-lab
+## Reference source code
 
-Research HD44780, matrix keyboard, RB4-RB7 interrupt and MPASM macros.
+<AsmDownload
+	downloadSlug="practica-2-teclado-lcd"
+	filename="practica-2-teclado-lcd.asm"
+	note="Requires an active CALETAS subscription. Includes 4-bit LCD routines and keyboard scan with RB4–RB7 interrupt. Fill in the header before submitting."
+	locale="en"
+/>
 
-<TopicQuiz slug="practicas/teclado-lcd" locale="en" />
+<LabTextPanel practiceSlug="practicas/teclado-lcd" kind="post" locale="en" />
+
+<TieredExamPanel practiceSlug="practicas/teclado-lcd" locale="en" />

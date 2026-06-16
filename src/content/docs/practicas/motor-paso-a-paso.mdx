@@ -1,38 +1,53 @@
 ---
-title: Practica 6 - Motor paso a paso
+title: Práctica 6 - Motor paso a paso
 description: Control de motor paso a paso con secuencia de pasos y PIC18F4550.
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import AIExplain from '../../../components/AIExplain.astro';
 import Figure from '../../../components/Figure.astro';
+import LabTextPanel from '../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../components/TieredExamPanel.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
 <LessonProgress slug="practicas/motor-paso-a-paso" />
 
-
-
-<PracticeBox title="Practica 6 de Laboratorio" level="UNEXPO">
-Controlar un motor paso a paso mediante secuencia de energizacion de bobinas. Puede combinarse con PWM o salidas digitales temporizadas.
+<PracticeBox title="Práctica 6 de Laboratorio" level="UNEXPO">
+Controlar un motor paso a paso mediante secuencia de energización de bobinas. Puede combinarse con PWM o salidas digitales temporizadas.
 </PracticeBox>
 
 <Figure
 	src="/images/pdf/motor-paso-a-paso/page-2.png"
-	alt="Diagrama electronico de la Practica 6 con motor paso a paso"
-	caption="Diagrama: PIC18F4550, LCD, modulo de motor paso a paso y pulsadores de control."
-	credit="Practica 6 — Motor paso a paso · UNEXPO"
+	alt="Diagrama electrónico de la Práctica 6 con motor paso a paso"
+	caption="Diagrama: PIC18F4550, LCD, módulo de motor paso a paso y pulsadores de control."
+	credit="Práctica 6 — Motor paso a paso · UNEXPO"
 />
+
+<LabTextPanel practiceSlug="practicas/motor-paso-a-paso" kind="pre" />
+
+<LabDesignChallenge practiceSlug="practicas/motor-paso-a-paso" />
 
 <AIExplain title="Secuencia de pasos">
 Motores unipolares/bipolares requieren patrones en fase (full step o half step). Usa timers para controlar velocidad entre pasos.
 </AIExplain>
 
-## Elementos tipicos
+## Elementos típicos
 
 - Driver (ULN2003 o similar)
 - 4 salidas del PIC a las bobinas
-- Botones para direccion y velocidad
+- Botones para dirección y velocidad
 - Timer para retardo entre pasos
 
-<TopicQuiz slug="practicas/motor-paso-a-paso" />
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-6-motor-paso-a-paso"
+	filename="practica-6-motor-paso-a-paso.asm"
+	note="Requiere suscripción activa en CALETAS. Secuencia full-step en RC0–RC3 vía ULN2003. RA0 invierte el sentido de giro."
+/>
+
+<LabTextPanel practiceSlug="practicas/motor-paso-a-paso" kind="post" />
+
+<TieredExamPanel practiceSlug="practicas/motor-paso-a-paso" />

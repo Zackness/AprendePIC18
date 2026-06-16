@@ -4,13 +4,15 @@ description: Stepper motor control with step sequences.
 ---
 
 import LessonProgress from '../../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../../components/PracticeBox.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
 import Figure from '../../../../components/Figure.astro';
+import LabTextPanel from '../../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../../components/TieredExamPanel.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
 <LessonProgress slug="practicas/motor-paso-a-paso" locale="en" />
-
-
 
 <PracticeBox title="Practice 6 — Lab" level="UNEXPO">
 Control a stepper motor with coil energization sequences. May use PWM or timed digital outputs.
@@ -23,6 +25,30 @@ Control a stepper motor with coil energization sequences. May use PWM or timed d
 	credit="Practice 6 — Stepper motor · UNEXPO"
 />
 
-Drive motor phases through ULN2003 or similar. Use timers for step delay.
+<LabTextPanel practiceSlug="practicas/motor-paso-a-paso" kind="pre" locale="en" />
 
-<TopicQuiz slug="practicas/motor-paso-a-paso" locale="en" />
+<LabDesignChallenge practiceSlug="practicas/motor-paso-a-paso" locale="en" />
+
+<AIExplain title="Step sequence">
+Unipolar/bipolar motors need phase patterns (full step or half step). Use timers to control speed between steps.
+</AIExplain>
+
+## Typical elements
+
+- Driver (ULN2003 or similar)
+- 4 PIC outputs to coils
+- Buttons for direction and speed
+- Timer for step delay
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-6-motor-paso-a-paso"
+	filename="practica-6-motor-paso-a-paso.asm"
+	note="Requires an active CALETAS subscription. Full-step sequence on RC0–RC3 via ULN2003. RA0 reverses rotation."
+	locale="en"
+/>
+
+<LabTextPanel practiceSlug="practicas/motor-paso-a-paso" kind="post" locale="en" />
+
+<TieredExamPanel practiceSlug="practicas/motor-paso-a-paso" locale="en" />

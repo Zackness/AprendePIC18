@@ -22,11 +22,21 @@ export async function fetchDownloadAccess(): Promise<DownloadAccess> {
 
 	const token = getToken();
 	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/downloads/access`, {
-		headers: { Authorization: `Bearer ${token}` },
+		headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+		redirect: 'manual',
 	});
 
-	if (!res.ok) {
-		return { authenticated: true, canDownload: false, reason: 'no_subscription' };
+	if (res.type === 'opaqueredirect' || res.status === 301 || res.status === 302 || res.status === 307) {
+		throw new Error('caleta_api_redirect');
+	}
+
+	if (res.status === 401) {
+		return { authenticated: false, canDownload: false, reason: 'login_required' };
+	}
+
+	const contentType = res.headers.get('content-type') ?? '';
+	if (!res.ok || !contentType.includes('application/json')) {
+		throw new Error(`download_access: ${res.status}`);
 	}
 
 	const data = (await res.json()) as DownloadAccess;
@@ -42,7 +52,12 @@ export async function downloadLabSource(slug: string, filename: string): Promise
 
 	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/downloads/${slug}`, {
 		headers: { Authorization: `Bearer ${token}` },
+		redirect: 'manual',
 	});
+
+	if (res.type === 'opaqueredirect' || res.status === 301 || res.status === 302 || res.status === 307) {
+		throw new Error('caleta_api_redirect');
+	}
 
 	if (res.status === 401) {
 		window.location.href = buildLoginUrl();

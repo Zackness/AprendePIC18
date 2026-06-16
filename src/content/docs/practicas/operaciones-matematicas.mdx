@@ -1,6 +1,6 @@
 ---
-title: Practica 1 - Operaciones matematicas
-description: Sistema minimo, puertos y operaciones ALU segun Practica 1 UNEXPO del curso de Microcontroladores UNEXPO (Ing. Mecatronica).
+title: Práctica 1 - Operaciones matemáticas
+description: Sistema mínimo, puertos y operaciones ALU según Práctica 1 UNEXPO del curso de Microcontroladores UNEXPO (Ing. Mecatrónica).
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
@@ -9,68 +9,68 @@ import AIExplain from '../../../components/AIExplain.astro';
 import Figure from '../../../components/Figure.astro';
 import AsmDownload from '../../../components/AsmDownload.astro';
 import LabTextPanel from '../../../components/LabTextPanel.astro';
-import LabDesignPanel from '../../../components/LabDesignPanel.astro';
+import LabDesignChallenge from '../../../components/LabDesignChallenge.astro';
 import TieredExamPanel from '../../../components/TieredExamPanel.astro';
 
 <LessonProgress slug="practicas/operaciones-matematicas" />
 
-<PracticeBox title="Practica 1 de Laboratorio" level="UNEXPO">
-Sistema minimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en puerto C y E (LEDs). Pulsador RA0 cambia operacion.
+<PracticeBox title="Práctica 1 de Laboratorio" level="UNEXPO">
+Sistema mínimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en puerto C y E (LEDs). Pulsador RA0 cambia la operación.
 </PracticeBox>
 
 <Figure
 	src="/images/pdf/practica-1/page-2.png"
-	alt="Diagrama electronico de la Practica 1 con PIC18F4550, switches y LEDs"
-	caption="Diagrama electronico: operandos en RB0–RB7 y RD0–RD7, resultado en LEDs de RC/RE, pulsador en RA0."
-	credit="Practica 1 — Operaciones matematicas · UNEXPO"
+	alt="Diagrama electrónico de la Práctica 1 con PIC18F4550, switches y LEDs"
+	caption="Diagrama electrónico: operandos en RB0–RB7 y RD0–RD7, resultado en LEDs de RC/RE, pulsador en RA0."
+	credit="Práctica 1 — Operaciones matemáticas · UNEXPO"
 />
 
 <LabTextPanel practiceSlug="practicas/operaciones-matematicas" kind="pre" />
 
-<LabDesignPanel practiceSlug="practicas/operaciones-matematicas" />
+<LabDesignChallenge practiceSlug="practicas/operaciones-matematicas" />
 
 ## Mapa de hardware
 
-| Pin / puerto | Funcion en el programa |
+| Pin / puerto | Función en el programa |
 | --- | --- |
 | `PORTB` | Operando A (DIP switch de 8 bits) |
 | `PORTD` | Operando B (DIP switch de 8 bits) |
 | `LATC` | Resultado bits 0–7 (LEDs) |
-| `LATE` | Resultado bits 8–15 (LEDs; multiplicacion) |
-| `RA0` | Pulsador NA — cambia la operacion activa |
+| `LATE` | Resultado bits 8–15 (LEDs; multiplicación) |
+| `RA0` | Pulsador NA — cambia la operación activa |
 
 ## Operaciones incluidas
 
-Pulsa **RA0** para avanzar entre modos (vuelve a 0 despues del ultimo):
+Pulsa **RA0** para avanzar entre modos (vuelve a 0 después del último):
 
-| Modo | Operacion | Instrucciones clave |
+| Modo | Operación | Instrucciones clave |
 | --- | --- | --- |
 | 0 | Suma | `ADDWF` |
 | 1 | Resta | `SUBWF` |
-| 2 | Multiplicacion | `MULWF` → `PRODH:PRODL` |
-| 3 | Division (software) | Restas repetidas |
-| 4 | OR logico | `IORWF` |
-| 5 | AND logico | `ANDWF` |
-| 6 | XOR logico | `XORWF` |
+| 2 | Multiplicación | `MULWF` → `PRODH:PRODL` |
+| 3 | División (software) | Restas repetidas |
+| 4 | OR lógico | `IORWF` |
+| 5 | AND lógico | `ANDWF` |
+| 6 | XOR lógico | `XORWF` |
 | 7 | Complemento | `COMF` (operando A) |
 | 8 | Rotar izq. sin acarreo | `RLNCF` (operando A) |
 
-<AIExplain title="Division por software">
-No hay instruccion `DIV` nativa en PIC18. La rutina `division_software` resta el divisor repetidamente hasta que el dividendo es menor; el cociente cuenta cuantas restas caben.
+<AIExplain title="División por software">
+No hay instrucción `DIV` nativa en PIC18. La rutina `division_software` resta el divisor repetidamente hasta que el dividendo es menor; el cociente cuenta cuántas restas caben.
 </AIExplain>
 
-## Codigo fuente de referencia
+## Código fuente de referencia
 
 <AsmDownload
 	downloadSlug="practica-1-operaciones"
 	filename="practica-1-operaciones.asm"
-	note="Requiere suscripcion activa en CALETAS. Completa el membrete (alumno, seccion, fecha) antes de entregar. Compila con MPASM y carga el .hex en Proteus o PICkit."
+	note="Requiere suscripción activa en CALETAS. Completa el membrete (alumno, sección, fecha) antes de entregar. Compila con MPASM y carga el .hex en Proteus o PICkit."
 />
 
 ## Proteus / MPLAB
 
 1. Crear proyecto MPASM para **PIC18F4550** (cristal HS 20 MHz).
-2. Importar el diagrama de la practica (pagina 2 del PDF).
+2. Importar el diagrama de la práctica (página 2 del PDF).
 3. Switches en `RB0–RB7` y `RD0–RD7` con pull-up 10 kΩ.
 4. LEDs en `RC0–RC7` y `RE0–RE7` con resistencia 220–330 Ω.
 5. Pulsador en `RA0` a tierra con pull-up.

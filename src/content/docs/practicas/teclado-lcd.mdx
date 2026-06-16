@@ -1,27 +1,32 @@
 ---
-title: Practica 2 - Teclado y LCD
+title: Práctica 2 - Teclado y LCD
 description: LCD 16x2 HD44780 y teclado matricial 4x4 con interrupciones RB4-RB7.
 ---
 
 import LessonProgress from '../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../components/TopicQuiz.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import Figure from '../../../components/Figure.astro';
+import LabTextPanel from '../../../components/LabTextPanel.astro';
+import LabDesignChallenge from '../../../components/LabDesignChallenge.astro';
+import TieredExamPanel from '../../../components/TieredExamPanel.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
 <LessonProgress slug="practicas/teclado-lcd" />
 
-
-
-<PracticeBox title="Practica 2 de Laboratorio" level="UNEXPO">
+<PracticeBox title="Práctica 2 de Laboratorio" level="UNEXPO">
 Gobernar LCD 16x2 y teclado matricial 4x4. Mostrar en pantalla los valores introducidos desde el teclado.
 </PracticeBox>
 
 <Figure
 	src="/images/pdf/practica-2/page-2.png"
-	alt="Diagrama electronico de la Practica 2 con PIC18F4550, LCD y teclado matricial"
+	alt="Diagrama electrónico de la Práctica 2 con PIC18F4550, LCD y teclado matricial"
 	caption="LCD en bus 4 bit (RD2-RD7), teclado 4x4 en RB0-RB7 con resistencias pull-up en columnas."
-	credit="Practica 2 — Teclado y LCD · UNEXPO"
+	credit="Práctica 2 — Teclado y LCD · UNEXPO"
 />
+
+<LabTextPanel practiceSlug="practicas/teclado-lcd" kind="pre" />
+
+<LabDesignChallenge practiceSlug="practicas/teclado-lcd" />
 
 ## Conexiones
 
@@ -36,11 +41,17 @@ Gobernar LCD 16x2 y teclado matricial 4x4. Mostrar en pantalla los valores intro
 
 - Ensamblador MPASM, modular y comentado
 - Interrupciones RB4-RB7 para teclado
-- Libreria LCD.INC (bus 4 bit) segun Tema 7.1
-- Pseudocodigo y diagrama de flujo en el informe
+- Librería LCD.INC (bus 4 bit) según Tema 7.1
+- Pseudocódigo y diagrama de flujo en el informe
 
-## Pre-laboratorio
+## Código fuente de referencia
 
-Investigar HD44780, teclado matricial, interrupcion RB4-RB7 y macros en MPASM.
+<AsmDownload
+	downloadSlug="practica-2-teclado-lcd"
+	filename="practica-2-teclado-lcd.asm"
+	note="Requiere suscripción activa en CALETAS. Incluye rutinas LCD 4 bit y escaneo de teclado con interrupción RB4–RB7. Completa el membrete antes de entregar."
+/>
 
-<TopicQuiz slug="practicas/teclado-lcd" />
+<LabTextPanel practiceSlug="practicas/teclado-lcd" kind="post" />
+
+<TieredExamPanel practiceSlug="practicas/teclado-lcd" />
