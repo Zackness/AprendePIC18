@@ -1,17 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 580" role="img" aria-label="Diagrama de flujo Practica 3 frecuencimetro">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 580" role="img" aria-label="Diagrama de flujo PrÃ¡ctica 3 frecuencÃ­metro">
   <rect width="400" height="580" fill="#e2e8f0"/>
-  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs>
-  <text x="200" y="24" text-anchor="middle" font-size="13" fill="#14213d">Práctica 3  Frecuencímetro</text>
-  <ellipse cx="200" cy="56" rx="72" ry="24" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/><text x="200" y="60" text-anchor="middle" font-size="12">INICIO</text>
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <text x="200" y="24" text-anchor="middle" font-size="13" fill="#14213d">PrÃ¡ctica 3 â€” FrecuencÃ­metro</text>
+  <ellipse cx="200" cy="56" rx="72" ry="24" fill="#22d3ee" stroke="#0e7490" stroke-width="2"/>
+  <text x="200" y="60" text-anchor="middle" font-size="12">INICIO</text>
+
   <line x1="200" y1="80" x2="200" y2="108" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="60" y="108" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="134" text-anchor="middle" font-size="12">Init timers + display</text>
+  <rect x="60" y="108" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/>
+  <text x="200" y="134" text-anchor="middle" font-size="12">Init timers + display</text>
+
   <line x1="200" y1="152" x2="200" y2="180" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="60" y="180" width="280" height="44" rx="6" fill="#cbd5e1" stroke="#334155" stroke-width="2"/><text x="200" y="206" text-anchor="middle" font-size="12">Contar pulsos (Timer)</text>
+  <rect x="60" y="180" width="280" height="44" rx="6" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+  <text x="200" y="206" text-anchor="middle" font-size="12">Contar pulsos (Timer)</text>
+
   <line x1="200" y1="224" x2="200" y2="252" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
-  <polygon points="200,252 290,292 200,332 110,292" fill="#fca311" stroke="#b45309" stroke-width="2"/><text x="200" y="296" text-anchor="middle" font-size="11">¿Ventana lista?</text>
+  <polygon points="200,252 290,292 200,332 110,292" fill="#fca311" stroke="#b45309" stroke-width="2"/>
+  <text x="200" y="296" text-anchor="middle" font-size="11">Â¿Ventana lista?</text>
+
   <line x1="200" y1="332" x2="200" y2="360" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="60" y="360" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="386" text-anchor="middle" font-size="12">f = conteo / T</text>
+  <rect x="60" y="360" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/>
+  <text x="200" y="386" text-anchor="middle" font-size="12">f = conteo / T</text>
+
   <line x1="200" y1="404" x2="200" y2="432" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
-  <rect x="60" y="432" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/><text x="200" y="458" text-anchor="middle" font-size="12">Multiplexar dígitos (ISR)</text>
+  <rect x="60" y="432" width="280" height="44" rx="6" fill="#f1f5f9" stroke="#14213d" stroke-width="2"/>
+  <text x="200" y="458" text-anchor="middle" font-size="12">Multiplexar dÃ­gitos (ISR)</text>
+
   <path d="M 200 476 L 330 476 L 330 200 L 200 200" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arr)"/>
 </svg>
