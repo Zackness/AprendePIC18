@@ -88,81 +88,269 @@ A **1 s window** can use another timer or calibrated loop + interrupts.`,
 	},
 	design: {
 		pseudocodeEs: `INICIO
-    Configurar Timer0 contador (entrada frecuencia)
-    Configurar Timer1 interrupción refresco display
-    Inicializar 74LS48 y líneas de dígito
-    conteo ← 0, digito_activo ← 0
-REPITIR SIEMPRE
-    SI ventana_1s_cerrada ENTONCES
-        frec ← conteo
-        conteo ← 0
-        valor_BCD ← convertir(frec)
+
+Configurar el PIC18F4550.
+Configurar los pines analógicos como digitales.
+Configurar RA4/T0CKI como entrada de frecuencia.
+Configurar el puerto D como salida para el 74LS48 y los transistores de selección.
+
+Inicializar las variables:
+    FLAG_1S ← 0
+    CNT_50MS ← 20
+    CENTENAS ← 0
+    DECENAS ← 0
+    UNIDADES ← 0
+
+Configurar Timer0:
+    Modo contador externo.
+    Entrada por RA4/T0CKI.
+    Modo de 16 bits.
+    Sin prescaler.
+    Conteo por flanco ascendente.
+
+Limpiar TMR0H y TMR0L.
+Encender Timer0.
+
+Configurar Timer1:
+    Modo temporizador interno.
+    Prescaler 1:8.
+    Carga inicial para interrupciones cada 50 ms.
+
+Habilitar interrupción de Timer1.
+Habilitar interrupciones periféricas y globales.
+Encender Timer1.
+
+REPETIR SIEMPRE
+
+    Multiplexar los displays:
+        Mostrar centenas.
+        Esperar retardo corto.
+        Apagar displays.
+
+        Mostrar decenas.
+        Esperar retardo corto.
+        Apagar displays.
+
+        Mostrar unidades.
+        Esperar retardo corto.
+        Apagar displays.
+
+    SI FLAG_1S = 1 ENTONCES
+
+        FLAG_1S ← 0
+
+        Convertir el conteo capturado del Timer0 a BCD.
+
+        SI el conteo es mayor que 999 ENTONCES
+            CENTENAS ← 9
+            DECENAS ← 9
+            UNIDADES ← 9
+        SINO
+            Separar el conteo en centenas, decenas y unidades.
+        FIN SI
+
     FIN SI
-    mostrar_digito(valor_BCD[digito_activo])
-FIN REPITIR`,
+
+FIN REPETIR
+
+INTERRUPCIÓN TIMER1
+
+Guardar contexto del programa.
+
+SI la interrupción fue causada por Timer1 ENTONCES
+
+    Limpiar bandera de interrupción de Timer1.
+    Recargar Timer1 para generar nuevamente 50 ms.
+
+    CNT_50MS ← CNT_50MS - 1
+
+    SI CNT_50MS = 0 ENTONCES
+
+        CNT_50MS ← 20
+
+        Detener Timer0.
+        Leer TMR0L y TMR0H.
+        Guardar el conteo de pulsos medido.
+        Limpiar TMR0H y TMR0L.
+        Encender nuevamente Timer0.
+
+        FLAG_1S ← 1
+
+    FIN SI
+
+FIN SI
+
+Restaurar contexto del programa.
+Retornar de la interrupción.`,
 		pseudocodeEn: `START
-    Config Timer0 counter (frequency input)
-    Config Timer1 interrupt for display refresh
-    Init 74LS48 and digit select lines
-    count ← 0, active_digit ← 0
+
+Configure the PIC18F4550.
+Set analog pins as digital.
+Configure RA4/T0CKI as the frequency input.
+Configure PORTD as output for the 74LS48 and digit select transistors.
+
+Initialize variables:
+    FLAG_1S ← 0
+    CNT_50MS ← 20
+    HUNDREDS ← 0
+    TENS ← 0
+    UNITS ← 0
+
+Configure Timer0:
+    External counter mode.
+    Input on RA4/T0CKI.
+    16-bit mode.
+    No prescaler.
+    Count on rising edge.
+
+Clear TMR0H and TMR0L.
+Turn on Timer0.
+
+Configure Timer1:
+    Internal timer mode.
+    Prescaler 1:8.
+    Preload for 50 ms interrupts.
+
+Enable Timer1 interrupt.
+Enable peripheral and global interrupts.
+Turn on Timer1.
+
 REPEAT FOREVER
-    IF 1s_window_closed THEN
-        freq ← count
-        count ← 0
-        bcd_value ← convert(freq)
+
+    Multiplex displays:
+        Show hundreds.
+        Short delay.
+        Turn off displays.
+
+        Show tens.
+        Short delay.
+        Turn off displays.
+
+        Show units.
+        Short delay.
+        Turn off displays.
+
+    IF FLAG_1S = 1 THEN
+
+        FLAG_1S ← 0
+
+        Convert captured Timer0 count to BCD.
+
+        IF count > 999 THEN
+            HUNDREDS ← 9
+            TENS ← 9
+            UNITS ← 9
+        ELSE
+            Split count into hundreds, tens, and units.
+        END IF
+
     END IF
-    show_digit(bcd_value[active_digit])
-END REPEAT`,
+
+END REPEAT
+
+TIMER1 INTERRUPT
+
+Save context.
+
+IF the interrupt was caused by Timer1 THEN
+
+    Clear Timer1 interrupt flag.
+    Reload Timer1 for another 50 ms.
+
+    CNT_50MS ← CNT_50MS - 1
+
+    IF CNT_50MS = 0 THEN
+
+        CNT_50MS ← 20
+
+        Stop Timer0.
+        Read TMR0L and TMR0H.
+        Store the measured pulse count.
+        Clear TMR0H and TMR0L.
+        Start Timer0 again.
+
+        FLAG_1S ← 1
+
+    END IF
+
+END IF
+
+Restore context.
+Return from interrupt.`,
 		flowchartSrc: '/images/practicas/practica-3-flujo.svg',
 		flowchartAltEs: 'Diagrama de flujo Práctica 3 frecuencímetro',
 		flowchartAltEn: 'Practice 3 frequency meter flowchart',
 		flowchartCaptionEs: 'Medición por ventana de tiempo + multiplexado de dígitos en ISR.',
 		flowchartCaptionEn: 'Time-window measurement + digit multiplexing in ISR.',
 		pseudoPlaceholderEs: `INICIO
-    Init timers y display
+    Configurar Timer0 como contador externo (RA4/T0CKI)
+    Configurar Timer1 para interrupción cada 50 ms
+    CNT_50MS ← 20, FLAG_1S ← 0
 REPITIR
-    Contar pulsos en ventana T
-    Calcular f = conteo / T
-    Mostrar en displays multiplexados
-FIN REPITIR`,
+    Multiplexar centenas/decenas/unidades
+    Si FLAG_1S = 1 → convertir conteo a BCD y actualizar displays
+FIN REPETIR
+
+ISR Timer1:
+    CNT_50MS-- ; si llega a 0 → capturar Timer0 y activar FLAG_1S`,
 		pseudoPlaceholderEn: `START
-    Init timers and display
+    Set Timer0 as external counter (RA4/T0CKI)
+    Set Timer1 for 50 ms interrupts
+    CNT_50MS ← 20, FLAG_1S ← 0
 REPEAT
-    Count pulses in window T
-    Compute f = count / T
-    Show on multiplexed displays
-END REPEAT`,
+    Multiplex hundreds/tens/units
+    If FLAG_1S = 1 → BCD convert and update digits
+END REPEAT
+
+Timer1 ISR:
+    CNT_50MS-- ; if 0 → capture Timer0 and set FLAG_1S`,
 		pseudoHintEs:
-			'Incluye: timer contador, ventana de medición, conversión a BCD, multiplexado por dígito e ISR de refresco.',
+			'Incluye: Timer0 como contador, Timer1 como base de 50 ms, contador CNT_50MS (20×50 ms = 1 s), multiplexado y la ISR (guardar/restaurar contexto).',
 		pseudoHintEn:
-			'Include: counter timer, measurement window, BCD conversion, per-digit multiplexing and refresh ISR.',
-		flowPlaceholderEs: `1. INICIO
-2. Init hardware
-3. Abrir ventana / contar pulsos
-4. ¿Ventana lista? → calcular frecuencia
-5. Multiplexar dígitos (ISR)
-6. Bucle`,
-		flowPlaceholderEn: `1. START
-2. Init hardware
-3. Open window / count pulses
-4. Window done? → compute frequency
-5. Multiplex digits (ISR)
-6. Loop`,
+			'Include: Timer0 as counter, Timer1 50 ms tick, CNT_50MS (20×50 ms = 1 s), multiplexing and the ISR (save/restore context).',
+		flowPlaceholderEs: `DIAGRAMA 1 (principal)
+1. INICIO
+2. Configurar PIC + puertos
+3. Inicializar variables (FLAG_1S, CNT_50MS, dígitos)
+4. Configurar Timer0 (contador) + encender
+5. Configurar Timer1 (50 ms) + habilitar IRQ + encender
+6. Multiplexar displays
+7. ¿FLAG_1S = 1? → limpiar flag → convertir a BCD → ¿>999? → actualizar dígitos
+8. Volver a multiplexar
+
+DIAGRAMA 2 (ISR Timer1)
+1. Guardar contexto
+2. ¿TMR1IF? → limpiar flag + recargar TMR1 → CNT_50MS-- → ¿0? → capturar Timer0 y FLAG_1S=1
+3. Restaurar contexto → RETFIE`,
+		flowPlaceholderEn: `DIAGRAM 1 (main)
+1. START
+2. Configure PIC + ports
+3. Init variables (FLAG_1S, CNT_50MS, digits)
+4. Configure Timer0 (counter) + start
+5. Configure Timer1 (50 ms) + enable IRQ + start
+6. Multiplex displays
+7. FLAG_1S = 1? → clear flag → BCD convert → >999? → update digits
+8. Loop back to multiplex
+
+DIAGRAM 2 (Timer1 ISR)
+1. Save context
+2. TMR1IF? → clear flag + reload TMR1 → CNT_50MS-- → 0? → capture Timer0 and set FLAG_1S=1
+3. Restore context → RETFIE`,
 		flowHintsEs: [
-			'Timer contador (rectángulo)',
-			'Ventana de tiempo (rombo)',
-			'Cálculo f = N/T (rectángulo)',
-			'Conversión BCD (subrutina)',
-			'Multiplexado (ISR aparte)',
-			'Bucle principal',
+			'Timer0 como contador externo (RA4/T0CKI)',
+			'Timer1 como tick de 50 ms (CNT_50MS=20 → 1 s)',
+			'Multiplexado centenas/decenas/unidades',
+			'Decisión FLAG_1S en el bucle principal',
+			'ISR: guardar/restaurar contexto + captura Timer0',
+			'Saturación >999 → 999',
 		],
 		flowHintsEn: [
-			'Counter timer (rectangle)',
-			'Time window (diamond)',
-			'Compute f = N/T (rectangle)',
-			'BCD conversion (subroutine)',
-			'Multiplexing (ISR aside)',
-			'Main loop',
+			'Timer0 external counter (RA4/T0CKI)',
+			'Timer1 50 ms tick (CNT_50MS=20 → 1 s)',
+			'Multiplex hundreds/tens/units',
+			'FLAG_1S decision in main loop',
+			'ISR: save/restore context + capture Timer0',
+			'Saturate >999 → 999',
 		],
 	},
 };
