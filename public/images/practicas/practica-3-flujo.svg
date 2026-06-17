@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 980" role="img" aria-label="Diagrama de flujo Practica 3 - Frecuencimetro (principal + ISR Timer1)">
-  <rect width="520" height="980" fill="#e2e8f0"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 1040" role="img" aria-label="Diagrama de flujo Practica 3 - Frecuencimetro (principal + ISR Timer1)">
+  <rect width="520" height="1040" fill="#e2e8f0"/>
   <defs>
     <style>
       .title { font: 13px sans-serif; fill: #14213d; }
@@ -20,11 +20,11 @@
   <text x="260" y="26" text-anchor="middle" class="title">Practica 3 - Frecuencimetro - Programa principal + ISR Timer1</text>
 
   <!-- Lanes -->
-  <rect x="22" y="50" width="476" height="570" rx="10" class="lane"/>
+  <rect x="22" y="50" width="476" height="610" rx="10" class="lane"/>
   <text x="260" y="72" text-anchor="middle" class="small">DIAGRAMA 1: PROGRAMA PRINCIPAL</text>
 
-  <rect x="22" y="650" width="476" height="300" rx="10" class="lane"/>
-  <text x="260" y="672" text-anchor="middle" class="small">DIAGRAMA 2: INTERRUPCION TIMER1</text>
+  <rect x="22" y="700" width="476" height="320" rx="10" class="lane"/>
+  <text x="260" y="722" text-anchor="middle" class="small">DIAGRAMA 2: INTERRUPCION TIMER1</text>
 
   <!-- MAIN -->
   <ellipse cx="260" cy="106" rx="72" ry="24" class="start"/>
@@ -63,11 +63,11 @@
   <line x1="260" y1="618" x2="260" y2="640" class="arrow"/>
   <rect x="120" y="640" width="280" height="46" rx="6" class="io"/>
   <text x="260" y="668" text-anchor="middle" class="label">Multiplexar displays</text>
-  <text x="260" y="684" text-anchor="middle" class="small">Centenas ? Decenas ? Unidades</text>
+  <text x="260" y="684" text-anchor="middle" class="small">Centenas -> Decenas -> Unidades</text>
 
   <line x1="260" y1="694" x2="260" y2="716" class="arrow"/>
   <polygon points="260,716 360,766 260,816 160,766" class="dec"/>
-  <text x="260" y="770" text-anchor="middle" class="label">-FLAG_1S = 1?</text>
+  <text x="260" y="770" text-anchor="middle" class="label">FLAG_1S = 1?</text>
 
   <!-- NO path loops back -->
   <path d="M 160 766 L 70 766 L 70 663 L 120 663" class="arrow"/>
@@ -82,39 +82,38 @@
   <rect x="120" y="906" width="280" height="46" rx="6" class="proc"/>
   <text x="260" y="934" text-anchor="middle" class="label">Convertir conteo a BCD</text>
 
-  <!-- ISR SECTION -->
-  <ellipse cx="90" cy="720" rx="64" ry="18" class="start"/>
-  <text x="90" y="724" text-anchor="middle" class="small">INTERRUPCION TMR1</text>
+  <!-- ISR (moved down to avoid overlap with main decision) -->
+  <ellipse cx="90" cy="782" rx="64" ry="18" class="start"/>
+  <text x="90" y="786" text-anchor="middle" class="small">INTERRUPCION TMR1</text>
 
-  <line x1="90" y1="740" x2="90" y2="758" class="arrow"/>
-  <rect x="36" y="758" width="108" height="40" rx="6" class="proc"/>
-  <text x="90" y="783" text-anchor="middle" class="small">Guardar contexto</text>
+  <line x1="90" y1="800" x2="90" y2="818" class="arrow"/>
+  <rect x="36" y="818" width="108" height="40" rx="6" class="proc"/>
+  <text x="90" y="843" text-anchor="middle" class="small">Guardar contexto</text>
 
-  <line x1="90" y1="798" x2="90" y2="818" class="arrow"/>
-  <polygon points="90,818 144,846 90,874 36,846" class="dec"/>
-  <text x="90" y="850" text-anchor="middle" class="small">-TMR1IF?</text>
+  <line x1="90" y1="858" x2="90" y2="878" class="arrow"/>
+  <polygon points="90,878 144,906 90,934 36,906" class="dec"/>
+  <text x="90" y="910" text-anchor="middle" class="small">TMR1IF?</text>
 
-  <line x1="90" y1="874" x2="90" y2="896" class="arrow"/>
-  <rect x="36" y="896" width="108" height="50" rx="6" class="proc"/>
-  <text x="90" y="916" text-anchor="middle" class="small">Limpiar flag</text>
-  <text x="90" y="934" text-anchor="middle" class="small">+ recargar TMR1</text>
+  <line x1="90" y1="934" x2="90" y2="956" class="arrow"/>
+  <rect x="36" y="956" width="108" height="50" rx="6" class="proc"/>
+  <text x="90" y="976" text-anchor="middle" class="small">Limpiar flag</text>
+  <text x="90" y="994" text-anchor="middle" class="small">+ recargar TMR1</text>
 
-  <line x1="90" y1="946" x2="90" y2="966" class="arrow"/>
-  <rect x="180" y="720" width="150" height="44" rx="6" class="proc"/>
-  <text x="255" y="746" text-anchor="middle" class="small">CNT_50MS--</text>
+  <rect x="180" y="782" width="150" height="44" rx="6" class="proc"/>
+  <text x="255" y="808" text-anchor="middle" class="small">CNT_50MS--</text>
 
-  <polygon points="255,770 320,804 255,838 190,804" class="dec"/>
-  <text x="255" y="808" text-anchor="middle" class="small">-CNT=0?</text>
+  <polygon points="255,832 320,866 255,900 190,866" class="dec"/>
+  <text x="255" y="870" text-anchor="middle" class="small">CNT=0?</text>
 
-  <rect x="346" y="720" width="140" height="88" rx="6" class="proc"/>
-  <text x="416" y="742" text-anchor="middle" class="small">Si CNT=0:</text>
-  <text x="416" y="760" text-anchor="middle" class="small">CNT?20</text>
-  <text x="416" y="778" text-anchor="middle" class="small">capturar TMR0</text>
-  <text x="416" y="796" text-anchor="middle" class="small">FLAG_1S?1</text>
+  <rect x="346" y="782" width="140" height="88" rx="6" class="proc"/>
+  <text x="416" y="804" text-anchor="middle" class="small">Si CNT=0:</text>
+  <text x="416" y="822" text-anchor="middle" class="small">CNT=20</text>
+  <text x="416" y="840" text-anchor="middle" class="small">capturar TMR0</text>
+  <text x="416" y="858" text-anchor="middle" class="small">FLAG_1S=1</text>
 
-  <rect x="180" y="862" width="150" height="44" rx="6" class="proc"/>
-  <text x="255" y="888" text-anchor="middle" class="small">Restaurar contexto</text>
+  <rect x="180" y="956" width="150" height="44" rx="6" class="proc"/>
+  <text x="255" y="982" text-anchor="middle" class="small">Restaurar contexto</text>
 
-  <rect x="180" y="914" width="150" height="34" rx="16" class="start"/>
-  <text x="255" y="936" text-anchor="middle" class="small">RETFIE</text>
+  <rect x="180" y="1008" width="150" height="34" rx="16" class="start"/>
+  <text x="255" y="1030" text-anchor="middle" class="small">RETFIE</text>
 </svg>
