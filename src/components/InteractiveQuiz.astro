@@ -175,7 +175,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 </section>
 
 <script>
-	import { initCaletaAuth, saveQuizResult, isLoggedIn } from '../scripts/caleta-auth';
+	import { initCaletaAuth, saveQuizResult, getQuizResult, isLoggedIn } from '../scripts/caleta-auth';
 	import { fetchDownloadAccess, subscriptionPlansUrl } from '../scripts/caleta-downloads';
 
 	async function setQuizAuthState(root: Element) {
@@ -269,8 +269,73 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 			const total = fieldsets.length;
 
 			setQuizAuthState(root);
-			window.addEventListener('aprende-auth-change', () => setQuizAuthState(root));
+			window.addEventListener('aprende-auth-change', () => {
+				setQuizAuthState(root);
+				restoreSavedQuizState();
+			});
+			window.addEventListener('aprende-progress-sync', restoreSavedQuizState);
 			initCaletaAuth();
+
+			function restoreSavedQuizState() {
+				const saved = getQuizResult(slug);
+				if (!saved) return;
+
+				const hasAnswers =
+					Array.isArray(saved.answers) && saved.answers.length === total;
+
+				if (hasAnswers) {
+					fieldsets.forEach((fs, qi) => {
+						const q = quizData.questions[qi];
+						const chosen = saved.answers![qi];
+						const feedback = fs.querySelector('[data-feedback]');
+						fs.classList.remove(
+							'interactive-quiz__question--correct',
+							'interactive-quiz__question--wrong',
+						);
+
+						if (!q || chosen < 0) return;
+
+						const input = fs.querySelector(
+							`input[data-option-index="${chosen}"]`,
+						) as HTMLInputElement | null;
+						if (input) input.checked = true;
+
+						const isCorrect = chosen === q.correctIndex;
+						fs.classList.add(
+							isCorrect
+								? 'interactive-quiz__question--correct'
+								: 'interactive-quiz__question--wrong',
+						);
+
+						if (feedback) {
+							feedback.hidden = false;
+							if (isCorrect) {
+								feedback.textContent = isEn ? 'Correct!' : 'Correcto!';
+							} else if (q.explanation) {
+								feedback.textContent = q.explanation;
+							} else {
+								feedback.textContent = isEn ? 'Incorrect.' : 'Incorrecto.';
+							}
+						}
+					});
+				}
+
+				if (resultEl) {
+					resultEl.hidden = false;
+					resultEl.className = `interactive-quiz__result ${saved.passed ? 'interactive-quiz__result--pass' : 'interactive-quiz__result--fail'}`;
+					const when = saved.at
+						? isEn
+							? ` — Last attempt: ${new Date(saved.at).toLocaleString()}`
+							: ` — Ultimo intento: ${new Date(saved.at).toLocaleString()}`
+						: '';
+					resultEl.textContent = isEn
+						? `${saved.correct}/${saved.total} correct (${saved.score}%)${saved.passed ? ' — Passed!' : ' — Review and try again.'}${when}`
+						: `${saved.correct}/${saved.total} correctas (${saved.score}%)${saved.passed ? ' — ¡Aprobado!' : ' — Repasa e intenta de nuevo.'}${when}`;
+				}
+
+				root.classList.toggle('interactive-quiz--passed', saved.passed);
+				updateAnsweredProgress();
+			}
 
 			function updateAnsweredProgress() {
 				let answered = 0;
@@ -293,6 +358,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 			});
 
 			updateAnsweredProgress();
+			restoreSavedQuizState();
 
 			form?.addEventListener('submit', async (e) => {
 				e.preventDefault();
@@ -326,6 +392,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 				let correct = 0;
 				let allAnswered = true;
+				const answers: number[] = [];
 
 				fieldsets.forEach((fs, qi) => {
 					const q = quizData.questions[qi];
@@ -338,10 +405,12 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 					if (!selected || !q) {
 						allAnswered = false;
+						answers.push(-1);
 						return;
 					}
 
 					const chosen = Number(selected.getAttribute('data-option-index'));
+					answers.push(chosen);
 					const isCorrect = chosen === q.correctIndex;
 					if (isCorrect) correct += 1;
 
@@ -387,7 +456,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 				root.classList.toggle('interactive-quiz--passed', passed);
 
-				saveQuizResult(slug, { score, passed, correct, total });
+				saveQuizResult(slug, { score, passed, correct, total, answers });
 
 				if (authMode === 'none' && !isLoggedIn() && loginHint) {
 					loginHint.hidden = false;

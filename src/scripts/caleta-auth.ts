@@ -22,7 +22,15 @@ export type QuizResult = {
 	correct: number;
 	total: number;
 	at?: string;
+	/** Indice de opcion elegida por pregunta (-1 si no respondida). */
+	answers?: number[];
 };
+
+function notifyProgressSync() {
+	if (typeof window !== 'undefined') {
+		window.dispatchEvent(new CustomEvent('aprende-progress-sync'));
+	}
+}
 
 export function getToken(): string | null {
 	try {
@@ -110,13 +118,16 @@ export function saveQuizResult(slug: string, result: QuizResult) {
 		at: new Date().toISOString(),
 	};
 	saveLocalProgress(data);
+	notifyProgressSync();
 
 	if (isLoggedIn()) {
 		syncProgressToCaleta({
 			...data,
 			checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
 			studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
-		}).catch(() => {});
+		})
+			.then(() => notifyProgressSync())
+			.catch(() => {});
 	}
 }
 
@@ -141,9 +152,15 @@ export async function syncProgressToCaleta(payload?: Record<string, unknown>) {
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Bearer ${token}`,
+			Accept: 'application/json',
 		},
+		redirect: 'manual',
 		body: JSON.stringify({ payload: body }),
 	});
+
+	if (res.type === 'opaqueredirect' || res.status === 301 || res.status === 302 || res.status === 307) {
+		throw new Error('caleta_api_redirect');
+	}
 
 	if (!res.ok) throw new Error('sync failed');
 	return res.json();
@@ -154,13 +171,22 @@ export async function fetchProgressFromCaleta() {
 	if (!token) return null;
 
 	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
-		headers: { Authorization: `Bearer ${token}` },
+		headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+		redirect: 'manual',
 	});
 
+	if (res.type === 'opaqueredirect' || res.status === 301 || res.status === 302 || res.status === 307) {
+		return null;
+	}
+
 	if (!res.ok) return null;
+	const contentType = res.headers.get('content-type') ?? '';
+	if (!contentType.includes('application/json')) return null;
+
 	const data = await res.json();
 	if (data?.payload) {
 		mergeRemoteProgress(data.payload);
+		notifyProgressSync();
 	}
 	return data;
 }
@@ -176,6 +202,7 @@ function mergeRemoteProgress(remote: Record<string, unknown>) {
 	}
 
 	saveLocalProgress(merged);
+	notifyProgressSync();
 
 	const localChecklists = JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}');
 	const remoteChecklists = (remote.checklists as Record<string, unknown>) || {};
