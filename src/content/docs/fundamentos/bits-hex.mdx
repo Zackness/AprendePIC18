@@ -13,48 +13,281 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 
 
-En el PIC18F4550 casi todo se configura modificando bits individuales dentro de registros de **8 bits** (un byte: **2⁸ = 256** estados, del **0 al 255**). Si necesitas repasar la idea de digitales, empieza por [Que significa 8 bits](/introduccion/pic18f4550/#que-significa-8-bits).
+En el PIC18F4550 casi todo se configura modificando **bits individuales** dentro de registros de **8 bits** (un byte: **2⁸ = 256** estados, del **0 al 255**). Si necesitas repasar la idea de digitales, empieza por [Que significa 8 bits](/introduccion/pic18f4550/#que-significa-8-bits).
 
-Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio.
+Esta pagina complementa [Arquitectura basica](/fundamentos/arquitectura/) y [Registros principales](/fundamentos/registros/): alli viste **que** son `WREG`, `STATUS` y los SFR; aqui aprendes **como leer, escribir y enmascarar bits** en ensamblador.
+
+Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio (especialmente la **Practica 1**, que exige rutinas logicas con la ALU).
 
 <AIExplain title="Regla practica">
-Un byte = 8 bits. En ensamblador MPASM escribes valores con `B'10101010'` (binario) o `0xAA` (hexadecimal). Para encender el bit 3 usas `BSF`; para apagarlo `BCF`.
+Un byte = 8 bits. En MPASM escribes valores con `B'10101010'` (binario), `D'170'` (decimal) o `0xAA` (hexadecimal). Para encender un bit concreto: `BSF`; para apagarlo: `BCF`. Para modificar varios bits a la vez sin tocar el resto: **mascaras** con AND, OR o XOR.
 </AIExplain>
 
-## Conversion rapida
+## Que es un bit y que es un byte
 
-| Decimal | Binario | Hex |
+| Concepto | Definicion | En el PIC18 |
 | --- | --- | --- |
-| 0 | 00000000 | 0x00 |
-| 15 | 00001111 | 0x0F |
-| 170 | 10101010 | 0xAA |
-| 255 | 11111111 | 0xFF |
+| **Bit** | La unidad minima: vale **0** o **1** | Cada pin, bandera o bit de un SFR |
+| **Byte** | Grupo de **8 bits** | Un registro (`WREG`, `LATB`, `STATUS`…) |
+| **Nibble** | Medio byte = **4 bits** | Un digito hex (0–F) o nibble alto/bajo |
 
-## Mascaras de bits
+Los bits se numeran del **0 al 7**. El **bit 0** es el **LSB** (menos significativo); el **bit 7** es el **MSB** (mas significativo):
 
-Una mascara selecciona que bits quieres modificar sin alterar el resto:
-
-```asm
-; Encender solo RB0 sin tocar otros pines
-BSF     LATB, 0
-
-; Leer solo el nibble alto de PORTB
-MOVF    PORTB, W
-ANDLW   B'11110000'
+```
+Bit:     7   6   5   4   3   2   1   0
+Valor:   1   1   0   0   0   0   1   1   →  decimal 195, hex 0xC3
+Peso:  128  64  32  16   8   4   2   1   (potencias de 2)
 ```
 
-## Operaciones logicas en la ALU
+Para calcular el decimal: suma los pesos donde el bit vale **1**. En el ejemplo: 128 + 64 + 2 + 1 = **195**.
 
-El PIC18F4550 puede realizar AND, OR, XOR, complemento y rotaciones. La Practica 1 del laboratorio exige rutinas para suma, resta, multiplicacion, division por software, OR, AND, XOR, complemento y rotacion sin acarreo.
+## Hexadecimal — por que lo usas
 
-<Exercise title="Convierte 0xC3 a binario y marca los bits activos">
-0xC3 = 11000011. Bits 0, 1, 6 y 7 estan en alto. Explica que hace `BCF PORTB, 6` si PORTB valia 0xC3.
+Escribir `B'11000011'` es largo; en hex un byte son **solo 2 digitos** (`0xC3`). Cada digito hex representa **4 bits** (un nibble):
+
+| Hex | Binario | Decimal |
+| --- | --- | --- |
+| 0 | 0000 | 0 |
+| 1 | 0001 | 1 |
+| … | … | … |
+| 9 | 1001 | 9 |
+| A | 1010 | 10 |
+| B | 1011 | 11 |
+| C | 1100 | 12 |
+| D | 1101 | 13 |
+| E | 1110 | 14 |
+| F | 1111 | 15 |
+
+### Tabla de conversion rapida (bytes utiles)
+
+| Decimal | Binario | Hex | Uso tipico |
+| --- | --- | --- | --- |
+| 0 | 00000000 | 0x00 | Todo apagado |
+| 1 | 00000001 | 0x01 | Solo bit 0 |
+| 15 | 00001111 | 0x0F | Nibble bajo completo |
+| 240 | 11110000 | 0xF0 | Nibble alto completo |
+| 170 | 10101010 | 0xAA | Patron alternado |
+| 255 | 11111111 | 0xFF | Todos los bits en 1 |
+
+### Como convertir paso a paso
+
+**Decimal → binario:** divide entre 2 y lee los restos de abajo hacia arriba, o resta potencias de 2 (128, 64, 32…).
+
+**Hex → binario:** cada digito hex se expande a 4 bits. `0xC3` → `C` = `1100`, `3` = `0011` → `11000011`.
+
+**Binario → hex:** agrupa de a 4 bits desde la derecha. `11000011` → `1100` + `0011` → `0xC3`.
+
+**Decimal → hex:** divide entre 16. Ejemplo: 195 ÷ 16 = 12 resto 3 → `0xC3`.
+
+<AIExplain title="En MPASM">
+`MOVLW 0xC3` y `MOVLW B'11000011'` y `MOVLW D'195'` cargan **el mismo valor** en `WREG`. El informe de laboratorio suele pedir hex o binario — no mezcles notaciones sin indicarlo.
+</AIExplain>
+
+## Un bit concreto — encender, apagar, invertir
+
+Cuando solo quieres cambiar **un bit** de un SFR sin tocar los demas, usa instrucciones de bit:
+
+| Instruccion | Efecto | Ejemplo |
+| --- | --- | --- |
+| **`BSF`** | Pone el bit en **1** | `BSF LATB, 0` → RB0 en alto |
+| **`BCF`** | Pone el bit en **0** | `BCF TRISB, 0` → RB0 como salida |
+| **`BTFSS`** | Salta si el bit es **1** | `BTFSS PORTB, 3` → lee boton |
+| **`BTFSC`** | Salta si el bit es **0** | `BTFSC STATUS, Z` → salta si Z=1 |
+
+Ya lo viste en [Arquitectura — SFR](/fundamentos/arquitectura/#sfr--registros-de-funcion-especial) y [Registros — GPIO](/fundamentos/registros/#puertos-gpio--trisx-portx-latx):
+
+```asm
+; Configurar RB0 como salida y encender LED
+BCF     TRISB, 0        ; bit 0 de TRISB = 0 → salida
+BSF     LATB, 0         ; bit 0 de LATB = 1 → LED encendido
+```
+
+Para **invertir** un bit (toggle) sin leer el byte entero:
+
+```asm
+; Invertir RB0: si estaba en 1 pasa a 0 y viceversa
+MOVLW   B'00000001'     ; mascara solo bit 0
+XORWF   LATB, F         ; XOR bit a bit → invierte ese bit
+```
+
+## Mascaras de bits — modificar varios bits a la vez
+
+Una **mascara** es un patron de bits que indica **que posiciones quieres afectar**. Las operaciones logicas de la ALU aplican la mascara **bit a bit** sobre `WREG` y otro operando.
+
+### AND — apagar o filtrar bits
+
+`AND` deja en **1** solo donde **ambos** operandos tienen 1. Sirve para **enmascarar** (quedarte con ciertos bits) o **apagar** bits poniendo 0 en la mascara:
+
+```asm
+; Leer solo el nibble alto de PORTB (bits 7..4)
+MOVF    PORTB, W
+ANDLW   B'11110000'     ; 0xF0 — bits 4-7 pasan; 0-3 quedan en 0
+
+; Apagar bits 4-7 de LATC sin tocar 0-3
+MOVLW   B'00001111'     ; mascara: conservar nibble bajo
+ANDWF   LATC, F         ; bits altos → 0
+```
+
+### IOR (OR) — encender bits
+
+`IOR` pone en **1** donde **cualquiera** de los operandos tiene 1. Sirve para **prender** bits sin apagar los demas:
+
+```asm
+; Encender bits 0 y 3 de LATB (resto intacto)
+MOVLW   B'00001001'     ; bits 0 y 3 en 1
+IORWF   LATB, F
+```
+
+En MPASM la instruccion se escribe **`IORWF`** / **`IORLW`**.
+
+### XOR — invertir o comparar
+
+`XOR` da **1** donde los bits **differen**. Usos:
+
+- **Toggle** de bits seleccionados (ver arriba).
+- **Comparar** si dos valores son iguales (resultado 0 → bandera **Z = 1** en `STATUS`).
+
+```asm
+MOVLW   D'5'
+XORWF   contador, W     ; si contador == 5 → W = 0 → Z = 1
+BTFSS   STATUS, Z
+GOTO    no_es_cinco
+```
+
+### Complemento (NOT)
+
+Invierte **todos** los bits del byte: `0` → `1`, `1` → `0`. En PIC18 con `WREG`:
+
+```asm
+MOVF    LATB, W
+XORLW   B'11111111'     ; equivalente a NOT de W (0xFF)
+MOVWF   temp            ; temp = complemento de LATB
+```
+
+O con **`COMF`** sobre un registro de archivo:
+
+```asm
+COMF    temp, F         ; temp = NOT temp
+```
+
+### Rotaciones
+
+Desplazan bits con o sin acarreo — la Practica 1 pide **rotacion sin acarreo**:
+
+| Instruccion | Direccion | Que hace |
+| --- | --- | --- |
+| **`RLCF`** | Izquierda | MSB entra en **C**; bit que sale por la izquierda entra por la derecha (con acarreo) |
+| **`RRCF`** | Derecha | LSB entra en **C**; rotacion hacia la derecha |
+| **`RLNCF`** | Izquierda | Rota **sin** acarreo — el bit que sale vuelve por el otro extremo |
+| **`RRNCF`** | Derecha | Rota **sin** acarreo hacia la derecha |
+
+Ejemplo — rotar `temp` a la izquierda sin acarreo:
+
+```asm
+RLNCF   temp, F
+```
+
+## Nibble alto y nibble bajo
+
+Muchos informes piden separar un byte en dos nibbles (util en displays, BCD, tablas):
+
+```asm
+; temp = 0xC3 → nibble_alto = 0xC0, nibble_bajo = 0x03
+MOVF    temp, W
+ANDLW   B'11110000'     ; 0xF0 — solo bits 7..4
+MOVWF   nibble_alto
+
+MOVF    temp, W
+ANDLW   B'00001111'     ; 0x0F — solo bits 3..0
+MOVWF   nibble_bajo
+```
+
+Para **mover** el nibble bajo al alto (shift de 4 posiciones):
+
+```asm
+SWAPF   temp, F         ; intercambia nibles alto ↔ bajo
+; o bien cuatro rotaciones con RLNCF
+```
+
+## Operaciones logicas y la Practica 1
+
+El laboratorio UNEXPO exige rutinas de software para **suma, resta, multiplicacion, division**, mas **OR, AND, XOR, complemento y rotacion** usando la ALU del PIC18. Las logicas pasan casi siempre por `WREG`:
+
+```asm
+; AND entre PORTB y una mascara en W
+MOVF    PORTB, W
+ANDLW   B'00001111'     ; W = PORTB AND 0x0F
+
+; OR entre LATC y W
+MOVLW   B'10000000'
+IORWF   LATC, F         ; LATC = LATC OR W
+
+; XOR entre temp y W
+MOVLW   B'10101010'
+XORWF   temp, F
+```
+
+Relacion con [Arquitectura — STATUS](/fundamentos/arquitectura/#status--banderas-del-resultado): despues de AND, OR o XOR, revisa **Z** (¿resultado cero?) y **N** (signo del bit 7).
+
+## Ejemplo integrado — configurar varios pines
+
+Quieres RB0–RB3 como **salidas** y RB4–RB7 como **entradas** en un solo paso (mascara sobre `TRISB`: 1 = entrada):
+
+```asm
+MOVLW   B'11110000'     ; bits 4-7 = 1 (entrada); 0-3 = 0 (salida)
+MOVWF   TRISB           ; escribe el byte completo
+```
+
+O bit a bit (mas claro en aprendizaje, mas largo en codigo):
+
+```asm
+; Salidas RB0-RB3
+BCF     TRISB, 0
+BCF     TRISB, 1
+BCF     TRISB, 2
+BCF     TRISB, 3
+; Entradas RB4-RB7
+BSF     TRISB, 4
+BSF     TRISB, 5
+BSF     TRISB, 6
+BSF     TRISB, 7
+```
+
+<Exercise title="Convierte 0xC3 a binario y explica BCF">
+**0xC3** = `11000011` (decimal 195). Bits activos: **0, 1, 6 y 7**.
+
+Si `PORTB` valia `0xC3` y ejecutas `BCF PORTB, 6`:
+- Solo el **bit 6** pasa a **0**; los demas no cambian.
+- Resultado: `11000011` → `10000011` = **0xC3** con bit 6 apagado = **0x83** (decimal 131).
+
+¿Por que conviene `BCF` en vez de escribir todo `PORTB`? Porque no arriesgas modificar pines que no querias tocar.
 </Exercise>
 
 ## Errores comunes
 
-- Confundir `TRIS` (direccion) con `LAT` (salida escrita).
-- Olvidar que `1` en TRIS = entrada, `0` = salida.
-- Usar decimal cuando el informe de laboratorio pide binario o hex en el informe.
+- **Confundir notacion:** `0x0F` (hex) no es lo mismo que `D'15'` (decimal) — ambos valen 15, pero `0xF0` es 240, no 15.
+- **Bit vs pin:** el **bit 3** de `LATB` es el pin **RB3**; la numeracion empieza en **0**.
+- **AND vs OR:** AND **apaga** bits donde la mascara es 0; OR **enciende** bits donde la mascara es 1.
+- **Mascara invertida en TRIS:** en `TRISx`, **1 = entrada** y **0 = salida** — al disenar mascaras, piensa en que significa cada bit.
+- **Escribir `PORTx` para salidas:** escribe **`LATx`** (o `BSF`/`BCF` sobre `LATx`); lee entradas con **`PORTx`**. Ver [Registros — PORT vs LAT](/fundamentos/registros/#puertos-gpio--trisx-portx-latx).
+- **Olvidar el sufijo `-LW` vs `-WF`:** `ANDLW` opera con literal → `WREG`; `ANDWF` opera con registro → `WREG` o el registro (`F`).
+
+## Preguntas tipo parcial
+
+**¿Cuantos valores distintos representa un byte sin signo?**
+
+256 valores, del **0 al 255** (2⁸ combinaciones).
+
+**¿Que hace `ANDLW 0x0F` despues de `MOVF PORTB, W`?**
+
+Deja en `WREG` solo el **nibble bajo** de `PORTB`; los bits 4–7 quedan en 0.
+
+**¿Para que sirve una mascara con OR?**
+
+Para **encender** bits concretos sin apagar los que ya estaban en 1.
+
+**¿Como sabes si dos bytes son iguales usando XOR?**
+
+`XORWF` entre ellos; si el resultado es **0**, la bandera **Z** de `STATUS` queda en **1**.
 
 <TopicQuiz slug="fundamentos/bits-hex" />

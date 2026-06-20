@@ -13,35 +13,280 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 
 
-On the PIC18F4550 almost everything is configured by modifying individual bits inside **8-bit** registers (one byte: **2⁸ = 256** states, **0 through 255**). To review the digital-systems idea, start with [What 8-bit means](/en/introduccion/pic18f4550/#what-8-bit-means).
+On the PIC18F4550 almost everything is configured by modifying **individual bits** inside **8-bit** registers (one byte: **2⁸ = 256** states, **0 through 255**). To review the digital-systems idea, start with [What 8-bit means](/en/introduccion/pic18f4550/#what-8-bit-means).
 
-Mastering binary, hexadecimal, and masks is essential for the exam and lab work.
+This page complements [Basic architecture](/en/fundamentos/arquitectura/) and [Main registers](/en/fundamentos/registros/): there you saw **what** `WREG`, `STATUS`, and SFRs are; here you learn **how to read, write, and mask bits** in assembly.
+
+Mastering binary, hexadecimal, and masks is essential for the exam and lab work (especially **Practice 1**, which requires logic routines with the ALU).
 
 <AIExplain title="Practical rule">
-One byte = 8 bits. In MPASM you write `B'10101010'` or `0xAA`. Use `BSF` to set a bit and `BCF` to clear it.
+One byte = 8 bits. In MPASM you write `B'10101010'` (binary), `D'170'` (decimal), or `0xAA` (hex). To turn on a specific bit: `BSF`; to clear it: `BCF`. To change several bits at once without touching the rest: **masks** with AND, OR, or XOR.
 </AIExplain>
 
-## Quick conversion
+## What is a bit and what is a byte
 
-| Decimal | Binary | Hex |
+| Concept | Definition | On the PIC18 |
 | --- | --- | --- |
-| 0 | 00000000 | 0x00 |
-| 15 | 00001111 | 0x0F |
-| 170 | 10101010 | 0xAA |
-| 255 | 11111111 | 0xFF |
+| **Bit** | Smallest unit: **0** or **1** | Each pin, flag, or SFR bit |
+| **Byte** | Group of **8 bits** | One register (`WREG`, `LATB`, `STATUS`…) |
+| **Nibble** | Half byte = **4 bits** | One hex digit (0–F) or high/low nibble |
 
-## Bit masks
+Bits are numbered **0 through 7**. **Bit 0** is the **LSB** (least significant); **bit 7** is the **MSB** (most significant):
 
-```asm
-BSF     LATB, 0
-MOVF    PORTB, W
-ANDLW   B'11110000'
+```
+Bit:     7   6   5   4   3   2   1   0
+Value:   1   1   0   0   0   0   1   1   →  decimal 195, hex 0xC3
+Weight: 128  64  32  16   8   4   2   1   (powers of 2)
 ```
 
-Lab Practice 1 requires routines for add, subtract, multiply, software divide, OR, AND, XOR, complement and rotate.
+To get decimal: add the weights where the bit is **1**. In the example: 128 + 64 + 2 + 1 = **195**.
 
-<Exercise title="Convert 0xC3 to binary">
-0xC3 = 11000011. Bits 0, 1, 6 and 7 are high.
+## Hexadecimal — why you use it
+
+Writing `B'11000011'` is long; in hex one byte is **only 2 digits** (`0xC3`). Each hex digit is **4 bits** (one nibble):
+
+| Hex | Binary | Decimal |
+| --- | --- | --- |
+| 0 | 0000 | 0 |
+| 1 | 0001 | 1 |
+| … | … | … |
+| 9 | 1001 | 9 |
+| A | 1010 | 10 |
+| B | 1011 | 11 |
+| C | 1100 | 12 |
+| D | 1101 | 13 |
+| E | 1110 | 14 |
+| F | 1111 | 15 |
+
+### Quick conversion table (useful bytes)
+
+| Decimal | Binary | Hex | Typical use |
+| --- | --- | --- | --- |
+| 0 | 00000000 | 0x00 | All off |
+| 1 | 00000001 | 0x01 | Bit 0 only |
+| 15 | 00001111 | 0x0F | Full low nibble |
+| 240 | 11110000 | 0xF0 | Full high nibble |
+| 170 | 10101010 | 0xAA | Alternating pattern |
+| 255 | 11111111 | 0xFF | All bits set |
+
+### Step-by-step conversion
+
+**Decimal → binary:** divide by 2 and read remainders bottom to top, or subtract powers of 2 (128, 64, 32…).
+
+**Hex → binary:** expand each hex digit to 4 bits. `0xC3` → `C` = `1100`, `3` = `0011` → `11000011`.
+
+**Binary → hex:** group in 4 bits from the right. `11000011` → `1100` + `0011` → `0xC3`.
+
+**Decimal → hex:** divide by 16. Example: 195 ÷ 16 = 12 remainder 3 → `0xC3`.
+
+<AIExplain title="In MPASM">
+`MOVLW 0xC3`, `MOVLW B'11000011'`, and `MOVLW D'195'` load **the same value** into `WREG`. Lab reports usually ask for hex or binary — do not mix notations without stating it.
+</AIExplain>
+
+## A single bit — set, clear, toggle
+
+When you only need to change **one bit** of an SFR without touching the others, use bit instructions:
+
+| Instruction | Effect | Example |
+| --- | --- | --- |
+| **`BSF`** | Set bit to **1** | `BSF LATB, 0` → RB0 high |
+| **`BCF`** | Clear bit to **0** | `BCF TRISB, 0` → RB0 as output |
+| **`BTFSS`** | Skip if bit is **1** | `BTFSS PORTB, 3` → read button |
+| **`BTFSC`** | Skip if bit is **0** | `BTFSC STATUS, Z` → skip if Z=1 |
+
+You already saw this in [Architecture — SFR](/en/fundamentos/arquitectura/#sfr--special-function-registers) and [Registers — GPIO](/en/fundamentos/registros/#gpio-ports--trisx-portx-latx):
+
+```asm
+; Configure RB0 as output and turn LED on
+BCF     TRISB, 0        ; TRISB bit 0 = 0 → output
+BSF     LATB, 0         ; LATB bit 0 = 1 → LED on
+```
+
+To **toggle** a bit without reading the whole byte:
+
+```asm
+; Toggle RB0
+MOVLW   B'00000001'     ; mask bit 0 only
+XORWF   LATB, F         ; XOR bit by bit → toggles that bit
+```
+
+## Bit masks — change several bits at once
+
+A **mask** is a bit pattern showing **which positions you want to affect**. ALU logic operations apply the mask **bit by bit** on `WREG` and another operand.
+
+### AND — clear or filter bits
+
+`AND` keeps **1** only where **both** operands have 1. Use it to **mask** (keep certain bits) or **clear** bits by putting 0 in the mask:
+
+```asm
+; Read only the high nibble of PORTB (bits 7..4)
+MOVF    PORTB, W
+ANDLW   B'11110000'     ; 0xF0 — bits 4-7 pass; 0-3 become 0
+
+; Clear bits 4-7 of LATC without touching 0-3
+MOVLW   B'00001111'     ; mask: keep low nibble
+ANDWF   LATC, F         ; high bits → 0
+```
+
+### IOR (OR) — set bits
+
+`IOR` sets **1** where **either** operand has 1. Use it to **turn on** bits without clearing others:
+
+```asm
+; Turn on bits 0 and 3 of LATB (rest unchanged)
+MOVLW   B'00001001'     ; bits 0 and 3 set
+IORWF   LATB, F
+```
+
+In MPASM the instruction is **`IORWF`** / **`IORLW`**.
+
+### XOR — toggle or compare
+
+`XOR` yields **1** where bits **differ**. Uses:
+
+- **Toggle** selected bits (see above).
+- **Compare** if two values are equal (result 0 → flag **Z = 1** in `STATUS`).
+
+```asm
+MOVLW   D'5'
+XORWF   counter, W      ; if counter == 5 → W = 0 → Z = 1
+BTFSS   STATUS, Z
+GOTO    not_five
+```
+
+### Complement (NOT)
+
+Inverts **all** bits: `0` → `1`, `1` → `0`. On PIC18 with `WREG`:
+
+```asm
+MOVF    LATB, W
+XORLW   B'11111111'     ; equivalent to NOT of W (0xFF)
+MOVWF   temp            ; temp = complement of LATB
+```
+
+Or with **`COMF`** on a file register:
+
+```asm
+COMF    temp, F         ; temp = NOT temp
+```
+
+### Rotates
+
+Shift bits with or without carry — Practice 1 asks for **rotate without carry**:
+
+| Instruction | Direction | What it does |
+| --- | --- | --- |
+| **`RLCF`** | Left | MSB goes to **C**; rotate through carry |
+| **`RRCF`** | Right | LSB goes to **C**; rotate right |
+| **`RLNCF`** | Left | Rotate **without** carry — bit that falls off re-enters |
+| **`RRNCF`** | Right | Rotate **without** carry to the right |
+
+Example — rotate `temp` left without carry:
+
+```asm
+RLNCF   temp, F
+```
+
+## High and low nibble
+
+Many lab reports ask you to split a byte into two nibbles (displays, BCD, tables):
+
+```asm
+; temp = 0xC3 → high_nibble = 0xC0, low_nibble = 0x03
+MOVF    temp, W
+ANDLW   B'11110000'     ; 0xF0 — bits 7..4 only
+MOVWF   high_nibble
+
+MOVF    temp, W
+ANDLW   B'00001111'     ; 0x0F — bits 3..0 only
+MOVWF   low_nibble
+```
+
+To **swap** high and low nibbles:
+
+```asm
+SWAPF   temp, F         ; swap high ↔ low nibble
+```
+
+## Logic operations and Practice 1
+
+The UNEXPO lab requires software routines for **add, subtract, multiply, divide**, plus **OR, AND, XOR, complement, and rotate** using the PIC18 ALU. Logic ops usually go through `WREG`:
+
+```asm
+; AND between PORTB and a mask in W
+MOVF    PORTB, W
+ANDLW   B'00001111'     ; W = PORTB AND 0x0F
+
+; OR between LATC and W
+MOVLW   B'10000000'
+IORWF   LATC, F         ; LATC = LATC OR W
+
+; XOR between temp and W
+MOVLW   B'10101010'
+XORWF   temp, F
+```
+
+See [Architecture — STATUS](/en/fundamentos/arquitectura/#status--result-flags): after AND, OR, or XOR, check **Z** (result zero?) and **N** (sign of bit 7).
+
+## Integrated example — configure several pins
+
+You want RB0–RB3 as **outputs** and RB4–RB7 as **inputs** in one step (mask on `TRISB`: 1 = input):
+
+```asm
+MOVLW   B'11110000'     ; bits 4-7 = 1 (input); 0-3 = 0 (output)
+MOVWF   TRISB           ; write full byte
+```
+
+Or bit by bit (clearer when learning, longer in code):
+
+```asm
+; Outputs RB0-RB3
+BCF     TRISB, 0
+BCF     TRISB, 1
+BCF     TRISB, 2
+BCF     TRISB, 3
+; Inputs RB4-RB7
+BSF     TRISB, 4
+BSF     TRISB, 5
+BSF     TRISB, 6
+BSF     TRISB, 7
+```
+
+<Exercise title="Convert 0xC3 to binary and explain BCF">
+**0xC3** = `11000011` (decimal 195). Active bits: **0, 1, 6, and 7**.
+
+If `PORTB` was `0xC3` and you run `BCF PORTB, 6`:
+- Only **bit 6** becomes **0**; the rest unchanged.
+- Result: `11000011` → `10000011` = **0x83** (decimal 131).
+
+Why use `BCF` instead of writing all of `PORTB`? You avoid accidentally changing pins you did not mean to touch.
 </Exercise>
+
+## Common mistakes
+
+- **Mixing notation:** `0x0F` (hex) is not the same as `D'15'` (decimal) — both equal 15, but `0xF0` is 240, not 15.
+- **Bit vs pin:** **bit 3** of `LATB` is pin **RB3**; numbering starts at **0**.
+- **AND vs OR:** AND **clears** bits where the mask is 0; OR **sets** bits where the mask is 1.
+- **Inverted mask on TRIS:** in `TRISx`, **1 = input** and **0 = output** — when designing masks, remember what each bit means.
+- **Writing `PORTx` for outputs:** write **`LATx`** (or `BSF`/`BCF` on `LATx`); read inputs with **`PORTx`**. See [Registers — PORT vs LAT](/en/fundamentos/registros/#gpio-ports--trisx-portx-latx).
+- **Forgetting `-LW` vs `-WF`:** `ANDLW` uses a literal → `WREG`; `ANDWF` uses a register → `WREG` or the register (`F`).
+
+## Exam-style questions
+
+**How many distinct unsigned values does one byte represent?**
+
+256 values, **0 through 255** (2⁸ combinations).
+
+**What does `ANDLW 0x0F` do after `MOVF PORTB, W`?**
+
+Leaves only the **low nibble** of `PORTB` in `WREG`; bits 4–7 become 0.
+
+**What is an OR mask used for?**
+
+To **set** specific bits without clearing those already at 1.
+
+**How do you tell if two bytes are equal using XOR?**
+
+`XORWF` between them; if the result is **0**, flag **Z** in `STATUS` is **1**.
 
 <TopicQuiz slug="fundamentos/bits-hex" locale="en" />

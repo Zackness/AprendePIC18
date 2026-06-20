@@ -3,57 +3,290 @@ title: Ensamblador para PIC18
 description: Base de MPASM para escribir programas del PIC18F4550.
 ---
 
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
 import LessonProgress from '../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../components/TopicQuiz.astro';
-import AIExplain from '../../../components/AIExplain.astro';
 
 <LessonProgress slug="fundamentos/ensamblador" />
 
 
 
-El ensamblador traduce instrucciones cercanas al hardware a codigo maquina. En PIC18 se suele trabajar con **MPASM**, especialmente en cursos que usan **MPLAB v8**.
+
+El **ensamblador** traduce instrucciones legibles por humanos a **codigo maquina** (bytes en la Flash del PIC). En el curso UNEXPO se trabaja con **MPASM** dentro de **MPLAB v8**: escribes un archivo `.ASM`, compilas y obtienes un `.HEX` que grabas en el microcontrolador.
+
+Esta pagina cierra el bloque de Fundamentos junto con [Arquitectura](/fundamentos/arquitectura/), [Registros](/fundamentos/registros/) y [Bits y hexadecimal](/fundamentos/bits-hex/). Ya sabes **que** son `WREG`, los SFR y las mascaras; aqui aprendes **como escribir el programa** linea por linea.
 
 <AIExplain title="No lo estudies como magia">
-Cada linea de ensamblador debe responder una pregunta concreta: mover un dato, cambiar un bit, comparar, saltar, llamar una subrutina o configurar un registro.
+Cada linea de ensamblador responde una pregunta concreta: mover un dato, cambiar un bit, sumar, comparar, saltar, llamar una subrutina o configurar un registro. Si no sabes que pregunta responde una linea, aun no la entiendes.
 </AIExplain>
 
-## Estructura comun
+## Flujo del programa — de .ASM al PIC
+
+```
+  Tu codigo (.ASM)
+       ↓  MPASM (ensamblador)
+  Archivo .HEX
+       ↓  Programador / MPLAB
+  Flash del PIC18F4550 → el chip ejecuta instrucciones
+```
+
+Mas adelante en [MPLAB y Proteus](/fundamentos/mplab-proteus/) veras el entorno completo. Los [config bits](/fundamentos/config-bits/) van en el mismo `.ASM` pero se graban en una zona especial de configuracion, no como codigo ejecutable normal.
+
+## Anatomia de un archivo MPASM
+
+```asm
+; ── 1. Cabecera ─────────────────────────────────────
+        LIST    P=18F4550              ; procesador objetivo
+        #include <P18F4550.INC>        ; nombres de registros (TRISB, LATB…)
+
+; ── 2. Config bits (fuses) ───────────────────────────
+        CONFIG  FOSC = HS
+        CONFIG  WDT  = OFF
+        CONFIG  LVP  = OFF
+
+; ── 3. Variables (RAM) ──────────────────────────────
+        CBLOCK  0x20                   ; bloque de GPR desde direccion 0x20
+contador    RES     1                  ; reserva 1 byte llamado 'contador'
+
+; ── 4. Vector de reset ──────────────────────────────
+        ORG     0x0000                 ; primera direccion en Flash
+        GOTO    inicio                 ; salta al codigo principal
+
+; ── 5. Programa principal ───────────────────────────
+inicio:
+        CALL    config_puertos
+        CALL    encender_led
+bucle:
+        GOTO    bucle                  ; bucle infinito (ejemplo minimo)
+
+; ── 6. Subrutinas ───────────────────────────────────
+config_puertos:
+        BCF     TRISB, 0               ; RB0 salida
+        RETURN
+
+encender_led:
+        BSF     LATB, 0                ; RB0 en alto
+        RETURN
+
+        END                            ; fin del archivo — obligatorio
+```
+
+### Directivas que debes conocer
+
+| Directiva | Funcion |
+| --- | --- |
+| **`LIST P=18F4550`** | Indica el micro al ensamblador |
+| **`#include <P18F4550.INC>`** | Importa nombres de registros y bits |
+| **`CONFIG …`** | Palabra de configuracion (oscilador, WDT…) |
+| **`ORG addr`** | Fija la direccion en Flash donde empieza el codigo |
+| **`CBLOCK` / `RES`** | Reserva bytes en RAM para variables GPR |
+| **`END`** | Marca el final del archivo |
+
+### Etiquetas, comentarios y literales
+
+- **Etiqueta** (`inicio:`, `bucle:`): nombre de una posicion en Flash; destino de `GOTO` o `CALL`.
+- **Comentario** (`; texto`): ignorado por MPASM — documenta tu codigo.
+- **Literal** — ver [Bits y hexadecimal](/fundamentos/bits-hex/):
+
+| Notacion | Ejemplo | Significado |
+| --- | --- | --- |
+| Decimal | `D'200'` | 200 |
+| Binario | `B'11110000'` | 240 |
+| Hexadecimal | `0xF0` | 240 |
+
+## Destino de la operacion — `,W` vs `,F`
+
+Muchas instrucciones tienen dos formas: el resultado va a **`WREG`** (`,W`) o al **registro de archivo** `f` (`,F`):
+
+```asm
+MOVF    contador, W     ; copia 'contador' → WREG (contador no cambia)
+MOVF    contador, F     ; copia contador → contador (inutil, pero valido)
+INCF    contador, F     ; contador = contador + 1 (resultado en contador)
+INCF    contador, W     ; WREG = contador + 1 (contador no cambia)
+```
+
+Regla mental: **`,F` modifica el registro**; **`,W` deja el registro intacto** y usa `WREG` como temporal.
+
+## Instrucciones basicas — movimiento de datos
+
+| Instruccion | Que hace | Ejemplo |
+| --- | --- | --- |
+| **`MOVLW k`** | Carga literal **k** en `WREG` | `MOVLW D'10'` |
+| **`MOVWF f`** | Copia `WREG` → registro **f** | `MOVWF LATB` |
+| **`MOVF f,d`** | Copia registro **f** → `d` (`,W` o `,F`) | `MOVF PORTB, W` |
+| **`CLRF f`** | Pone registro **f** en 0 | `CLRF contador` |
+| **`CLRW`** | Pone `WREG` en 0 | `CLRW` |
+
+Patron tipico — cargar y guardar:
+
+```asm
+MOVLW   D'55'         ; WREG = 55
+MOVWF   contador      ; contador = 55
+```
+
+## Instrucciones aritmeticas
+
+| Instruccion | Operacion | Actualiza `STATUS` |
+| --- | --- | --- |
+| **`ADDLW k`** | WREG = WREG + k | Si (Z, C, DC, OV, N) |
+| **`ADDWF f,d`** | WREG + f → d | Si |
+| **`SUBLW k`** | WREG = k − WREG | Si |
+| **`SUBWF f,d`** | f − WREG → d | Si |
+| **`INCF f,d`** | f + 1 → d | Si (Z, N…) |
+| **`DECF f,d`** | f − 1 → d | Si |
+| **`DECFSZ f,d`** | Decrementa; si queda **0**, **salta** la siguiente instruccion | Si |
+
+Ejemplo — contador con bucle de N iteraciones:
+
+```asm
+MOVLW   D'10'
+MOVWF   contador
+bucle:
+        ; ... trabajo ...
+        DECFSZ  contador, F     ; contador--; si llega a 0, salta GOTO
+        GOTO    bucle
+        ; aqui termina el bucle
+```
+
+Tras sumas y restas revisa las banderas de [STATUS](/fundamentos/arquitectura/#status--banderas-del-resultado): **Z** (¿cero?), **C** (¿acarreo?), **N** (signo).
+
+## Instrucciones logicas
+
+| Instruccion | Operacion |
+| --- | --- |
+| **`ANDLW k` / `ANDWF f,d`** | AND bit a bit |
+| **`IORLW k` / `IORWF f,d`** | OR bit a bit |
+| **`XORLW k` / `XORWF f,d`** | XOR bit a bit |
+| **`COMF f,d`** | Complemento (NOT) de f |
+
+Detalle y mascaras en [Bits y hexadecimal](/fundamentos/bits-hex/#mascaras-de-bits--modificar-varios-bits-a-la-vez). La Practica 1 exige rutinas con estas operaciones.
+
+## Instrucciones de bit — un pin sin tocar el resto
+
+| Instruccion | Efecto |
+| --- | --- |
+| **`BSF f,b`** | Bit **b** de **f** → 1 |
+| **`BCF f,b`** | Bit **b** de **f** → 0 |
+| **`BTFSS f,b`** | **Salta** la siguiente linea si bit = 1 |
+| **`BTFSC f,b`** | **Salta** la siguiente linea si bit = 0 |
+
+```asm
+; Leer boton en RB3 (entrada)
+BSF     TRISB, 3        ; RB3 entrada
+BTFSS   PORTB, 3        ; ¿RB3 = 1?
+GOTO    boton_suelto
+; si no salto → boton presionado (segun cableado)
+```
+
+## Saltos, subrutinas y la pila
+
+| Instruccion | Funcion |
+| --- | --- |
+| **`GOTO etiqueta`** | Salto incondicional — `PC` va a la etiqueta |
+| **`CALL sub`** | Llama subrutina — guarda retorno en la **pila** |
+| **`RETURN`** | Vuelve del `CALL` — restaura `PC` desde la pila |
+| **`RETFIE`** | Return from interrupt (ISR) |
+
+```asm
+inicio:
+        CALL    retardo_1s    ; va a retardo_1s; guarda direccion de retorno
+        BSF     LATB, 0       ; al volver, enciende LED
+        GOTO    inicio
+
+retardo_1s:
+        ; ... bucle que consume tiempo ...
+        RETURN                ; vuelve justo despues del CALL
+```
+
+La **pila** es LIFO: el ultimo `CALL` es el primero en volver con `RETURN`. En [Arquitectura — PC](/fundamentos/arquitectura/#pc--contador-de-programa) esta explicado con mas detalle.
+
+## Comparar y decidir — saltos condicionales
+
+El PIC18 **no tiene** instruccion `CMP`. Comparas operando y leyendo **STATUS**:
+
+```asm
+; ¿contador == 0?
+MOVLW   D'0'
+XORWF   contador, W     ; si iguales → W=0 → Z=1
+BTFSS   STATUS, Z       ; salta si Z=1 (contador era 0)
+GOTO    no_es_cero
+
+; ¿RB0 encendido?
+BTFSS   LATB, 0         ; salta si bit 0 de LATB = 1
+GOTO    led_apagado
+```
+
+| Instruccion | Salta si… |
+| --- | --- |
+| **`BTFSS STATUS, Z`** | Resultado fue **cero** (Z=1) |
+| **`BTFSC STATUS, Z`** | Resultado **no** fue cero (Z=0) |
+| **`BTFSS STATUS, C`** | Hubo **acarreo** (C=1) |
+
+## Ejemplo completo — LED en RB0
+
+Traduce “enciende un LED en RB0” a pasos concretos usando [Registros GPIO](/fundamentos/registros/#puertos-gpio--trisx-portx-latx):
 
 ```asm
         LIST    P=18F4550
         #include <P18F4550.INC>
-
-        CONFIG  FOSC = HS
-        CONFIG  WDT = OFF
-        CONFIG  LVP = OFF
+        CONFIG  FOSC = HS, WDT = OFF, LVP = OFF
 
         ORG     0x0000
         GOTO    inicio
 
 inicio:
-        ; Codigo principal
-        GOTO    inicio
+        BCF     TRISB, 0        ; 1) RB0 como salida
+        BSF     LATB, 0         ; 2) RB0 en alto → LED ON
+        GOTO    inicio          ; 3) bucle (programa no termina)
 
         END
 ```
 
-## Instrucciones basicas
+En ensamblador **no dices** “enciende un LED”. Dices: configura direccion del pin, escribe el latch, manten el programa corriendo.
 
-| Instruccion | Idea |
-| --- | --- |
-| `MOVLW k` | Carga un literal en `WREG`. |
-| `MOVWF f` | Copia `WREG` a un registro `f`. |
-| `CLRF f` | Limpia un registro. |
-| `BSF f,b` | Coloca en 1 el bit `b` del registro `f`. |
-| `BCF f,b` | Coloca en 0 el bit `b` del registro `f`. |
-| `BTFSC f,b` | Salta la siguiente instruccion si el bit esta en 0. |
-| `BTFSS f,b` | Salta la siguiente instruccion si el bit esta en 1. |
-| `GOTO etiqueta` | Salto incondicional. |
-| `CALL sub` | Llama una subrutina. |
-| `RETURN` | Regresa de una subrutina. |
+<Exercise title="Traza este fragmento">
+```asm
+MOVLW   D'3'
+MOVWF   contador
+INCF    contador, F
+DECFSZ  contador, F
+GOTO    $-1
+```
 
-## Idea clave
+1. `contador` queda en **3**, luego `INCF` → **4**.
+2. `DECFSZ` decrementa: **3** — no es cero → no salta.
+3. `GOTO $-1` vuelve al `DECFSZ`.
+4. Repite hasta que `contador` = **0** → `DECFSZ` salta el `GOTO` y el bucle termina.
 
-En ensamblador no dices “enciende un LED”. Dices: configura el pin como salida, escribe un `1` en el latch correcto y manten el programa corriendo.
+`$-1` es la instruccion anterior (etiqueta implicita de MPASM).
+</Exercise>
+
+## Errores comunes
+
+- **Olvidar `END`**: MPASM puede dar error o generar codigo incompleto.
+- **`MOVLW` vs `MOVWF`**: `MOVLW` carga en **WREG**; `MOVWF` **guarda** WREG en un registro — no son intercambiables.
+- **Escribir salidas en `PORTx`**: usa **`LATx`** para salidas; lee entradas con **`PORTx`**.
+- **Confundir `BTFSS` y `BTFSC`**: uno salta si el bit es **1**, el otro si es **0** — revisa el cableado del boton.
+- **No incluir `P18F4550.INC`**: sin el include, `TRISB` y `LATB` no existen como simbolos.
+- **Etiqueta sin dos puntos** (`inicio` en vez de `inicio:`): el ensamblador no reconoce el destino del salto.
+
+## Preguntas tipo parcial
+
+**¿Que hace `MOVLW D'5'` seguido de `MOVWF contador`?**
+
+Carga 5 en `WREG` y lo copia a la variable GPR `contador`.
+
+**¿Para que sirve `ORG 0x0000`?**
+
+Indica que el codigo empieza en la direccion **0x0000** de la memoria de programa (vector de reset).
+
+**¿Que diferencia hay entre `GOTO` y `CALL`?**
+
+`GOTO` salta sin guardar retorno. `CALL` salta a una subrutina y apila la direccion para volver con `RETURN`.
+
+**¿Que hace `DECFSZ contador, F`?**
+
+Decrementa `contador`; si el resultado es **0**, **no ejecuta** la instruccion siguiente (util para bucles).
 
 <TopicQuiz slug="fundamentos/ensamblador" />

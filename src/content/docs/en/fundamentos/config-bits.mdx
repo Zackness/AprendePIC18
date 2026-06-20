@@ -3,33 +3,259 @@ title: Config bits and configuration word
 description: Fuses, CONFIG directives and minimum system for PIC18F4550.
 ---
 
-import LessonProgress from '../../../../components/LessonProgress.astro';
-import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import Figure from '../../../../components/Figure.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
 import PracticeBox from '../../../../components/PracticeBox.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="fundamentos/config-bits" locale="en" />
 
 
 
-Configuration bits define hardware behavior at power-on: oscillator, watchdog, MCLR, etc.
+
+The **configuration word** (also called **config bits** or **fuses**) sets hardware options the PIC applies **at power-on**, before running your program: oscillator source, watchdog, MCLR behavior, whether ports start digital, and more.
+
+This page complements [MPASM assembly](/en/fundamentos/ensamblador/): there you saw `CONFIG` at the top of the `.ASM`; here you learn **what each bit means** and how it ties to the UNEXPO lab **minimum system**.
+
+<AIExplain title="In MPASM">
+`CONFIG` directives **do not generate executable code**. The assembler turns them into bits the programmer writes to the PIC's **configuration memory** (separate from the Flash where your `GOTO start` lives).
+</AIExplain>
+
+## What config bits are
+
+| Concept | Explanation |
+| --- | --- |
+| **Config bits / fuses** | Non-volatile bits that define fixed chip behavior |
+| **Configuration word** | Those bits grouped in configuration registers |
+| **`CONFIG` directive** | MPASM syntax to set them in the `.ASM` file |
+| **Configuration memory** | Programmed with the `.HEX`, but not CPU-executable code |
+
+Think of config bits as **factory switches** you choose once when building/programming. If `WDT = ON` and your program never runs `CLRWDT`, the PIC will reset on its own even when your logic looks fine.
+
+## Where they go in the .ASM file
+
+Place them **after** `LIST` and `#include`, **before** `ORG` and your code:
 
 ```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+
+; ── Config bits (required in course projects) ──
         CONFIG  FOSC = HS
         CONFIG  WDT  = OFF
         CONFIG  LVP  = OFF
         CONFIG  MCLRE = ON
         CONFIG  PBADEN = OFF
+        CONFIG  BOR  = OFF
+        CONFIG  PWRT = ON
+
+        ORG     0x0000
+        GOTO    start
+; ... rest of program ...
 ```
 
-## Minimum system
+In MPLAB v8 you can also edit them via **Configure → Configuration Bits**, but in the UNEXPO course you usually declare them in the `.ASM` so the report and `.HEX` match.
 
-- PIC18F4550, 20 MHz crystal, 1 nF caps
-- 10 kΩ pull-up on MCLR
-- 5 V supply, 10 nF decoupling cap
+## Each config bit in detail
+
+### `FOSC` — clock source (oscillator)
+
+Selects **where the execution clock comes from**.
+
+| Typical value | Meaning | In this course |
+| --- | --- | --- |
+| **`HS`** | **H**igh-**S**peed — external crystal (4–20 MHz+) | **Use with 20 MHz crystal** |
+| `XT` | Low/medium speed crystal | Less common on F4550 |
+| `INTIO` / RC | Internal oscillator | No external crystal |
+| `EC` / `ECM` | External clock on a pin | Special cases |
+
+With **`FOSC = HS`** you must wire the **crystal + capacitors** of the minimum system. Without a crystal (or bad wiring), the PIC **does not run** at the expected speed — or does not start at all.
+
+### `WDT` — Watchdog Timer
+
+| Value | Effect |
+| --- | --- |
+| **`OFF`** | Watchdog **disabled** — recommended while learning |
+| `ON` | If you do not reset the WDT with `CLRWDT` in time, the PIC **resets** |
+
+In learning labs almost always **`WDT = OFF`**. If left `ON` without `CLRWDT` in long loops, the program “restarts by itself” and looks like a mysterious bug.
+
+### `LVP` — Low Voltage Programming
+
+| Value | Effect |
+| --- | --- |
+| **`OFF`** | Normal programming; **RB5** free as GPIO |
+| `ON` | Low-voltage programming mode — **RB5** reserved for programming |
+
+In UNEXPO labs use **`LVP = OFF`**. With `LVP = ON`, RB5 may not behave as expected on your breadboard.
+
+### `MCLRE` — MCLR / reset pin
+
+| Value | Effect |
+| --- | --- |
+| **`ON`** | **MCLR** pin active as reset (with external pull-up) |
+| `OFF` | MCLR can act as a digital pin (uncommon in this course) |
+
+With **`MCLRE = ON`** you wire **10 kΩ** from MCLR to VDD and a button to GND for manual reset — part of the minimum system.
+
+### `PBADEN` — analog PORTA/B at startup
+
+| Value | Effect |
+| --- | --- |
+| **`OFF`** | RA0–RA3 and RB0–RB4 start as **digital** |
+| `ON` | Those pins may start in **analog** mode |
+
+For GPIO and the first LED use **`PBADEN = OFF`**. If `ON`, reading/writing pins can fail until you configure `ADCON1` — a typical lab mistake.
+
+### `BOR` — Brown-Out Reset
+
+| Value | Effect |
+| --- | --- |
+| **`OFF`** | No automatic reset on VDD drop |
+| `ON` | Reset if supply voltage falls too low |
+
+Many course builds use **`BOR = OFF`**. With `ON`, 5 V supply variations can cause unexpected resets.
+
+### `PWRT` — Power-up Timer
+
+| Value | Effect |
+| --- | --- |
+| **`ON`** | Short delay at power-on so supply stabilizes |
+| `OFF` | No extra delay |
+
+**`PWRT = ON`** is good practice with HS crystal and decoupling caps.
+
+### Summary — course template (20 MHz)
+
+```asm
+        CONFIG  FOSC = HS        ; External high-speed crystal
+        CONFIG  WDT  = OFF       ; No watchdog (learning)
+        CONFIG  LVP  = OFF       ; RB5 free; normal programming
+        CONFIG  MCLRE = ON       ; MCLR reset enabled
+        CONFIG  PBADEN = OFF     ; Digital ports at startup
+        CONFIG  BOR  = OFF       ; No brown-out reset
+        CONFIG  PWRT = ON        ; Power-up delay
+```
+
+<AIExplain title="Practical tip">
+Copy this block into **all** your course `.ASM` files until you understand each line. Changing one `CONFIG` without knowing why can cost hours of breadboard debugging.
+</AIExplain>
+
+## Minimum system — hardware that goes with config bits
+
+Config bits **do not replace** the circuit. With `FOSC = HS` and `MCLRE = ON` you need the Topic 2 (UNEXPO) wiring:
+
+| Component | Typical value | Function |
+| --- | --- | --- |
+| PIC18F4550 | — | Microcontroller |
+| Crystal | **20 MHz** | Main clock (with `FOSC = HS`) |
+| Crystal caps | **~22 pF** each (check datasheet) | Oscillator load |
+| MCLR pull-up | **10 kΩ** to VDD | Stable reset (`MCLRE = ON`) |
+| Reset button | MCLR to GND | Manual reset |
+| Supply | **5 V** (VDD/VSS) | PIC power |
+| Decoupling | **100 nF** (0.1 µF) near PIC | Filters VDD noise |
+
+<Figure
+	src="/images/arquitectura/sistema-minimo.svg"
+	alt="Minimum system diagram for PIC18F4550 with 20 MHz crystal and reset"
+	caption="Minimum system with crystal, capacitors, MCLR with 10 kΩ pull-up, and 5 V supply."
+	credit="Topic 2 PIC Architecture — UNEXPO · Mechatronics Engineering · Microcontrollers"
+/>
+
+Link to [Assembly — LED example](/en/fundamentos/ensamblador/#full-example--led-on-rb0): the `.ASM` configures **software** (`TRISB`, `LATB`); config bits and the crystal configure **hardware** so that software can run.
 
 <PracticeBox title="Lab Practice 1 pre-lab" level="UNEXPO">
-Research minimum system wiring and draw the schematic before breadboarding.
+Research minimum-system wiring, explain PIC18F4550 ports, and draw the schematic **including crystal, MCLR, and capacitors** before breadboarding. Note on the diagram that `FOSC = HS` and `MCLRE = ON`.
 </PracticeBox>
+
+## Reset types on the PIC18
+
+The PIC can restart for several reasons. Config bits control **some**; others come from hardware or code:
+
+| Type | Cause | Config bit link |
+| --- | --- | --- |
+| **Power-On Reset (POR)** | VDD turned on | Always on power-up |
+| **Power-up Timer (PWRT)** | Delay after POR | `PWRT = ON/OFF` |
+| **MCLR** | Low pulse on MCLR pin | `MCLRE = ON` |
+| **Watchdog (WDT)** | WDT not cleared in time | `WDT = ON` + missing `CLRWDT` |
+| **Brown-Out (BOR)** | VDD below threshold | `BOR = ON/OFF` |
+| **Software reset** | `RESET` instruction | From your code |
+
+Mental power-on flow:
+
+```
+  Apply 5 V
+       ↓  POR (+ PWRT if ON)
+  Config bits applied (FOSC, PBADEN…)
+       ↓
+  PC = 0x0000 → GOTO start (your ORG)
+```
+
+If the program “does not start”, check **in this order**: supply and decoupling → crystal and `FOSC` → MCLR and `MCLRE` → `LVP`/`PBADEN` → only then Flash code.
+
+## Config bits vs SFR registers
+
+| | Config bits | SFR registers (`TRISB`, `INTCON`…) |
+| --- | --- | --- |
+| **When applied** | At power-on / after reset | On each instruction in your program |
+| **Where defined** | `CONFIG` directives in `.ASM` | Runtime instructions |
+| **Change at runtime** | No (unless reprogramming) | Yes — your code modifies them |
+| **Example** | `FOSC = HS` | `BCF TRISB, 0` |
+
+Config bits set the **stage**; your [assembly](/en/fundamentos/ensamblador/) program works on **registers** once the PIC is already running.
+
+<Exercise title="Diagnose the problem">
+A classmate programs this `.ASM` with a correctly wired 20 MHz crystal, but RB0 never changes and Proteus simulation also misbehaves:
+
+```asm
+        CONFIG  FOSC = INTIO
+        CONFIG  WDT  = ON
+        CONFIG  PBADEN = ON
+```
+
+**Likely causes:**
+
+1. **`FOSC = INTIO`** — code/hardware expect external HS crystal, but config selects **internal** oscillator → clock mismatch.
+2. **`WDT = ON`** — no `CLRWDT` → continuous reset.
+3. **`PBADEN = ON`** — RB0 may start analog → digital GPIO fails.
+
+**Typical course fix:**
+
+```asm
+        CONFIG  FOSC = HS
+        CONFIG  WDT  = OFF
+        CONFIG  PBADEN = OFF
+```
+</Exercise>
+
+## Common mistakes
+
+- **Forgetting the `CONFIG` block**: the `.HEX` may use defaults different from the lab.
+- **Wrong `FOSC`**: crystal wired but `FOSC = INTIO` (or vice versa) → no stable clock.
+- **`WDT = ON` without `CLRWDT`**: PIC resets itself in loops.
+- **`LVP = ON`**: RB5 reserved for programming — breadboard conflicts.
+- **`PBADEN = ON`**: pins “dead” as digital until ADC/analog setup.
+- **Confusing CONFIG with code**: `CONFIG` lines do not replace `BCF TRISB, 0` or turn on LEDs by themselves.
+- **Crystal without capacitors**: even with `FOSC = HS`, the oscillator may not start.
+
+## Exam-style questions
+
+**Where are config bits stored?**
+
+In the PIC's **configuration memory**, not in normal executable Flash.
+
+**What does `CONFIG WDT = OFF` do?**
+
+Disables the **watchdog timer** so the PIC does not reset on WDT timeout.
+
+**Why `FOSC = HS` with a 20 MHz crystal?**
+
+Selects **high-speed** external crystal mode, matching the course minimum system.
+
+**What problem does `PBADEN = ON` cause in a first GPIO program?**
+
+Several PORTA/PORTB pins may start as **analog**, blocking correct digital read/write.
 
 <TopicQuiz slug="fundamentos/config-bits" locale="en" />

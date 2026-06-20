@@ -3,57 +3,290 @@ title: PIC18 assembly
 description: MPASM basics for writing PIC18F4550 programs.
 ---
 
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
 import LessonProgress from '../../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../../components/TopicQuiz.astro';
-import AIExplain from '../../../../components/AIExplain.astro';
 
 <LessonProgress slug="fundamentos/ensamblador" locale="en" />
 
 
 
-Assembly translates hardware-close instructions into machine code. On PIC18, courses often use **MPASM**, especially when they work with **MPLAB v8**.
+
+**Assembly** translates human-readable instructions into **machine code** (bytes in the PIC's Flash). In the UNEXPO course you use **MPASM** inside **MPLAB v8**: you write a `.ASM` file, assemble it, and get a `.HEX` file to program the microcontroller.
+
+This page completes the Foundations block with [Architecture](/en/fundamentos/arquitectura/), [Registers](/en/fundamentos/registros/), and [Bits and hexadecimal](/en/fundamentos/bits-hex/). You already know **what** `WREG`, SFRs, and masks are; here you learn **how to write the program** line by line.
 
 <AIExplain title="Do not study it as magic">
-Each assembly line should answer a specific question: move data, change a bit, compare, jump, call a subroutine, or configure a register.
+Each assembly line answers a specific question: move data, change a bit, add, compare, jump, call a subroutine, or configure a register. If you cannot state the question a line answers, you do not understand it yet.
 </AIExplain>
 
-## Common structure
+## Program flow — from .ASM to the PIC
+
+```
+  Your code (.ASM)
+       ↓  MPASM (assembler)
+  .HEX file
+       ↓  Programmer / MPLAB
+  PIC18F4550 Flash → the chip executes instructions
+```
+
+Later in [MPLAB and Proteus](/en/fundamentos/mplab-proteus/) you will see the full toolchain. [Config bits](/en/fundamentos/config-bits/) go in the same `.ASM` but are stored in a special configuration area, not as normal executable code.
+
+## Anatomy of an MPASM file
+
+```asm
+; ── 1. Header ───────────────────────────────────────
+        LIST    P=18F4550              ; target processor
+        #include <P18F4550.INC>        ; register names (TRISB, LATB…)
+
+; ── 2. Config bits (fuses) ───────────────────────────
+        CONFIG  FOSC = HS
+        CONFIG  WDT  = OFF
+        CONFIG  LVP  = OFF
+
+; ── 3. Variables (RAM) ──────────────────────────────
+        CBLOCK  0x20                   ; GPR block from address 0x20
+counter     RES     1                  ; reserve 1 byte named 'counter'
+
+; ── 4. Reset vector ─────────────────────────────────
+        ORG     0x0000                 ; first address in Flash
+        GOTO    start                  ; jump to main code
+
+; ── 5. Main program ─────────────────────────────────
+start:
+        CALL    setup_ports
+        CALL    turn_on_led
+loop:
+        GOTO    loop                   ; infinite loop (minimal example)
+
+; ── 6. Subroutines ──────────────────────────────────
+setup_ports:
+        BCF     TRISB, 0               ; RB0 output
+        RETURN
+
+turn_on_led:
+        BSF     LATB, 0                ; RB0 high
+        RETURN
+
+        END                            ; end of file — required
+```
+
+### Directives you must know
+
+| Directive | Function |
+| --- | --- |
+| **`LIST P=18F4550`** | Tells the assembler which MCU |
+| **`#include <P18F4550.INC>`** | Imports register and bit names |
+| **`CONFIG …`** | Configuration word (oscillator, WDT…) |
+| **`ORG addr`** | Sets the Flash address where code starts |
+| **`CBLOCK` / `RES`** | Reserves RAM bytes for GPR variables |
+| **`END`** | Marks end of file |
+
+### Labels, comments, and literals
+
+- **Label** (`start:`, `loop:`): name of a Flash location; target of `GOTO` or `CALL`.
+- **Comment** (`; text`): ignored by MPASM — document your code.
+- **Literal** — see [Bits and hexadecimal](/en/fundamentos/bits-hex/):
+
+| Notation | Example | Meaning |
+| --- | --- | --- |
+| Decimal | `D'200'` | 200 |
+| Binary | `B'11110000'` | 240 |
+| Hexadecimal | `0xF0` | 240 |
+
+## Operation destination — `,W` vs `,F`
+
+Many instructions have two forms: the result goes to **`WREG`** (`,W`) or to file register **`f`** (`,F`):
+
+```asm
+MOVF    counter, W     ; copy 'counter' → WREG (counter unchanged)
+MOVF    counter, F     ; copy counter → counter (useless but valid)
+INCF    counter, F     ; counter = counter + 1 (result in counter)
+INCF    counter, W     ; WREG = counter + 1 (counter unchanged)
+```
+
+Mental rule: **`,F` modifies the register**; **`,W` leaves the register alone** and uses `WREG` as a temp.
+
+## Basic instructions — data movement
+
+| Instruction | What it does | Example |
+| --- | --- | --- |
+| **`MOVLW k`** | Load literal **k** into `WREG` | `MOVLW D'10'` |
+| **`MOVWF f`** | Copy `WREG` → register **f** | `MOVWF LATB` |
+| **`MOVF f,d`** | Copy register **f** → **d** (`,W` or `,F`) | `MOVF PORTB, W` |
+| **`CLRF f`** | Set register **f** to 0 | `CLRF counter` |
+| **`CLRW`** | Set `WREG` to 0 | `CLRW` |
+
+Typical load-and-store pattern:
+
+```asm
+MOVLW   D'55'         ; WREG = 55
+MOVWF   counter       ; counter = 55
+```
+
+## Arithmetic instructions
+
+| Instruction | Operation | Updates `STATUS` |
+| --- | --- | --- |
+| **`ADDLW k`** | WREG = WREG + k | Yes (Z, C, DC, OV, N) |
+| **`ADDWF f,d`** | WREG + f → d | Yes |
+| **`SUBLW k`** | WREG = k − WREG | Yes |
+| **`SUBWF f,d`** | f − WREG → d | Yes |
+| **`INCF f,d`** | f + 1 → d | Yes (Z, N…) |
+| **`DECF f,d`** | f − 1 → d | Yes |
+| **`DECFSZ f,d`** | Decrement; if result is **0**, **skip** next instruction | Yes |
+
+Example — loop for N iterations:
+
+```asm
+MOVLW   D'10'
+MOVWF   counter
+loop:
+        ; ... work ...
+        DECFSZ  counter, F     ; counter--; if 0, skip GOTO
+        GOTO    loop
+        ; loop ends here
+```
+
+After adds and subtracts check [STATUS](/en/fundamentos/arquitectura/#status--result-flags) flags: **Z** (zero?), **C** (carry?), **N** (sign).
+
+## Logic instructions
+
+| Instruction | Operation |
+| --- | --- |
+| **`ANDLW k` / `ANDWF f,d`** | Bitwise AND |
+| **`IORLW k` / `IORWF f,d`** | Bitwise OR |
+| **`XORLW k` / `XORWF f,d`** | Bitwise XOR |
+| **`COMF f,d`** | Complement (NOT) of f |
+
+Details and masks in [Bits and hexadecimal](/en/fundamentos/bits-hex/#bit-masks--change-several-bits-at-once). Practice 1 requires routines with these operations.
+
+## Bit instructions — one pin without touching the rest
+
+| Instruction | Effect |
+| --- | --- |
+| **`BSF f,b`** | Bit **b** of **f** → 1 |
+| **`BCF f,b`** | Bit **b** of **f** → 0 |
+| **`BTFSS f,b`** | **Skip** next line if bit = 1 |
+| **`BTFSC f,b`** | **Skip** next line if bit = 0 |
+
+```asm
+; Read button on RB3 (input)
+BSF     TRISB, 3        ; RB3 input
+BTFSS   PORTB, 3        ; RB3 = 1?
+GOTO    button_released
+; if no skip → button pressed (depends on wiring)
+```
+
+## Branches, subroutines, and the stack
+
+| Instruction | Function |
+| --- | --- |
+| **`GOTO label`** | Unconditional jump — `PC` goes to label |
+| **`CALL sub`** | Call subroutine — saves return address on **stack** |
+| **`RETURN`** | Return from `CALL` — restores `PC` from stack |
+| **`RETFIE`** | Return from interrupt (ISR) |
+
+```asm
+start:
+        CALL    delay_1s      ; go to delay_1s; save return address
+        BSF     LATB, 0       ; on return, turn LED on
+        GOTO    start
+
+delay_1s:
+        ; ... timing loop ...
+        RETURN                ; return right after the CALL
+```
+
+The **stack** is LIFO: the last `CALL` returns first with `RETURN`. See [Architecture — PC](/en/fundamentos/arquitectura/#pc--program-counter) for more detail.
+
+## Compare and decide — conditional branches
+
+PIC18 has **no** `CMP` instruction. You compare by operating and reading **STATUS**:
+
+```asm
+; counter == 0?
+MOVLW   D'0'
+XORWF   counter, W      ; if equal → W=0 → Z=1
+BTFSS   STATUS, Z       ; skip if Z=1 (counter was 0)
+GOTO    not_zero
+
+; RB0 on?
+BTFSS   LATB, 0         ; skip if LATB bit 0 = 1
+GOTO    led_off
+```
+
+| Instruction | Skips if… |
+| --- | --- |
+| **`BTFSS STATUS, Z`** | Result was **zero** (Z=1) |
+| **`BTFSC STATUS, Z`** | Result was **not** zero (Z=0) |
+| **`BTFSS STATUS, C`** | There was **carry** (C=1) |
+
+## Full example — LED on RB0
+
+Translate “turn on an LED on RB0” into concrete steps using [GPIO registers](/en/fundamentos/registros/#gpio-ports--trisx-portx-latx):
 
 ```asm
         LIST    P=18F4550
         #include <P18F4550.INC>
-
-        CONFIG  FOSC = HS
-        CONFIG  WDT = OFF
-        CONFIG  LVP = OFF
+        CONFIG  FOSC = HS, WDT = OFF, LVP = OFF
 
         ORG     0x0000
         GOTO    start
 
 start:
-        ; Main code
-        GOTO    start
+        BCF     TRISB, 0        ; 1) RB0 as output
+        BSF     LATB, 0         ; 2) RB0 high → LED ON
+        GOTO    start           ; 3) loop (program never exits)
 
         END
 ```
 
-## Basic instructions
+In assembly you **do not say** “turn on an LED.” You say: set pin direction, write the latch, keep the program running.
 
-| Instruction | Idea |
-| --- | --- |
-| `MOVLW k` | Loads a literal into `WREG`. |
-| `MOVWF f` | Copies `WREG` into register `f`. |
-| `CLRF f` | Clears a register. |
-| `BSF f,b` | Sets bit `b` of register `f` to 1. |
-| `BCF f,b` | Clears bit `b` of register `f` to 0. |
-| `BTFSC f,b` | Skips the next instruction if the bit is 0. |
-| `BTFSS f,b` | Skips the next instruction if the bit is 1. |
-| `GOTO label` | Unconditional jump. |
-| `CALL sub` | Calls a subroutine. |
-| `RETURN` | Returns from a subroutine. |
+<Exercise title="Trace this fragment">
+```asm
+MOVLW   D'3'
+MOVWF   counter
+INCF    counter, F
+DECFSZ  counter, F
+GOTO    $-1
+```
 
-## Key idea
+1. `counter` becomes **3**, then `INCF` → **4**.
+2. `DECFSZ` decrements: **3** — not zero → no skip.
+3. `GOTO $-1` goes back to `DECFSZ`.
+4. Repeats until `counter` = **0** → `DECFSZ` skips the `GOTO` and the loop ends.
 
-In assembly you do not say “turn on an LED.” You say: configure the pin as output, write a `1` to the correct latch, and keep the program running.
+`$-1` is the previous instruction (MPASM implicit label).
+</Exercise>
+
+## Common mistakes
+
+- **Forgetting `END`**: MPASM may error or produce incomplete code.
+- **`MOVLW` vs `MOVWF`**: `MOVLW` loads **WREG**; `MOVWF` **stores** WREG into a register — not interchangeable.
+- **Writing outputs to `PORTx`**: use **`LATx`** for outputs; read inputs with **`PORTx`**.
+- **Mixing up `BTFSS` and `BTFSC`**: one skips if bit is **1**, the other if **0** — check button wiring.
+- **Missing `P18F4550.INC`**: without the include, `TRISB` and `LATB` are undefined symbols.
+- **Label without colon** (`start` instead of `start:`): the assembler will not recognize the jump target.
+
+## Exam-style questions
+
+**What does `MOVLW D'5'` followed by `MOVWF counter` do?**
+
+Loads 5 into `WREG` and copies it to GPR variable `counter`.
+
+**What is `ORG 0x0000` for?**
+
+It places code at address **0x0000** in program memory (reset vector).
+
+**What is the difference between `GOTO` and `CALL`?**
+
+`GOTO` jumps without saving a return address. `CALL` jumps to a subroutine and pushes the address to return with `RETURN`.
+
+**What does `DECFSZ counter, F` do?**
+
+Decrements `counter`; if the result is **0**, it **skips** the next instruction (useful for loops).
 
 <TopicQuiz slug="fundamentos/ensamblador" locale="en" />
