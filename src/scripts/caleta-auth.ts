@@ -4,16 +4,13 @@
  */
 
 import { isQuizAuthRequired } from '../data/quizzes';
+import { CALETA_ORIGIN, SITE_ORIGIN, getCaletaApiOrigin } from './caleta-config';
+
 const STORAGE_TOKEN = 'aprende-pic18-caleta-token';
 const STORAGE_USER = 'aprende-pic18-caleta-user';
 const STORAGE_PROGRESS = 'aprende-pic18-progress-local';
 const STORAGE_CHECKLISTS = 'aprende-pic18-checklists';
 const STORAGE_STUDY_PATH = 'aprende-pic18-study-path';
-
-const CALETA_ORIGIN =
-	import.meta.env.PUBLIC_CALETA_URL?.replace(/\/$/, '') || 'https://caleta.top';
-const SITE_ORIGIN =
-	typeof window !== 'undefined' ? window.location.origin : 'https://pic18.caleta.top';
 
 export type CaletaUser = { id: string; email: string; name: string };
 export type QuizResult = {
@@ -180,7 +177,7 @@ export async function syncProgressToCaleta(payload?: Record<string, unknown>) {
 
 	const body = payload ?? buildFullProgressPayload();
 
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/progress`, {
 		method: 'PUT',
 		headers: {
 			'Content-Type': 'application/json',
@@ -203,7 +200,7 @@ export async function fetchProgressFromCaleta() {
 	const token = getToken();
 	if (!token) return null;
 
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/progress`, {
 		headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
 		redirect: 'manual',
 	});

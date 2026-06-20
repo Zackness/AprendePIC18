@@ -3,8 +3,7 @@
  * Consumido desde AprendePIC18 via fetch (API publica en caleta.top).
  */
 
-const CALETA_ORIGIN =
-	import.meta.env.PUBLIC_CALETA_URL?.replace(/\/$/, '') || 'https://caleta.top';
+import { getCaletaApiOrigin } from './caleta-config';
 
 export type CaletaMicroRecurso = {
 	id: string;
@@ -25,7 +24,7 @@ export type CaletaMicroRecursosResponse = {
 
 export async function fetchCaletaMicroRecursos(limit = 24): Promise<CaletaMicroRecursosResponse> {
 	const params = new URLSearchParams({ limit: String(limit) });
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/recursos?${params}`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/recursos?${params}`, {
 		method: 'GET',
 		headers: { Accept: 'application/json' },
 	});

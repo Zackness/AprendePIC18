@@ -2,6 +2,12 @@
 	"buildCommand": "npm run build",
 	"outputDirectory": "dist",
 	"framework": "astro",
+	"rewrites": [
+		{
+			"source": "/api/aprende-pic18/:path*",
+			"destination": "https://caleta.top/api/aprende-pic18/:path*"
+		}
+	],
 	"headers": [
 		{
 			"source": "/_astro/(.*)",

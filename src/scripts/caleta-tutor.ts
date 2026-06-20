@@ -3,9 +3,7 @@
  */
 
 import { buildLoginUrl, getToken, isLoggedIn } from './caleta-auth';
-
-const CALETA_ORIGIN =
-	import.meta.env.PUBLIC_CALETA_URL?.replace(/\/$/, '') || 'https://caleta.top';
+import { CALETA_ORIGIN, getCaletaApiOrigin } from './caleta-config';
 
 export type TutorMessage = {
 	role: 'user' | 'assistant';
@@ -34,7 +32,7 @@ function authHeaders(): HeadersInit {
 }
 
 export async function fetchTutorAccess(): Promise<TutorAccessResponse> {
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/tutor/access`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/tutor/access`, {
 		method: 'GET',
 		headers: authHeaders(),
 		redirect: 'manual',
@@ -64,7 +62,7 @@ export async function sendTutorMessage(payload: {
 		throw new Error('login_required');
 	}
 
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/tutor/chat`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/tutor/chat`, {
 		method: 'POST',
 		headers: authHeaders(),
 		body: JSON.stringify(payload),

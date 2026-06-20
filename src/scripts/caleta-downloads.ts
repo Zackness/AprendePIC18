@@ -2,9 +2,7 @@
  * Descarga de codigo fuente AprendePIC18 — requiere JWT + suscripcion activa en CALETAS.
  */
 import { buildLoginUrl, getToken, isLoggedIn } from './caleta-auth';
-
-const CALETA_ORIGIN =
-	import.meta.env.PUBLIC_CALETA_URL?.replace(/\/$/, '') || 'https://caleta.top';
+import { CALETA_ORIGIN, getCaletaApiOrigin } from './caleta-config';
 
 export type DownloadAccessReason = 'login_required' | 'no_subscription' | 'ok';
 
@@ -21,7 +19,7 @@ export async function fetchDownloadAccess(): Promise<DownloadAccess> {
 	}
 
 	const token = getToken();
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/downloads/access`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/downloads/access`, {
 		headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
 		redirect: 'manual',
 	});
@@ -50,7 +48,7 @@ export async function downloadLabSource(slug: string, filename: string): Promise
 		return;
 	}
 
-	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/downloads/${slug}`, {
+	const res = await fetch(`${getCaletaApiOrigin()}/api/aprende-pic18/downloads/${slug}`, {
 		headers: { Authorization: `Bearer ${token}` },
 		redirect: 'manual',
 	});
