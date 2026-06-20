@@ -108,6 +108,47 @@ function saveLocalProgress(data: Record<string, unknown>) {
 	localStorage.setItem(STORAGE_PROGRESS, JSON.stringify(data));
 }
 
+function buildFullProgressPayload(): Record<string, unknown> {
+	return {
+		...loadLocalProgress(),
+		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
+		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+	};
+}
+
+function hasLocalProgressData(): boolean {
+	const progress = loadLocalProgress();
+	const checklists = JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}');
+	const studyPath = JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}');
+	return (
+		Object.keys(progress).length > 0 ||
+		Object.keys(checklists).length > 0 ||
+		Object.keys(studyPath).length > 0
+	);
+}
+
+let hydratePromise: Promise<boolean> | null = null;
+
+/** Descarga progreso de CALETAS y lo fusiona en localStorage. Resuelve true si hubo respuesta valida. */
+export function hydrateProgressFromCaleta(): Promise<boolean> {
+	if (!isLoggedIn()) return Promise.resolve(false);
+	if (!hydratePromise) {
+		hydratePromise = fetchProgressFromCaleta()
+			.then((data) => data !== null)
+			.catch(() => false)
+			.finally(() => {
+				hydratePromise = null;
+			});
+	}
+	return hydratePromise;
+}
+
+/** Sube cambios locales a CALETAS (p. ej. al marcar lecciones o checklists). */
+export function scheduleProgressSync() {
+	if (!isLoggedIn()) return;
+	syncProgressToCaleta(buildFullProgressPayload()).catch(() => {});
+}
+
 export function saveQuizResult(slug: string, result: QuizResult) {
 	if (isQuizAuthRequired(slug) && !isLoggedIn()) return;
 
@@ -121,11 +162,7 @@ export function saveQuizResult(slug: string, result: QuizResult) {
 	notifyProgressSync();
 
 	if (isLoggedIn()) {
-		syncProgressToCaleta({
-			...data,
-			checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
-			studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
-		})
+		syncProgressToCaleta(buildFullProgressPayload())
 			.then(() => notifyProgressSync())
 			.catch(() => {});
 	}
@@ -141,11 +178,7 @@ export async function syncProgressToCaleta(payload?: Record<string, unknown>) {
 	const token = getToken();
 	if (!token) return null;
 
-	const body = payload ?? {
-		...loadLocalProgress(),
-		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
-		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
-	};
+	const body = payload ?? buildFullProgressPayload();
 
 	const res = await fetch(`${CALETA_ORIGIN}/api/aprende-pic18/progress`, {
 		method: 'PUT',
@@ -222,12 +255,11 @@ function mergeRemoteProgress(remote: Record<string, unknown>) {
 /** Sube progreso local (quizzes opcionales, ruta, checklists) a CALETAS tras iniciar sesion */
 export async function pushLocalProgressToCaleta() {
 	if (!isLoggedIn()) return null;
-	await fetchProgressFromCaleta().catch(() => null);
-	return syncProgressToCaleta({
-		...loadLocalProgress(),
-		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
-		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
-	});
+
+	const fetched = await hydrateProgressFromCaleta();
+	if (!fetched && !hasLocalProgressData()) return null;
+
+	return syncProgressToCaleta(buildFullProgressPayload());
 }
 
 export function handleAuthCallback() {
@@ -256,14 +288,12 @@ export function handleAuthCallback() {
 		}
 	}
 
-	fetchProgressFromCaleta()
-		.then(() =>
-			syncProgressToCaleta({
-				...loadLocalProgress(),
-				checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
-				studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
-			}),
-		)
+	hydrateProgressFromCaleta()
+		.then((fetched) => {
+			if (fetched || hasLocalProgressData()) {
+				return syncProgressToCaleta(buildFullProgressPayload());
+			}
+		})
 		.finally(() => {
 			window.history.replaceState({}, '', returnTo);
 			window.location.href = returnTo;

@@ -1,6 +1,7 @@
 import { getSkillSeries } from '../data/skill-tutorials/index';
 import { getTutorialSteps } from '../data/tutorial-steps';
 import { practiceTutorials } from '../data/tutorials';
+import { hydrateProgressFromCaleta, scheduleProgressSync } from './caleta-auth';
 
 export const STORAGE_STUDY_PATH = 'aprende-pic18-study-path';
 export const STORAGE_PROGRESS = 'aprende-pic18-progress-local';
@@ -22,6 +23,7 @@ export function loadStudyPath(): Record<string, boolean> {
 export function saveStudyPath(data: Record<string, boolean>) {
 	localStorage.setItem(STORAGE_STUDY_PATH, JSON.stringify(data));
 	window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
+	scheduleProgressSync();
 }
 
 export function loadQuizzes(): Record<string, { passed?: boolean; score?: number }> {
@@ -47,10 +49,12 @@ export function isPracticeTutorialComplete(slug: string): boolean {
 	return steps.every((_, index) => checklist[String(index)] || checklist[index]);
 }
 
-export function initStudyPath() {
+export async function initStudyPath() {
 	const root = document.querySelector('[data-study-path]');
 	if (!root || root.getAttribute('data-progress-bound') === '1') return;
 	root.setAttribute('data-progress-bound', '1');
+
+	await hydrateProgressFromCaleta();
 
 	const isEn = root.getAttribute('data-locale') === 'en';
 	const inputs = root.querySelectorAll<HTMLInputElement>('.study-path__check');
@@ -167,14 +171,14 @@ export function initStudyPath() {
 		});
 	});
 
-	refresh();
-
 	const onExternalUpdate = () => refresh();
 	window.addEventListener('aprende-quiz-complete', onExternalUpdate);
 	window.addEventListener('aprende-auth-change', onExternalUpdate);
 	window.addEventListener('aprende-checklist-update', onExternalUpdate);
 	window.addEventListener('aprende-skill-guide-update', onExternalUpdate);
 	window.addEventListener('aprende-progress-sync', onExternalUpdate);
+
+	refresh();
 
 	resetBtn?.addEventListener('click', () => {
 		const msg = isEn

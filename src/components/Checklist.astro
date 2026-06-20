@@ -41,6 +41,8 @@ const checklistId = `aprende-pic18-${id}`;
 </section>
 
 <script>
+	import { scheduleProgressSync } from '../scripts/caleta-auth';
+
 	function initChecklists() {
 		const STORAGE_KEY = 'aprende-pic18-checklists';
 
@@ -55,6 +57,7 @@ const checklistId = `aprende-pic18-${id}`;
 		function saveAll(data) {
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
+			scheduleProgressSync();
 		}
 
 		document.querySelectorAll('[data-checklist]').forEach((section) => {
