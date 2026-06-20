@@ -1,10 +1,21 @@
 ---
-title: 'Tutorial — Practica 4'
-description: 'PWM: calculo de PR2, duty y control.'
+title: 'Tutorial — Práctica 4: PWM'
+description: 'Genera PWM con Timer2 y CCP1 para controlar brillo o velocidad de un motor.'
 ---
 
 import PracticeTutorial from '../../../components/PracticeTutorial.astro';
 
 <PracticeTutorial slug="practica-4" locale="es" />
+
+## Teoría de apoyo
+
+Antes de programar, repasa [PWM / CCP](/pwm/): cálculo de **PR2**, **duty cycle** y configuración de **Timer2**.
+
+## Qué debes lograr en código
+
+1. Calcular `PR2` para la frecuencia PWM deseada (ej. ~1 kHz).
+2. Configurar `T2CON`, `PR2` y `CCP1CON` en modo PWM.
+3. Escribir el duty en los bits adecuados de `CCPR1L` y `CCP1CON`.
+4. Conectar carga en **RC2/CCP1** y variar el duty (potenciómetro + ADC opcional).
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

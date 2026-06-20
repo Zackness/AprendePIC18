@@ -1,10 +1,70 @@
 ---
-title: 'Tutorial — Practica 1'
-description: 'Operaciones matematicas y logicas con puertos.'
+title: 'Tutorial — Práctica 1: Operaciones matemáticas'
+description: 'Programa una calculadora ALU en ensamblador: suma, resta, mul, div y operaciones lógicas con switches y LEDs.'
 ---
 
-import PracticeTutorial from '../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-1" locale="es" />
+<PracticeLabPage tutorialSlug="practica-1">
+
+<PracticeBox title="Práctica 1 de Laboratorio" level="UNEXPO">
+Sistema mínimo PIC18F4550. Operandos en puerto B y D (switches). Resultado en puerto C y E (LEDs). Pulsador RA0 cambia la operación.
+</PracticeBox>
+
+## Mapa de hardware
+
+| Pin / puerto | Función en el programa |
+| --- | --- |
+| `PORTB` | Operando A (DIP switch de 8 bits) |
+| `PORTD` | Operando B (DIP switch de 8 bits) |
+| `LATC` | Resultado bits 0–7 (LEDs) |
+| `LATE` | Resultado bits 8–15 (LEDs; multiplicación) |
+| `RA0` | Pulsador NA — cambia la operación activa |
+
+## Operaciones incluidas
+
+Pulsa **RA0** para avanzar entre modos (vuelve a 0 después del último):
+
+| Modo | Operación | Instrucciones clave |
+| --- | --- | --- |
+| 0 | Suma | `ADDWF` |
+| 1 | Resta | `SUBWF` |
+| 2 | Multiplicación | `MULWF` → `PRODH:PRODL` |
+| 3 | División (software) | Restas repetidas |
+| 4 | OR lógico | `IORWF` |
+| 5 | AND lógico | `ANDWF` |
+| 6 | XOR lógico | `XORWF` |
+| 7 | Complemento | `COMF` (operando A) |
+| 8 | Rotar izq. sin acarreo | `RLNCF` (operando A) |
+
+<AIExplain title="División por software">
+No hay instrucción `DIV` nativa en PIC18. La rutina `division_software` resta el divisor repetidamente hasta que el dividendo es menor; el cociente cuenta cuántas restas caben.
+</AIExplain>
+
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-1-operaciones"
+	filename="practica-1-operaciones.asm"
+	note="Requiere suscripción activa en CALETAS. Completa el membrete (alumno, sección, fecha) antes de entregar. Compila con MPASM y carga el .hex en Proteus o PICkit."
+/>
+
+## Proteus / MPLAB
+
+1. Crear proyecto MPASM para **PIC18F4550** (cristal HS 20 MHz).
+2. Importar el diagrama de la práctica (página 2 del PDF).
+3. Switches en `RB0–RB7` y `RD0–RD7` con pull-up 10 kΩ.
+4. LEDs en `RC0–RC7` y `RE0–RE7` con resistencia 220–330 Ω.
+5. Pulsador en `RA0` a tierra con pull-up.
+6. Compilar → `.hex` → simular → verificar cada modo.
+
+## Herramientas
+
+- MPLAB IDE 8.88 · PICkit 2/3 · Proteus · Datasheet PIC18F4550
+
+</PracticeLabPage>
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

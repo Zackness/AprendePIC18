@@ -1,10 +1,37 @@
 ---
-title: 'Tutorial — Practica 8'
-description: 'Comunicacion serial UART.'
+title: 'Tutorial — Práctica 8: Comunicación serial'
+description: 'Configura EUSART a 9600 baudios y envía/recibe datos entre el PIC y una terminal en PC.'
 ---
 
-import PracticeTutorial from '../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-8" locale="es" />
+<PracticeLabPage tutorialSlug="practica-8">
+
+<PracticeBox title="Práctica 8 de Laboratorio" level="UNEXPO">
+Establecer comunicación serial entre el PIC18F4550 y una PC usando EUSART. Enviar y recibir datos (terminal serial).
+</PracticeBox>
+
+## Requisitos
+
+- Configurar EUSART a 9600 o 115200 baudios
+- Pines RC6 (TX) y RC7 (RX)
+- Terminal en PC (PuTTY, Tera Term, Arduino Serial Monitor)
+- Opcional: protocolo simple de comandos
+
+## Evaluación
+
+Código funcional, simulación o prueba física, informe con diagrama y explicación del cálculo de SPBRG.
+
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-8-comunicacion-serial"
+	filename="practica-8-comunicacion-serial.asm"
+	note="Requiere suscripción activa en CALETAS. EUSART a 9600 baudios, mensaje de bienvenida y eco de caracteres."
+/>
+
+</PracticeLabPage>
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

@@ -1,0 +1,123 @@
+---
+import {
+	getSkillSeries,
+	skillStepHref,
+	skillSeriesHref,
+	type SkillTutorialSeries,
+} from '../data/skill-tutorials';
+
+interface Props {
+	seriesId: string;
+	locale?: 'es' | 'en';
+}
+
+const { seriesId, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const series = getSkillSeries(seriesId);
+
+if (!series) {
+	throw new Error(`Skill tutorial series not found: ${seriesId}`);
+}
+
+function levelLabel(level: SkillTutorialSeries['level']) {
+	if (isEn) {
+		return level === 'basico' ? 'Beginner' : level === 'intermedio' ? 'Intermediate' : 'Advanced';
+	}
+	return level === 'basico' ? 'Basico' : level === 'intermedio' ? 'Intermedio' : 'Avanzado';
+}
+
+const progressKeys = series.steps.map((s) => `${seriesId}/${s.id}`);
+---
+
+<article class="skill-series" data-skill-series-id={seriesId} data-skill-total={series.steps.length}>
+	{
+		series.steps.map((step, i) => (
+			<meta data-skill-step={i} data-skill-step-key={`${seriesId}/${step.id}`} />
+		))
+	}
+
+	<header class="skill-series__header">
+		<p class="skill-series__eyebrow">{isEn ? 'Practical guide unit' : 'Unidad de guia practica'}</p>
+		<h1 class="skill-series__title">{isEn ? series.titleEn : series.titleEs}</h1>
+		<span class={`skill-series__level skill-series__level--${series.level}`}>
+			{levelLabel(series.level)}
+		</span>
+		<p class="skill-series__desc">{isEn ? series.descriptionEn : series.descriptionEs}</p>
+		<div class="skill-series__progress-wrap" aria-hidden="true">
+			<div class="skill-series__progress-bar">
+				<div class="skill-series__progress-fill" data-skill-bar style="width: 0%" />
+			</div>
+		</div>
+	</header>
+
+	{
+		series.prerequisites?.length ? (
+			<p class="skill-series__prereq">
+				<strong>{isEn ? 'Recommended first:' : 'Recomendado antes:'}</strong>{' '}
+				{series.prerequisites.map((p, i) => (
+					<>
+						{i > 0 ? ', ' : ''}
+						<a href={skillSeriesHref(p, locale)}>{p}</a>
+					</>
+				))}
+			</p>
+		) : null
+	}
+
+	<ol class="skill-series__steps">
+		{
+			series.steps.map((step, i) => (
+				<li class="skill-series__step">
+					<span class="skill-series__step-num">{i + 1}</span>
+					<a href={skillStepHref(seriesId, step.id, locale)} class="skill-series__step-link">
+						{isEn ? step.titleEn : step.titleEs}
+					</a>
+				</li>
+			))
+		}
+	</ol>
+
+	{
+		series.preparesFor?.length ? (
+			<footer class="skill-series__footer">
+				<p>
+					<strong>{isEn ? 'Prepares you for:' : 'Te prepara para:'}</strong>{' '}
+					{series.preparesFor.map((slug, i) => (
+						<>
+							{i > 0 ? ', ' : ''}
+							<a href={isEn ? `/en/tutoriales/${slug}/` : `/tutoriales/${slug}/`}>{slug}</a>
+						</>
+					))}
+				</p>
+			</footer>
+		) : null
+	}
+
+	<p class="skill-series__start">
+		<a class="skill-series__cta" href={skillStepHref(seriesId, series.steps[0].id, locale)}>
+			{isEn ? 'Start step 1 →' : 'Empezar paso 1 →'}
+		</a>
+	</p>
+</article>
+
+<script define:vars={{ STORAGE_KEY: 'aprende-pic18-skill-guides', progressKeys }}>
+	function paintSeriesProgress() {
+		let saved = {};
+		try {
+			saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+		} catch {
+			/* ignore */
+		}
+		const total = progressKeys.length;
+		let done = 0;
+		progressKeys.forEach((k) => {
+			if (saved[k]) done += 1;
+		});
+		const bar = document.querySelector('[data-skill-bar]');
+		if (bar) bar.style.width = `${total ? Math.round((done / total) * 100) : 0}%`;
+	}
+
+	paintSeriesProgress();
+	document.addEventListener('astro:page-load', paintSeriesProgress);
+	window.addEventListener('aprende-skill-guide-update', paintSeriesProgress);
+</script>

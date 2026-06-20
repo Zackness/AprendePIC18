@@ -1,10 +1,38 @@
 ---
-title: 'Tutorial — Practica 7'
-description: 'Convertidor AD de 10 bits.'
+title: 'Tutorial — Práctica 7: Convertidor A/D'
+description: 'Lee un potenciómetro en AN0 con el ADC de 10 bits y muestra el resultado en LCD.'
 ---
 
-import PracticeTutorial from '../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-7" locale="es" />
+<PracticeLabPage tutorialSlug="practica-7">
+
+<PracticeBox title="Práctica 7 de Laboratorio" level="UNEXPO">
+Implementar conversión analógico-digital: leer potenciómetro o sensor, procesar valor y visualizar en LCD o LEDs.
+</PracticeBox>
+
+## Pasos obligatorios en tu código
+
+1. Configurar ADCON1 (pines analógicos)
+2. Configurar ADCON2 (reloj, formato)
+3. Seleccionar canal en ADCON0
+4. Iniciar conversión y esperar GO/DONE
+5. Leer y escalar resultado a voltaje o unidades
+
+## Cristal 20 MHz
+
+Seleccionar ADCS = 101 (16 Tosc) en ADCON2 según Tema 9 CAD.
+
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-7-convertidor-ad"
+	filename="practica-7-convertidor-ad.asm"
+	note="Requiere suscripción activa en CALETAS. Lectura AN0, configuración ADCON y visualización en LCD (bus 4 bit en RB/RE)."
+/>
+
+</PracticeLabPage>
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

@@ -12,29 +12,150 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 
 
-**SFR** control hardware; **GPR** store variables. The `BSR` register selects the active memory bank.
+This page is the PIC18F4550 **register catalog**. If you have not read [Basic architecture](/en/fundamentos/arquitectura/) yet, start there: it explains **SFR**, **GPR**, `WREG`, `STATUS`, `BSR`, and `PC` with assembly examples.
+
+Here you will see **which registers exist**, **what each one does**, and **how to use them** in code.
+
+## Data memory map
+
+Data RAM mixes two kinds of locations:
+
+| Type | What it is | Examples |
+| --- | --- | --- |
+| **SFR** | Control internal hardware | `TRISB`, `LATB`, `INTCON`, `TMR0` |
+| **GPR** | Your program variables | `counter`, `temp` (declared with `RES`) |
+
+The PIC18F4550 organizes RAM into **16 banks** (0 through 15). Register **`BSR`** selects the active bank. Many important SFRs sit in the **access bank** (`ACCESS`): you can read and write them **without changing `BSR`**.
+
+<AIExplain title="Practical rule">
+In the lab you usually access `TRISx`, `LATx`, `INTCON`… without touching `BSR`. You only need it if MPASM requires a specific bank or you place GPRs in another bank.
+</AIExplain>
 
 ## CPU registers
 
-| Register | Function |
-| --- | --- |
-| `WREG` | Working accumulator |
-| `STATUS` | Flags: Z, C, DC, OV, N |
-| `BSR` | Bank select |
-| `PC` | Program counter |
-
-## Port registers
+These registers do not control a specific peripheral; they belong to the processor **core**. See [Architecture](/en/fundamentos/arquitectura/) for detailed examples; here is a quick reference:
 
 | Register | Function |
 | --- | --- |
-| `TRISx` | Direction: 1=input, 0=output |
-| `PORTx` | Read pin levels |
-| `LATx` | Write output latch |
+| `WREG` | 8-bit accumulator. Source/destination for many instructions. |
+| `STATUS` | Flags Z, C, DC, OV, N after arithmetic/logic operations. |
+| `BSR` | Selects memory bank (0–15). |
+| `PC` | Program counter. Points to the next instruction in Flash. |
+| `STKPTR` / **Stack** | Pushes return addresses on `CALL`/`RETURN` and interrupts. |
 
-## Exam question
+## GPIO ports — `TRISx`, `PORTx`, `LATx`
 
-**What is the difference between reading PORTB and writing LATB?**
+Each port (A, B, C, D, E) has **three SFRs** with different roles:
 
-`PORTB` reflects electrical pin levels. `LATB` sets the output value without reading the physical pin.
+| Register | Read / write | Function |
+| --- | --- | --- |
+| **`TRISx`** | Write | Pin direction: **1 = input**, **0 = output** |
+| **`LATx`** | Write | **Output** value written to the latch (does not read the physical pin) |
+| **`PORTx`** | Read | **Actual** pin level (useful for inputs and switches) |
+
+PIC18F4550 ports (40-pin PDIP):
+
+| Port | Pins | Course notes |
+| --- | --- | --- |
+| A | RA0–RA5 | Some analog pins |
+| B | RB0–RB7 | RB0 = INT0; RB4–RB7 = change interrupt |
+| C | RC0–RC7 | RC6/RC7 = UART (TX/RX) |
+| D | RD0–RD7 | LCD in lab practices |
+| E | RE0–RE2 | Analog inputs |
+
+### Output — turn on LED on RB0
+
+```asm
+BCF     TRISB, 0    ; RB0 as output (TRISB bit 0 = 0)
+BSF     LATB, 0     ; RB0 high → LED on
+```
+
+### Input — read a button on RB3
+
+```asm
+BSF     TRISB, 3    ; RB3 as input (TRISB bit 3 = 1)
+BTFSS   PORTB, 3    ; skip if RB3 is 1 (button released, depends on wiring)
+GOTO    button_pressed
+```
+
+<AIExplain title="PORT vs LAT — exam favorite">
+**Write outputs with `LATx`** (or `BSF`/`BCF` on `LATx`). **Read inputs with `PORTx`**. Writing to `PORTx` on a pin configured as analog input can cause odd behavior.
+</AIExplain>
+
+More examples in [GPIO](/en/gpio/) and the [quick register guide](/en/referencia/guia-registros/).
+
+## Interrupt registers
+
+Interrupts use several SFRs in sequence: **enable** → **check flag** → **run ISR** → **clear flag** → `RETFIE`.
+
+### Global control — `INTCON`, `INTCON2`, `INTCON3`
+
+| Register / bit | Function |
+| --- | --- |
+| **`INTCON.GIE`** | **G**lobal **I**nterrupt **E**nable — master switch (1 = interrupts active) |
+| **`INTCON.PEIE`** | Enables **peripheral** interrupts (timers, UART, ADC…) |
+| **`INTCON.TMR0IF`** | Flag: Timer0 overflowed |
+| **`INTCON2` / `INTCON3`** | External INT0–INT2, RB port, priorities |
+
+### Per peripheral — `PIEx`, `PIRx`, `IPRx`
+
+| Family | Purpose |
+| --- | --- |
+| **`PIE1`, `PIE2`** | **P**eripheral **I**nterrupt **E**nable — enable the source (e.g. TMR0IE) |
+| **`PIR1`, `PIR2`** | **P**eripheral **I**nterrupt **R**equest — flag that the event occurred |
+| **`IPR1`, `IPR2`** | High/low priority for each source |
+
+Typical Timer0 flow:
+
+```asm
+        BSF     INTCON, GIE     ; turn on global switch
+        BSF     INTCON, PEIE    ; allow peripheral interrupts
+        BSF     PIE1, TMR0IE    ; enable Timer0 interrupt
+        ; ... in the ISR ...
+        BCF     INTCON, TMR0IF  ; clear flag before RETFIE
+        RETFIE
+```
+
+Full detail in [Interrupts](/en/interrupciones/).
+
+## Other SFRs you will see in the course
+
+Summary by module — full table in [Quick register guide](/en/referencia/guia-registros/):
+
+| Module | Key registers | Topic |
+| --- | --- | --- |
+| **Timer0** | `T0CON`, `TMR0L`, `TMR0H` | [Timer 0](/en/timers/timer0/) |
+| **Timer1/2** | `T1CON`, `T2CON`, `PR2` | [Timers](/en/timers/timer1-timer2/) |
+| **ADC** | `ADCON0`, `ADCON1`, `ADCON2`, `ADRESH/L` | [ADC](/en/adc/) |
+| **UART** | `TXSTA`, `RCSTA`, `SPBRG`, `TXREG`, `RCREG` | [UART](/en/comunicacion/uart/) |
+| **PWM/CCP** | `CCP1CON`, `CCPR1L`, `PR2` | PWM and CCP |
+| **SPI/I2C** | `SSPSTAT`, `SSPCON1` | [SPI/I2C](/en/comunicacion/spi-i2c/) |
+
+## GPR variables — declaring in assembly
+
+```asm
+        ; Variable section (e.g. after UDATA or at end of file):
+counter     RES     1       ; define name + reserve 1 byte
+
+        ; Usage:
+INCF    counter, F
+MOVF    counter, W
+```
+
+The **name** is your variable; an **SFR** has a fixed factory name. That difference is covered in [Architecture — GPR vs SFR](/en/fundamentos/arquitectura/#gpr--general-purpose-registers).
+
+## Exam-style questions
+
+**What is the difference between reading `PORTB` and writing `LATB`?**
+
+`PORTB` reflects electrical pin levels (useful for inputs). `LATB` changes the latch output value without reading the physical pin.
+
+**What does `BSR` do?**
+
+It selects the RAM bank (0–15) when accessing an address. Many SFRs do not need it because they are in the ACCESS bank.
+
+**What is `INTCON.GIE` for?**
+
+It enables or disables **all** interrupts globally.
 
 <TopicQuiz slug="fundamentos/registros" locale="en" />

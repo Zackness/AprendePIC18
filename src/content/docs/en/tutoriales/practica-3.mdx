@@ -1,10 +1,34 @@
 ---
-title: 'Tutorial — Practice 3'
-description: 'Frequency meter with multiplexed displays.'
+title: 'Tutorial — Practice 3: Frequency meter'
+description: 'Measure frequency with Timer0, a 1 s Timer1 ISR window, and multiplexed 7-segment displays.'
 ---
 
-import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-3" locale="en" />
+<PracticeLabPage tutorialSlug="practica-3" locale="en">
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+<PracticeBox title="Lab Practice 3" level="UNEXPO">
+Frequency meter with multiplexed 7-segment displays. Use timers for the measurement window and display refresh.
+</PracticeBox>
+
+## Key concepts
+
+- Timer as external pulse counter
+- Display multiplexing to save pins
+- Visual persistence with fast refresh (~50 Hz per digit)
+- Calculation: frequency = count / window time
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-3-frecuencimetro"
+	filename="practica-3-frecuencimetro.asm"
+	locale="en"
+	note="Requires an active CALETAS subscription. Template with Timer0 counter, measurement window, and multiplexing. Calibrate the 1 s delay in Proteus."
+/>
+
+</PracticeLabPage>
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)

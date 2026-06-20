@@ -1,0 +1,143 @@
+---
+title: Conceptos basicos del microcontrolador
+description: Microcontrolador vs microprocesador, tipos de memoria y perifericos internos y externos segun el Tema 1 UNEXPO.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../components/AIExplain.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="introduccion/conceptos-basicos" />
+
+Contenido alineado al **Tema 1 — Conceptos basicos** del curso de Microcontroladores (UNEXPO · Ing. Mecatronica), segun el material del Prof. Ing. Yoel Pire.
+
+## Que es un microcontrolador
+
+Un **microcontrolador** (μC) es un circuito integrado **programable** que integra en un solo chip los bloques basicos de una computadora en miniatura:
+
+- **CPU** — ejecuta las instrucciones del programa paso a paso.
+- **Memorias** — guardan el programa y los datos de trabajo.
+- **Lineas de entrada y salida** — conectan el chip con LEDs, botones, sensores, etc.
+- **Perifericos** — modulos internos o externos que amplian lo que puede hacer el dispositivo.
+
+Para usarlo escribes un **programa** (firmware): la CPU lee las instrucciones almacenadas en memoria y las ejecuta. No hay sistema operativo como en una PC; el control es directo.
+
+<AIExplain title="Computadora en miniatura">
+Un μC se puede tratar como un pequeno dispositivo de computo con prestaciones limitadas, pero suficiente para controlar procesos, sensores, motores, pantallas y comunicacion en tiempo real.
+</AIExplain>
+
+## Microprocesador vs microcontrolador
+
+| | **Microcontrolador (μC)** | **Microprocesador (μP)** |
+| --- | --- | --- |
+| **Que integra** | CPU, memoria, buses y perifericos en **un chip** | Solo la **CPU** (procesador) |
+| **Tipo de sistema** | **Cerrado** — computador completo de prestaciones fijas | **Abierto** — conectas memoria, E/S y perifericos **externos** |
+| **Pines al exterior** | Salen las lineas que gobiernan perifericos y puertos | Salen buses de **direccion, datos y control** para armar un PC |
+| **Programacion** | Te concentras en la aplicacion | Debes controlar tambien dispositivos externos |
+| **Ejemplo academico** | PIC18F4550 (un solo chip) | CPU de una PC clasica en socket (RAM, chipset y almacenamiento van **en la placa madre**, no dentro del chip del procesador) |
+
+<Figure
+	src="/images/arquitectura/harvard-von-neumann.svg"
+	alt="Comparacion de arquitecturas y sistemas de computo embebido"
+	caption="El μC integra CPU, memoria y perifericos en un chip; el μP es solo el procesador y el resto del sistema se monta aparte."
+	credit="Basado en Tema 1 — Conceptos basicos · UNEXPO"
+/>
+
+<AIExplain title="No confundir μC con μP">
+Un Arduino lleva un **microcontrolador** AVR dentro. En este curso trabajas con un μC: lo esencial del PIC18F4550 esta en un solo chip.
+</AIExplain>
+
+## Raspberry Pi y otras placas: no es lo mismo
+
+La **Raspberry Pi** no es un microcontrolador ni un microprocesador suelto. Es una **computadora de placa unica (SBC)** — una **mini PC** que ya trae montada en la placa:
+
+- Un **SoC** (System-on-Chip): nucleos ARM de aplicacion, GPU y otros bloques en un mismo circuito integrado.
+- **RAM** incluida en la placa (soldada o en el paquete del SoC, segun el modelo).
+- Conectores **USB**, **HDMI**, red, alimentacion, GPIO.
+- **microSD** (o almacenamiento interno) para el sistema operativo y tus programas.
+
+No partes de un chip vacio al que debas soldarle RAM como en un diseño academico con μP puro: **la placa ya es un equipo completo**. Ejecuta **Linux** (sistema operativo), no el firmware directo que grabas en Flash como en el PIC.
+
+| | **PIC18F4550** | **Raspberry Pi** |
+| --- | --- | --- |
+| **Que es** | Microcontrolador (μC) | Computadora de placa unica (SBC) |
+| **Programa** | Firmware en Flash del chip | SO + apps en tarjeta SD / Linux |
+| **Memoria** | Flash, RAM y EEPROM **dentro del chip** | RAM **en la placa** + almacenamiento en SD |
+| **Nivel de estudio** | Registros, bits, ensamblador | Python, Linux, drivers de alto nivel |
+
+## Perifericos internos y externos
+
+Los perifericos permiten al μC interactuar con el mundo. Pueden estar **dentro del chip** o conectarse **por fuera**.
+
+### Perifericos internos (integrados en el chip)
+
+Modulos que el fabricante incluye dentro del microcontrolador. En el PIC18F4550 encontraras, entre otros:
+
+- Temporizadores / contadores (Timer0, Timer1, Timer2)
+- Conversor A/D (ADC)
+- UART / USART (comunicacion serial)
+- PWM / modulo CCP
+- Interfaces SPI e I2C
+- USB (en el 4550)
+- Memoria EEPROM interna
+
+### Perifericos externos (conectados al μC)
+
+Dispositivos que **no** vienen dentro del chip y se cablean a los pines:
+
+- Sensores (temperatura, presion, distancia…)
+- Modulos de comunicacion (Bluetooth, Wi-Fi, GPS…)
+- Memorias externas
+- Pantallas LCD u OLED
+- Displays de 7 segmentos
+- Teclados matriciales
+- Motores, reles, drivers
+
+En laboratorio usaras ambos: el **ADC interno** del PIC y, por ejemplo, un **LCD externo** cableado a los puertos GPIO.
+
+## Tipos de memoria
+
+### Memoria de programa (tecnologia de fabricacion)
+
+Segun como se graba el firmware, el curso distingue:
+
+| Tipo | Que es | Regrabable |
+| --- | --- | --- |
+| **ROM** | Programa grabado en fabrica | No |
+| **OTP** | One-Time Programmable — se graba una vez | No |
+| **EPROM** | Se graba electricamente; se borra con luz UV | Si (con borrado UV) |
+| **EEPROM** | Grabado y borrado electrico | Si |
+| **Flash** | Grabado electrico; la usa el PIC18F4550 para el `.hex` | Si |
+
+En el PIC18F4550 el programa vive en **Flash** (no volatil: se conserva al apagar). Los datos que quieras guardar entre encendidos pueden ir en **EEPROM** interna.
+
+### Memoria de datos (uso en ejecucion)
+
+| Tipo | Funcion en el μC |
+| --- | --- |
+| **RAM** | Variables temporales, contadores, banderas mientras el programa corre. Se pierde al apagar si no la guardas antes. |
+| **Registros especiales (SFR)** | Controlan puertos, timers, ADC, etc. (lo veras en Fundamentos). |
+
+<AIExplain title="Para el parcial">
+Pregunta tipica: diferencia μC vs μP, nombra perifericos internos del PIC, y explica para que sirve Flash vs RAM vs EEPROM.
+</AIExplain>
+
+## Aplicaciones tipicas
+
+Un microcontrolador puede usarse en:
+
+- Control de sensores y actuadores
+- Control de procesos industriales
+- Equipos medicos y robótica
+- Electrodomesticos e interfaces hombre-maquina (teclado, pantalla)
+- Control de motores (PWM)
+- Comunicacion (SPI, I2C, UART, USB)
+- Relojes, alarmas, calculadoras y muchas mas
+
+## Siguiente paso
+
+Ya conoces los conceptos generales del Tema 1. Sigue con [Que es el PIC18F4550](/introduccion/pic18f4550/) para ver como se aplican estos bloques al chip que usaras en el laboratorio.
+
+<TopicQuiz slug="introduccion/conceptos-basicos" />

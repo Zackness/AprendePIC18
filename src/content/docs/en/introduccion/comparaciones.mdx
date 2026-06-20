@@ -12,10 +12,10 @@ import AIExplain from '../../../../components/AIExplain.astro';
 
 
 
-Comparing the PIC18F4550 with Arduino, ESP32, and Raspberry Pi helps explain that not every board solves the same problem.
+Comparing the PIC18F4550 with Arduino, ESP32, and Raspberry Pi helps explain that not every board solves the same problem. You already covered [microcontroller vs microprocessor](/en/introduccion/conceptos-basicos/) in Topic 1; here we apply that to real platforms.
 
 <AIExplain title="Key difference">
-Arduino and ESP32 also use microcontrollers. Raspberry Pi uses a microprocessor capable of running Linux. The PIC18F4550 is studied closer to the hardware: registers, bits, and instructions.
+Arduino and ESP32 are boards built around a **microcontroller**. Raspberry Pi is a **single-board computer (SBC)**: a mini PC with SoC, RAM on the board, SD storage, and Linux — not a μC like the PIC. The PIC18F4550 is studied at the register, bit, and instruction level.
 </AIExplain>
 
 <CompareTable rows={[
@@ -39,15 +39,15 @@ Arduino and ESP32 also use microcontrollers. Raspberry Pi uses a microprocessor 
 	},
 	{
 		name: 'Raspberry Pi',
-		role: 'Single-board computer',
-		strength: 'Runs Linux and works well for vision, servers, Python, and full applications.',
-		limit: 'Not ideal for learning low-level microcontroller registers.',
+		role: 'Single-board computer (SBC / mini PC)',
+		strength: 'SoC + RAM on board, SD for the OS, Linux, Python, computer vision, and full applications.',
+		limit: 'Not a microcontroller; not suited for learning PIC-style registers and assembly.',
 	},
 ]} />
 
 ## How to explain it in an exam
 
-A **microcontroller** integrates CPU, memory, and peripherals in one chip to control devices. A **microprocessor** usually needs external memory and peripherals, and can run full operating systems.
+A **microcontroller** integrates CPU, memory, and peripherals in **one chip** (PIC18F4550). A **microprocessor** is only the CPU; in a classic design, RAM and the rest sit on the motherboard. **Raspberry Pi** is another category: an **SBC** with SoC, RAM, and connectors already on the board, running Linux.
 
 The PIC18F4550 is academically useful because it shows how hardware is configured through registers without relying on high-level libraries.
 

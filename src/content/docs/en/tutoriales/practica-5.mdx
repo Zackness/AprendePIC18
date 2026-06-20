@@ -1,10 +1,21 @@
 ---
-title: 'Tutorial — Practice 5'
-description: 'Timers and interrupts.'
+title: 'Tutorial — Practice 5: Timers and interrupts'
+description: 'Use Timer0 and interrupts for precise delays without blocking the main program.'
 ---
 
 import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
 
 <PracticeTutorial slug="practica-5" locale="en" />
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+## Supporting theory
+
+Review [Timer 0](/en/timers/timer0/), [Timer 1 and 2](/en/timers/timer1-timer2/), and [Interrupts](/en/interrupciones/) before writing your ISR.
+
+## What your code should do
+
+1. Configure **Timer0** (or Timer1) for a known delay.
+2. Enable **GIE** and the timer interrupt flag.
+3. Write an **ISR** that saves and restores context (`WREG`, `STATUS`, bank).
+4. Handle a pushbutton with **INT0** or **RB4–RB7** without polling in the main loop.
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)

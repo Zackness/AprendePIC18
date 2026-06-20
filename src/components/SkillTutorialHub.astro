@@ -1,0 +1,118 @@
+---
+import {
+	getSkillSeries,
+	skillSeriesHref,
+	skillStepHref,
+	skillTutorialSeries,
+	type SkillTutorialSeries,
+} from '../data/skill-tutorials';
+
+interface Props {
+	locale?: 'es' | 'en';
+}
+
+const { locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+
+function levelLabel(level: SkillTutorialSeries['level']) {
+	if (isEn) {
+		return level === 'basico' ? 'Beginner' : level === 'intermedio' ? 'Intermediate' : 'Advanced';
+	}
+	return level === 'basico' ? 'Basico' : level === 'intermedio' ? 'Intermedio' : 'Avanzado';
+}
+---
+
+<section class="skill-hub" aria-labelledby="skill-hub-title">
+	<header class="skill-hub__header">
+		<p class="skill-hub__eyebrow">{isEn ? 'Practical guides' : 'Guias practicas'}</p>
+		<h2 class="skill-hub__title" id="skill-hub-title">
+			{isEn ? 'Learn skills before the labs' : 'Aprende habilidades antes de las practicas'}
+		</h2>
+		<p class="skill-hub__intro">
+			{
+				isEn
+					? 'Short multi-step tutorials like Astro and Expo docs. Complete each unit before jumping into UNEXPO lab tutorials.'
+					: 'Tutoriales cortos en varios pasos, como la documentacion de Astro y Expo. Completa cada unidad antes de saltar a los tutoriales de practicas UNEXPO.'
+			}
+		</p>
+	</header>
+
+	<div class="skill-hub__grid">
+		{
+			skillTutorialSeries.map((series) => (
+				<article
+					class="skill-hub__card"
+					data-skill-series-id={series.id}
+					data-skill-total={series.steps.length}
+				>
+					<span class={`skill-hub__level skill-hub__level--${series.level}`}>
+						{levelLabel(series.level)}
+					</span>
+					<h3 class="skill-hub__card-title">
+						<a href={skillSeriesHref(series.id, locale)}>
+							{isEn ? series.titleEn : series.titleEs}
+						</a>
+					</h3>
+					<p class="skill-hub__card-desc">{isEn ? series.descriptionEn : series.descriptionEs}</p>
+					<p class="skill-hub__meta">
+						{series.steps.length} {isEn ? 'steps' : 'pasos'}
+						{series.prerequisites?.length ? (
+							<span>
+								{' · '}
+								{isEn ? 'After: ' : 'Despues de: '}
+								{series.prerequisites.join(', ')}
+							</span>
+						) : null}
+					</p>
+					<div class="skill-hub__progress" aria-hidden="true">
+						<div class="skill-hub__progress-bar">
+							<div class="skill-hub__progress-fill" data-skill-bar style="width: 0%" />
+						</div>
+					</div>
+					<div hidden>
+						{series.steps.map((step) => (
+							<span data-skill-step-key={`${series.id}/${step.id}`} />
+						))}
+					</div>
+					<a class="skill-hub__cta" href={skillStepHref(series.id, series.steps[0].id, locale)}>
+						{isEn ? 'Start unit →' : 'Empezar unidad →'}
+					</a>
+				</article>
+			))
+		}
+	</div>
+
+	<p class="skill-hub__back">
+		<a href={isEn ? '/en/tutoriales/' : '/tutoriales/'}>
+			{isEn ? '← All tutorials' : '← Todos los tutoriales'}
+		</a>
+	</p>
+</section>
+
+<script define:vars={{ STORAGE_KEY: 'aprende-pic18-skill-guides' }}>
+	function paintSkillHubProgress() {
+		let saved = {};
+		try {
+			saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+		} catch {
+			/* ignore */
+		}
+
+		document.querySelectorAll('[data-skill-series-id]').forEach((el) => {
+			const id = el.getAttribute('data-skill-series-id');
+			const total = Number(el.getAttribute('data-skill-total') || '0');
+			if (!id || !total) return;
+			let done = 0;
+			el.querySelectorAll('[data-skill-step-key]').forEach((meta) => {
+				const key = meta.getAttribute('data-skill-step-key');
+				if (key && saved[key]) done += 1;
+			});
+			const bar = el.querySelector('[data-skill-bar]');
+			if (bar) bar.style.width = `${Math.round((done / total) * 100)}%`;
+		});
+	}
+
+	paintSkillHubProgress();
+	document.addEventListener('astro:page-load', paintSkillHubProgress);
+	window.addEventListener('aprende-skill-guide-update', paintSkillHubProgress);
+</script>

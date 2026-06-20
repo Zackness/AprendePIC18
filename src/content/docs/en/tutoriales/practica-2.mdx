@@ -1,10 +1,43 @@
 ---
-title: 'Tutorial — Practice 2'
-description: 'HD44780 LCD and matrix keyboard.'
+title: 'Tutorial — Practice 2: Keyboard and LCD'
+description: 'Program 4x4 keyboard scan and display keys on an HD44780 LCD in 4-bit mode.'
 ---
 
-import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-2" locale="en" />
+<PracticeLabPage tutorialSlug="practica-2" locale="en">
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+<PracticeBox title="Lab Practice 2" level="UNEXPO">
+Control a 16x2 LCD and 4x4 matrix keyboard. Display values entered from the keyboard.
+</PracticeBox>
+
+## Wiring
+
+| Device | PIC pins |
+| --- | --- |
+| LCD data (4 bit) | RD4-RD7 |
+| LCD RS, E | RD2, RD3 |
+| Keyboard rows | RB0-RB3 |
+| Keyboard columns | RB4-RB7 |
+
+## Program requirements
+
+- Commented modular MPASM
+- RB4-RB7 interrupts for keyboard
+- LCD.INC library (4-bit bus) per Topic 7.1
+- Pseudocode and flowchart in your report
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-2-teclado-lcd"
+	filename="practica-2-teclado-lcd.asm"
+	locale="en"
+	note="Requires an active CALETAS subscription. Includes 4-bit LCD routines and RB4–RB7 keyboard scan. Fill in the header before submitting."
+/>
+
+</PracticeLabPage>
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)

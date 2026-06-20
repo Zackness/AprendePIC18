@@ -1,0 +1,143 @@
+---
+title: Basic microcontroller concepts
+description: Microcontroller vs microprocessor, memory types, and internal and external peripherals per UNEXPO Topic 1.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="introduccion/conceptos-basicos" locale="en" />
+
+Content aligned with **Topic 1 — Basic concepts** from the Microcontrollers course (UNEXPO · Mechatronics), based on Prof. Ing. Yoel Pire's material.
+
+## What is a microcontroller
+
+A **microcontroller** (μC) is a **programmable** integrated circuit that puts the basic blocks of a tiny computer on one chip:
+
+- **CPU** — executes program instructions step by step.
+- **Memories** — store the program and working data.
+- **Input/output lines** — connect the chip to LEDs, buttons, sensors, etc.
+- **Peripherals** — internal or external modules that extend what the device can do.
+
+To use it you write **firmware**: the CPU reads instructions stored in memory and runs them. There is no operating system like on a PC; control is direct.
+
+<AIExplain title="Computer in miniature">
+A μC can be treated as a small computing device with limited but sufficient capability to control processes, sensors, motors, displays, and real-time communication.
+</AIExplain>
+
+## Microprocessor vs microcontroller
+
+| | **Microcontroller (μC)** | **Microprocessor (μP)** |
+| --- | --- | --- |
+| **What it integrates** | CPU, memory, buses, and peripherals in **one chip** | Only the **CPU** (processor) |
+| **System type** | **Closed** — complete computer with fixed capability | **Open** — you attach **external** memory, I/O, and peripherals |
+| **External pins** | Lines that drive peripherals and ports | **Address, data, and control** buses to build a PC |
+| **Programming** | You focus on the application | You must also manage external devices |
+| **Academic example** | PIC18F4550 (single chip) | Classic PC CPU in a socket (RAM, chipset, and storage live **on the motherboard**, not inside the processor chip) |
+
+<Figure
+	src="/images/arquitectura/harvard-von-neumann.svg"
+	alt="Comparison of architectures and embedded computing systems"
+	caption="The μC integrates CPU, memory, and peripherals in one chip; the μP is only the processor and the rest of the system is built separately."
+	credit="Based on Topic 1 — Basic concepts · UNEXPO"
+/>
+
+<AIExplain title="Do not confuse μC with μP">
+An Arduino board contains an AVR **microcontroller**. In this course you work with a μC: the essentials of the PIC18F4550 are on one chip.
+</AIExplain>
+
+## Raspberry Pi and similar boards: not the same thing
+
+A **Raspberry Pi** is not a microcontroller or a bare microprocessor. It is a **single-board computer (SBC)** — a **mini PC** already assembled on the board:
+
+- An **SoC** (System-on-Chip): application ARM cores, GPU, and other blocks in one integrated circuit.
+- **RAM** included on the board (soldered or in the SoC package, depending on model).
+- **USB**, **HDMI**, network, power, and GPIO connectors.
+- **microSD** (or internal storage) for the operating system and your programs.
+
+You do not start from an empty chip and add RAM like in an academic μP-only design: **the board is already a complete computer**. It runs **Linux** (a full OS), not direct firmware burned to Flash like on the PIC.
+
+| | **PIC18F4550** | **Raspberry Pi** |
+| --- | --- | --- |
+| **What it is** | Microcontroller (μC) | Single-board computer (SBC) |
+| **Program** | Firmware in chip Flash | OS + apps on SD card / Linux |
+| **Memory** | Flash, RAM, and EEPROM **inside the chip** | RAM **on the board** + storage on SD |
+| **Study level** | Registers, bits, assembly | Python, Linux, high-level drivers |
+
+## Internal and external peripherals
+
+Peripherals let the μC interact with the world. They can be **inside the chip** or wired **outside**.
+
+### Internal peripherals (on-chip)
+
+Modules the manufacturer builds into the microcontroller. On the PIC18F4550 you will find, among others:
+
+- Timers / counters (Timer0, Timer1, Timer2)
+- A/D converter (ADC)
+- UART / USART (serial communication)
+- PWM / CCP module
+- SPI and I2C interfaces
+- USB (on the 4550)
+- Internal EEPROM memory
+
+### External peripherals (wired to the μC)
+
+Devices **not** inside the chip, connected to pins:
+
+- Sensors (temperature, pressure, distance…)
+- Communication modules (Bluetooth, Wi-Fi, GPS…)
+- External memories
+- LCD or OLED displays
+- 7-segment displays
+- Matrix keyboards
+- Motors, relays, drivers
+
+In the lab you use both: the PIC's **internal ADC** and, for example, an **external LCD** wired to GPIO ports.
+
+## Memory types
+
+### Program memory (fabrication technology)
+
+By how firmware is stored, the course distinguishes:
+
+| Type | What it is | Reprogrammable |
+| --- | --- | --- |
+| **ROM** | Program burned at the factory | No |
+| **OTP** | One-Time Programmable — written once | No |
+| **EPROM** | Electrically programmed; erased with UV light | Yes (UV erase) |
+| **EEPROM** | Electrically programmed and erased | Yes |
+| **Flash** | Electrically programmed; PIC18F4550 stores your `.hex` here | Yes |
+
+On the PIC18F4550 the program lives in **Flash** (non-volatile: kept when power is off). Data you want to keep between power cycles can go in internal **EEPROM**.
+
+### Data memory (at runtime)
+
+| Type | Role in the μC |
+| --- | --- |
+| **RAM** | Temporary variables, counters, flags while the program runs. Lost on power-off unless saved elsewhere. |
+| **Special registers (SFR)** | Control ports, timers, ADC, etc. (covered in Foundations). |
+
+<AIExplain title="For the exam">
+Typical questions: μC vs μP difference, name PIC internal peripherals, and explain Flash vs RAM vs EEPROM.
+</AIExplain>
+
+## Typical applications
+
+A microcontroller can be used in:
+
+- Sensor and actuator control
+- Industrial process control
+- Medical equipment and robotics
+- Appliances and human-machine interfaces (keyboard, display)
+- Motor control (PWM)
+- Communication (SPI, I2C, UART, USB)
+- Clocks, alarms, calculators, and many more
+
+## Next step
+
+You now know the general Topic 1 concepts. Continue with [What is the PIC18F4550](/en/introduccion/pic18f4550/) to see how these blocks apply to the chip you will use in the lab.
+
+<TopicQuiz slug="introduccion/conceptos-basicos" locale="en" />

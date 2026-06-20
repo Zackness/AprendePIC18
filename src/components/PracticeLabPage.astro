@@ -1,0 +1,87 @@
+---
+import LessonProgress from './LessonProgress.astro';
+import PracticeTutorialFlow from './PracticeTutorialFlow.astro';
+import LabTextPanel from './LabTextPanel.astro';
+import LabDesignChallenge from './LabDesignChallenge.astro';
+import TieredExamPanel from './TieredExamPanel.astro';
+import { practiceTutorials } from '../data/tutorials';
+
+interface Props {
+	tutorialSlug: string;
+	locale?: 'es' | 'en';
+	showPreLab?: boolean;
+	showDesign?: boolean;
+	showPostLab?: boolean;
+	showExam?: boolean;
+}
+
+const {
+	tutorialSlug,
+	locale = 'es',
+	showPreLab = true,
+	showDesign = true,
+	showPostLab = true,
+	showExam = true,
+} = Astro.props;
+
+const isEn = locale === 'en';
+const tutorial = practiceTutorials.find((p) => p.slug === tutorialSlug);
+
+if (!tutorial) {
+	throw new Error(`Practice tutorial not found: ${tutorialSlug}`);
+}
+
+const practiceSlug = tutorial.practiceSlug;
+const progressSlug = practiceSlug ?? `tutoriales/${tutorialSlug}`;
+---
+
+<LessonProgress slug={progressSlug} locale={locale} />
+
+<p class="practice-lab-page__intro">
+	{
+		isEn
+			? 'Learn by programming: follow each step, write your own code, then validate with the lab questions and exam. Adapt pins and routines to your board when needed.'
+			: 'Aprende programando: sigue cada paso, escribe tu propio codigo y valida con las preguntas y el examen del laboratorio. Adapta pines y rutinas a tu placa cuando haga falta.'
+	}
+</p>
+
+<PracticeTutorialFlow slug={tutorialSlug} locale={locale} />
+
+{
+	practiceSlug && showPreLab && (
+		<>
+			<h2>{isEn ? 'Before you code — pre-lab' : 'Antes de programar — pre-laboratorio'}</h2>
+			<LabTextPanel practiceSlug={practiceSlug} kind="pre" locale={locale} />
+		</>
+	)
+}
+
+{
+	practiceSlug && showDesign && (
+		<>
+			<h2>{isEn ? 'Design your solution' : 'Disena tu solucion'}</h2>
+			<LabDesignChallenge practiceSlug={practiceSlug} locale={locale} />
+		</>
+	)
+}
+
+<h2>{isEn ? 'Build and adapt the code' : 'Construye y adapta el codigo'}</h2>
+<slot />
+
+{
+	practiceSlug && showPostLab && (
+		<>
+			<h2>{isEn ? 'After building — post-lab' : 'Despues de programar — post-laboratorio'}</h2>
+			<LabTextPanel practiceSlug={practiceSlug} kind="post" locale={locale} />
+		</>
+	)
+}
+
+{
+	practiceSlug && showExam && (
+		<>
+			<h2>{isEn ? 'Check what you learned' : 'Comprueba lo aprendido'}</h2>
+			<TieredExamPanel practiceSlug={practiceSlug} locale={locale} />
+		</>
+	)
+}

@@ -14,9 +14,7 @@ interface Props {
 
 const { locale = 'es' } = Astro.props;
 const isEn = locale === 'en';
-	const stats = getStudyPathStats();
-	const STORAGE_KEY = 'aprende-pic18-study-path';
-	const PROGRESS_KEY = 'aprende-pic18-progress-local';
+const stats = getStudyPathStats();
 
 function t(es: string, en: string) {
 	return isEn ? en : es;
@@ -32,15 +30,15 @@ function t(es: string, en: string) {
 
 	<div class="study-path__stats">
 		<div class="study-path__stat">
-			<span class="study-path__stat-value">{stats.courses}</span>
-			<span class="study-path__stat-label">{t('cursos', 'courses')}</span>
+			<span class="study-path__stat-value">{stats.phases}</span>
+			<span class="study-path__stat-label">{t('fases', 'phases')}</span>
 		</div>
 		<div class="study-path__stat">
 			<span class="study-path__stat-value">{stats.lessons}</span>
-			<span class="study-path__stat-label">{t('clases', 'classes')}</span>
+			<span class="study-path__stat-label">{t('lecciones', 'lessons')}</span>
 		</div>
 		<div class="study-path__stat">
-			<span class="study-path__stat-value">~{stats.hours}h</span>
+			<span class="study-path__stat-value">~{stats.hours} h</span>
 			<span class="study-path__stat-label">{t('estimadas', 'estimated')}</span>
 		</div>
 		<div class="study-path__stat study-path__stat--progress">
@@ -54,10 +52,10 @@ function t(es: string, en: string) {
 	</div>
 
 	<p class="study-path__method">
-		<strong>{t('Metodo por clase', 'Method per class')}:</strong>
+		<strong>{t('Metodo por bloque', 'Method per block')}:</strong>
 		{t(
-			'concepto → registro → ejemplo .ASM → Proteus → placa → pregunta de parcial',
-			'concept → register → .ASM example → Proteus → board → exam question',
+			'teoria → guia practica (si aplica) → laboratorio → parcial',
+			'theory → practical guide (if any) → lab → partial exam',
 		)}
 	</p>
 
@@ -92,8 +90,8 @@ function t(es: string, en: string) {
 											{t(level.es, level.en)}
 										</span>
 										<span class="study-path__course-time">
-											{course.lessons.length} {t('clases', 'classes')} · ~
-											{Math.round(courseMinutes / 60) || 1}h
+											{course.lessons.length} {t('lecciones', 'lessons')} · ~
+											{Math.max(1, Math.ceil(courseMinutes / 60))} h
 										</span>
 										<span class="study-path__course-progress" data-course-pct>
 											0%
@@ -144,6 +142,8 @@ function t(es: string, en: string) {
 															class="study-path__check"
 															data-lesson-id={lesson.id}
 															data-quiz-slug={quizSlug || undefined}
+															data-skill-series={lesson.autoSkillSeries || undefined}
+															data-practice-slug={lesson.autoPracticeSlug || undefined}
 															aria-label={t(lesson.titleEs, lesson.titleEn)}
 														/>
 														<span class="study-path__lesson-index">{idx + 1}</span>
@@ -200,142 +200,13 @@ function t(es: string, en: string) {
 
 	<footer class="study-path__footer">
 		<button type="button" class="study-path__reset" data-reset-path>
-			{t('Reiniciar progreso de la ruta', 'Reset path progress')}
+			{t('Reiniciar progreso del curso', 'Reset course progress')}
 		</button>
 	</footer>
 </div>
 
-<script define:vars={{ STORAGE_KEY, PROGRESS_KEY }}>
-	function initStudyPath() {
-		const root = document.querySelector('[data-study-path]');
-		if (!root) return;
-
-		const isEn = root.getAttribute('data-locale') === 'en';
-		const inputs = root.querySelectorAll('.study-path__check');
-		const globalPct = root.querySelector('[data-global-pct]');
-		const globalFill = root.querySelector('[data-global-fill]');
-		const resetBtn = root.querySelector('[data-reset-path]');
-
-		function loadQuizzes() {
-			try {
-				const progress = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
-				return progress.quizzes || {};
-			} catch {
-				return {};
-			}
-		}
-
-		function load() {
-			try {
-				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-			} catch {
-				return {};
-			}
-		}
-
-		function save(data) {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
-		}
-
-		function applyQuizProgress() {
-			const quizzes = loadQuizzes();
-			inputs.forEach((input) => {
-				const quizSlug = input.getAttribute('data-quiz-slug');
-				if (!quizSlug) return;
-				const result = quizzes[quizSlug];
-				const badge = input.closest('.study-path__lesson')?.querySelector('[data-quiz-badge]');
-				if (result?.passed) {
-					input.checked = true;
-					input.disabled = true;
-					if (badge) {
-						badge.textContent = isEn ? 'Passed' : 'Aprobado';
-						badge.classList.add('study-path__quiz-badge--passed');
-					}
-				} else if (result?.score) {
-					if (badge) {
-						badge.textContent = `${result.score}%`;
-						badge.classList.add('study-path__quiz-badge--attempt');
-					}
-				}
-			});
-		}
-
-		function updateUI() {
-			const total = inputs.length;
-			const done = [...inputs].filter((i) => i.checked).length;
-			const pct = total ? Math.round((done / total) * 100) : 0;
-
-			if (globalPct) globalPct.textContent = `${pct}%`;
-			if (globalFill) globalFill.style.width = `${pct}%`;
-
-			root.querySelectorAll('[data-course]').forEach((courseEl) => {
-				const courseInputs = courseEl.querySelectorAll('.study-path__check');
-				const courseDone = [...courseInputs].filter((i) => i.checked).length;
-				const courseTotal = courseInputs.length;
-				const coursePct = courseTotal
-					? Math.round((courseDone / courseTotal) * 100)
-					: 0;
-				const badge = courseEl.querySelector('[data-course-pct]');
-				if (badge) badge.textContent = `${coursePct}%`;
-				courseEl.classList.toggle('study-path__course--done', coursePct === 100 && courseTotal > 0);
-			});
-
-			inputs.forEach((input) => {
-				const row = input.closest('.study-path__lesson');
-				if (row) row.classList.toggle('study-path__lesson--done', input.checked);
-			});
-		}
-
-		const saved = load();
-		inputs.forEach((input) => {
-			const id = input.getAttribute('data-lesson-id');
-			if (id && saved[id]) input.checked = true;
-			input.addEventListener('change', () => {
-				if (input.disabled) return;
-				const id = input.getAttribute('data-lesson-id');
-				if (!id) return;
-				const data = load();
-				data[id] = input.checked;
-				save(data);
-				updateUI();
-			});
-		});
-
-		applyQuizProgress();
-		updateUI();
-
-		window.addEventListener('aprende-quiz-complete', () => {
-			applyQuizProgress();
-			const quizzes = loadQuizzes();
-			const data = load();
-			inputs.forEach((input) => {
-				const quizSlug = input.getAttribute('data-quiz-slug');
-				const id = input.getAttribute('data-lesson-id');
-				if (!quizSlug || !id) return;
-				if (quizzes[quizSlug]?.passed) data[id] = true;
-			});
-			save(data);
-			updateUI();
-		});
-
-		window.addEventListener('aprende-auth-change', () => {
-			applyQuizProgress();
-			updateUI();
-		});
-
-		resetBtn?.addEventListener('click', () => {
-			const msg = isEn
-				? 'Reset all study path progress?'
-				: 'Reiniciar todo el progreso de la ruta?';
-			if (!confirm(msg)) return;
-			localStorage.removeItem(STORAGE_KEY);
-			inputs.forEach((i) => {
-				if (!i.disabled) i.checked = false;
-			});
-			updateUI();
-		});
-	}
+<script>
+	import { initStudyPath } from '../scripts/course-progress';
 
 	initStudyPath();
 	document.addEventListener('astro:page-load', initStudyPath);

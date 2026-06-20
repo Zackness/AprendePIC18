@@ -32,10 +32,162 @@ Programa y datos no viven en el mismo lugar. El codigo va en Flash; las variable
 | --- | --- |
 | `WREG` | Registro de trabajo. Muchas operaciones pasan por el. |
 | `STATUS` | Guarda banderas como cero, acarreo y negativo. |
-| `BSR` | Selecciona banco de memoria para acceder a registros. |
-| `PC` | Contador de programa. Indica la proxima instruccion. |
 | `SFR` | Registros de funcion especial para controlar perifericos. |
 | `GPR` | Registros de proposito general, usados como variables. |
+| `BSR` | Selecciona banco de memoria para acceder a registros. |
+| `PC` | Contador de programa. Indica la proxima instruccion. |
+
+La tabla resume el papel de cada uno. Abajo los ves **en detalle con ejemplos** de lo que haras en laboratorio.
+
+## Cada elemento en detalle
+
+### `WREG` — registro de trabajo
+
+Es el **acumulador** de la CPU: un registro de **8 bits** (un byte, valores **0 a 255** — ver [Que significa 8 bits](/introduccion/pic18f4550/#que-significa-8-bits)) por donde pasan la mayoria de operaciones aritmeticas y logicas antes de guardar el resultado en otro sitio.
+
+Piensa en el como una **mano temporal** del procesador: agarra un valor, opera con el y luego lo suelta en un registro o variable.
+
+```asm
+MOVLW   D'5'        ; carga 5 en WREG
+ADDLW   D'3'        ; WREG = 5 + 3  →  WREG vale 8
+MOVWF   contador    ; copia WREG al GPR 'contador'
+```
+
+Sin `WREG` no podrias hacer un `MOVLW`, sumar dos numeros ni mover datos entre registros con la mayoria de instrucciones del PIC18.
+
+### `STATUS` — banderas del resultado
+
+Despues de muchas operaciones, el PIC guarda **banderas** en `STATUS`. Cada bandera es **un bit**: vale **1** (activa) o **0** (inactiva). Lo que importa en el parcial no es solo el nombre, sino **que significa cada valor**.
+
+| Bit | Nombre | Que mide |
+| --- | --- | --- |
+| 0 | `C` | Acarreo (carry) |
+| 1 | `DC` | Acarreo de digito (nibble bajo) |
+| 2 | `Z` | Resultado cero |
+| 4 | `OV` | Desbordamiento con signo (overflow) |
+| 7 | `N` | Signo del resultado (bit 7) |
+
+#### Que significa activa (= 1) vs inactiva (= 0)
+
+| Bandera | **= 1 (activa)** | **= 0 (inactiva)** |
+| --- | --- | --- |
+| **Z** | El resultado de la operacion es **cero** | El resultado **no es cero** |
+| **C** | Hubo **acarreo** mas alla del bit 7 (en sumas: el valor supera 255 en 8 bits sin signo) | **No** hubo acarreo hacia afuera del byte |
+| **DC** | Hubo acarreo del **nibble bajo** (del bit 3 al 4) | No hubo acarreo de digito |
+| **N** | El bit 7 del resultado es **1** → numero **negativo** en complemento a 2 (signed) | El bit 7 es **0** → no es negativo en signed 8 bits |
+| **OV** | **Desbordamiento con signo**: el resultado no cabe en el rango **-128 a +127** | La operacion con signo fue valida |
+
+Ejemplo con **Z** — ¿`contador` es cero? El PIC no tiene instruccion `CMP` (comparar); comparas operando y leyendo la bandera **Z** del registro `STATUS`:
+
+```asm
+MOVLW   D'0'         ; WREG = 0 (con esto vamos a comparar)
+XORWF   contador, W  ; XOR bit a bit entre contador y WREG → resultado en W
+                     ; (compuerta XOR: bit igual → 0, bit distinto → 1)
+                     ; contador no cambia; solo se actualiza W y las banderas
+                     ;
+                     ; si contador = 0: todos los bits coinciden con WREG
+                     ;   → resultado 00000000 → Z = 1 (activa)
+                     ; si contador = 5: hay bits distintos de cero
+                     ;   → resultado 00000101 → Z = 0 (inactiva)
+```
+
+Ejemplo con **C** tras una suma. `WREG` solo guarda **8 bits** (2⁸ = 256 valores: **0 a 255**); si la suma pasa de 255, lo que no cabe se registra en **C** y en W queda el resto:
+
+```asm
+MOVLW   D'200'       ; WREG = 200
+ADDLW   D'100'       ; 200 + 100 = 300
+                     ; 300 > 255 → no cabe en 8 bits
+                     ; sobra 256 (un byte completo) → C = 1 (acarreo)
+                     ; en WREG queda: 300 - 256 = 44
+```
+
+Las usas para **decidir** con saltos condicionales:
+
+```asm
+MOVLW   D'0'          ; referencia: comparar contra 0
+XORWF   contador, W   ; ¿contador == WREG? → si igual, resultado 0, Z=1
+BTFSS   STATUS, Z     ; salta si Z=1 (eran iguales → contador era 0)
+GOTO    sigue
+GOTO    manejar_cero
+sigue:
+```
+
+`BTFSC` salta si la bandera esta en **0**; `BTFSS` salta si esta en **1**.
+
+En un parcial te pueden preguntar: *"¿Como sabes si una operacion dio cero?"* → **Z = 1**. *"¿Como sabes si una suma desbordo 255?"* → **C = 1**.
+
+### `SFR` — registros de funcion especial
+
+Los **SFR** (Special Function Registers) **controlan el hardware interno**: puertos, timers, ADC, UART, interrupciones, etc. Cada bit o byte de un SFR tiene un significado fijo definido por Microchip.
+
+Ejemplo real — encender un LED en `RB0`. Para cambiar **un solo bit** de un SFR sin tocar los demas, el PIC usa **`BCF`** (Bit **C**lear **F**ile → pone el bit en **0**) y **`BSF`** (Bit **S**et **F**ile → pone el bit en **1**):
+
+```asm
+BCF     TRISB, 0    ; TRISB es SFR, bit 0 → fuerza ese bit a 0
+                     ; (los bits 1..7 de TRISB no cambian)
+                     ; en TRISB: 0 = salida → RB0 queda como salida
+BSF     LATB, 0     ; LATB es SFR, bit 0 → fuerza ese bit a 1
+                     ; (los bits 1..7 de LATB no cambian)
+                     ; RB0 queda en alto → enciende el LED
+```
+
+No escribes el byte entero: **`BCF`/`BSF` solo modifican el bit que indicas**; el resto del registro se queda igual. **`TRISB` y `LATB` son nombres fijos** del hardware — no los inventas tu.
+
+Otros SFR que usaras pronto: `INTCON` (interrupciones), `TMR0` (Timer0), `ADCON0` (ADC).
+
+### `GPR` — registros de proposito general
+
+Los **GPR** son bytes de RAM que **tu programa usa como variables**: contadores, temporales, estados de una maquina de estados, etc. No controlan hardware directamente; guardan datos.
+
+Con **`contador RES 1`** haces dos cosas a la vez: el **nombre** (`contador`) **define la variable** — un simbolo que usaras en el codigo — y **`RES 1`** le **reserva 1 byte** en RAM. Despues escribes `INCF contador, F` y el ensamblador ya sabe que direccion es.
+
+```asm
+; En la zona de variables:
+contador    RES     1       ; define 'contador' y reserva 1 byte en RAM
+
+; En el codigo:
+INCF    contador, F         ; contador = contador + 1
+MOVF    contador, W         ; copia contador a WREG
+DECFSZ  contador, F         ; decrementa; si llega a 0, salta la siguiente linea
+GOTO    espera
+```
+
+La diferencia clave frente a un SFR: **`contador` es tuyo** — puedes llamarlo como quieras y usarlo para lo que necesites. **`TRISB` no** — su nombre y funcion vienen del hardware.
+
+### `BSR` — selector de banco
+
+Tanto los **SFR** como los **GPR** viven en la **RAM de datos**, dividida en **bancos** (0 a 15). El registro `BSR` indica **en que banco estas parado** cuando accedes a una direccion.
+
+Muchos SFR (`TRISB`, `LATB`, `INTCON`…) estan en el banco de acceso (`ACCESS`) y no necesitas tocar `BSR`. Pero si reservas **variables GPR** en distintos bancos con `RES`, debes seleccionar el banco correcto:
+
+```asm
+; 'temp' declarada con:  temp  RES  1
+MOVLW   0x01
+MOVWF   BSR         ; activa banco 1
+CLRF    temp         ; limpia la variable GPR en ese banco
+CLRF    BSR         ; vuelve a banco 0
+```
+
+<AIExplain title="Tip practico">
+Si MPASM te da error de banco o una variable no cambia, revisa `BSR`. En la pagina [Registros principales](/fundamentos/registros/) veras el mapa completo de SFR y bancos.
+</AIExplain>
+
+### `PC` — contador de programa
+
+`PC` (**Program Counter**) apunta a la **siguiente instruccion** que el PIC va a ejecutar en la memoria Flash. No lo escribes directamente en codigo normal; lo cambias con saltos y llamadas:
+
+```asm
+        GOTO    inicio      ; PC salta a la etiqueta 'inicio'
+
+inicio:
+        CALL    retardo     ; guarda donde volver; PC va a 'retardo'
+        ; ... al RETURN de retardo, PC regresa aqui ...
+        GOTO    inicio      ; repite el bucle
+```
+
+Cuando ocurre una **interrupcion**, el hardware guarda `PC` en la pila para retomar despues donde se quedo el programa principal.
+
+**La pila** es una memoria auxiliar **LIFO** (*Last In, First Out*: lo ultimo que entra es lo primero que sale). Con un `CALL` se **apila** la direccion de retorno; con `RETURN` se **desapila** y el programa continua donde se quedo. El registro `STKPTR` indica la posicion actual de la pila.
 
 ## Ciclo mental de ejecucion
 

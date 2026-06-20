@@ -12,41 +12,150 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 
 
-Los registros son posiciones de memoria especiales. Los **SFR** (Special Function Registers) controlan hardware; los **GPR** (General Purpose Registers) almacenan variables.
+Esta pagina es el **catalogo de registros** del PIC18F4550. Si aun no leiste [Arquitectura basica](/fundamentos/arquitectura/), empieza por ahi: explica que son **SFR**, **GPR**, `WREG`, `STATUS`, `BSR` y `PC` con ejemplos en ensamblador.
 
-<AIExplain title="Bancos de memoria">
-El PIC18F4550 usa bancos de memoria. El registro `BSR` selecciona el banco activo. Muchos SFR existen en todos los bancos con la misma direccion accesible via `ACCESS`.
+Aqui veras **que registros existen**, **para que sirve cada uno** y **como se usan** en codigo.
+
+## Mapa de memoria de datos
+
+La RAM de datos mezcla dos tipos de posiciones:
+
+| Tipo | Que es | Ejemplos |
+| --- | --- | --- |
+| **SFR** | Controlan hardware interno | `TRISB`, `LATB`, `INTCON`, `TMR0` |
+| **GPR** | Variables de tu programa | `contador`, `temp` (declaradas con `RES`) |
+
+El PIC18F4550 organiza esa RAM en **16 bancos** (0 a 15). El registro **`BSR`** indica el banco activo. Muchos SFR importantes estan en el **banco de acceso** (`ACCESS`): puedes leerlos y escribirlos **sin cambiar `BSR`**.
+
+<AIExplain title="Regla practica">
+En laboratorio casi siempre accedes a `TRISx`, `LATx`, `INTCON`… sin tocar `BSR`. Solo lo necesitas si MPASM te pide un banco concreto o reservas GPR en otro banco.
 </AIExplain>
 
 ## Registros de la CPU
 
-| Registro | Funcion |
-| --- | --- |
-| `WREG` | Acumulador de trabajo. Destino/origen de muchas instrucciones. |
-| `STATUS` | Banderas: Z (cero), C (acarreo), DC (digito), OV (overflow), N (negativo). |
-| `BSR` | Bank Select Register. Selecciona banco 0-15. |
-| `PC` | Program Counter. Apunta a la siguiente instruccion. |
-| `STKPTR` / Pila | Guarda direcciones de retorno en llamadas e interrupciones. |
-
-## Registros de puertos
+Estos registros no controlan un periferico concreto; son parte del **nucleo** del procesador. En [Arquitectura](/fundamentos/arquitectura/) estan explicados con ejemplos; aqui el resumen de consulta:
 
 | Registro | Funcion |
 | --- | --- |
-| `TRISx` | Direccion del puerto: 1=entrada, 0=salida. |
-| `PORTx` | Lee el estado real de los pines. |
-| `LATx` | Escribe el valor de salida al latch. |
+| `WREG` | Acumulador de 8 bits. Origen/destino de muchas instrucciones. |
+| `STATUS` | Banderas Z, C, DC, OV, N tras operaciones aritmeticas/logicas. |
+| `BSR` | Selecciona banco de memoria (0–15). |
+| `PC` | Contador de programa. Apunta a la siguiente instruccion en Flash. |
+| `STKPTR` / **Pila** | Apila direcciones de retorno en `CALL`/`RETURN` e interrupciones. |
+
+## Puertos GPIO — `TRISx`, `PORTx`, `LATx`
+
+Cada puerto (A, B, C, D, E) tiene **tres SFR** con roles distintos:
+
+| Registro | Lectura / escritura | Funcion |
+| --- | --- | --- |
+| **`TRISx`** | Escritura | Direccion del pin: **1 = entrada**, **0 = salida** |
+| **`LATx`** | Escritura | Valor de **salida** escrito al latch (no lee el pin fisico) |
+| **`PORTx`** | Lectura | Nivel **real** en el pin (util para entradas y lectura de switches) |
+
+Puertos del PIC18F4550 (40 pines PDIP):
+
+| Puerto | Pines | Notas del curso |
+| --- | --- | --- |
+| A | RA0–RA5 | Algunos pines analogicos |
+| B | RB0–RB7 | RB0 = INT0; RB4–RB7 = interrupcion por cambio |
+| C | RC0–RC7 | RC6/RC7 = UART (TX/RX) |
+| D | RD0–RD7 | LCD en practicas |
+| E | RE0–RE2 | Entradas analogicas |
+
+### Salida — encender LED en RB0
+
+```asm
+BCF     TRISB, 0    ; RB0 como salida (bit 0 de TRISB = 0)
+BSF     LATB, 0     ; RB0 en alto → enciende LED
+```
+
+### Entrada — leer un boton en RB3
+
+```asm
+BSF     TRISB, 3    ; RB3 como entrada (bit 3 de TRISB = 1)
+BTFSS   PORTB, 3    ; salta si RB3 esta en 1 (boton suelto, segun cableado)
+GOTO    boton_presionado
+```
+
+<AIExplain title="PORT vs LAT — pregunta de parcial">
+**Escribe salidas con `LATx`** (o `BSF`/`BCF` sobre `LATx`). **Lee entradas con `PORTx`**. Si escribes en `PORTx` en un pin configurado como entrada analogica, puedes tener comportamientos raros.
+</AIExplain>
+
+Mas ejemplos en [GPIO](/gpio/) y en la [guia rapida de registros](/referencia/guia-registros/).
 
 ## Registros de interrupciones
 
-- `INTCON`, `INTCON2`, `INTCON3`: control global y externas.
-- `PIE1`, `PIE2`: habilitacion de interrupciones perifericas.
-- `PIR1`, `PIR2`: banderas de interrupcion periferica.
-- `IPR1`, `IPR2`: prioridad de interrupciones.
+Las interrupciones usan varios SFR en cadena: **habilitar** → **detectar bandera** → **atender en ISR** → **limpiar bandera** → `RETFIE`.
 
-## Pregunta tipo parcial
+### Control global — `INTCON`, `INTCON2`, `INTCON3`
 
-**Que diferencia hay entre leer PORTB y escribir LATB?**
+| Registro / bit | Funcion |
+| --- | --- |
+| **`INTCON.GIE`** | **G**lobal **I**nterrupt **E**nable — interruptor maestro (1 = interrupciones activas) |
+| **`INTCON.PEIE`** | Habilita interrupciones **perifericas** (timers, UART, ADC…) |
+| **`INTCON.TMR0IF`** | Bandera: Timer0 desbordo |
+| **`INTCON2` / `INTCON3`** | Externas INT0–INT2, RB puerto, prioridades |
 
-`PORTB` refleja el nivel electrico en los pines (util para entradas). `LATB` modifica el valor que el puerto intenta colocar en salida, sin leer el pin fisico.
+### Por periferico — `PIEx`, `PIRx`, `IPRx`
+
+| Familia | Para que sirve |
+| --- | --- |
+| **`PIE1`, `PIE2`** | **P**eripheral **I**nterrupt **E**nable — habilita la fuente (ej. TMR0IE) |
+| **`PIR1`, `PIR2`** | **P**eripheral **I**nterrupt **R**equest — bandera de que ocurrio el evento |
+| **`IPR1`, `IPR2`** | Prioridad alta/baja de cada fuente (PIC18 con prioridades) |
+
+Flujo tipico para Timer0:
+
+```asm
+        BSF     INTCON, GIE     ; enciende interruptor global
+        BSF     INTCON, PEIE    ; permite interrupciones perifericas
+        BSF     PIE1, TMR0IE    ; habilita interrupcion de Timer0
+        ; ... en la ISR ...
+        BCF     INTCON, TMR0IF  ; limpia bandera antes de RETFIE
+        RETFIE
+```
+
+Detalle completo en [Interrupciones](/interrupciones/).
+
+## Otros SFR que veras en el curso
+
+Resumen por modulo — la tabla completa esta en [Guia rapida de registros](/referencia/guia-registros/):
+
+| Modulo | Registros clave | Tema |
+| --- | --- | --- |
+| **Timer0** | `T0CON`, `TMR0L`, `TMR0H` | [Timer 0](/timers/timer0/) |
+| **Timer1/2** | `T1CON`, `T2CON`, `PR2` | [Timers](/timers/timer1-timer2/) |
+| **ADC** | `ADCON0`, `ADCON1`, `ADCON2`, `ADRESH/L` | [ADC](/adc/) |
+| **UART** | `TXSTA`, `RCSTA`, `SPBRG`, `TXREG`, `RCREG` | [UART](/comunicacion/uart/) |
+| **PWM/CCP** | `CCP1CON`, `CCPR1L`, `PR2` | PWM y CCP |
+| **SPI/I2C** | `SSPSTAT`, `SSPCON1` | [SPI/I2C](/comunicacion/spi-i2c/) |
+
+## Variables GPR — declarar en ensamblador
+
+```asm
+        ; Zona de variables (ej. tras UDATA o al final del archivo):
+contador    RES     1       ; define nombre + reserva 1 byte
+
+        ; Uso:
+INCF    contador, F
+MOVF    contador, W
+```
+
+El **nombre** es tu variable; el **SFR** tiene nombre fijo del fabricante. Esa diferencia ya la viste en [Arquitectura — GPR vs SFR](/fundamentos/arquitectura/#gpr--registros-de-proposito-general).
+
+## Preguntas tipo parcial
+
+**¿Que diferencia hay entre leer `PORTB` y escribir `LATB`?**
+
+`PORTB` refleja el nivel electrico en los pines (util para entradas). `LATB` modifica el valor de salida del latch sin leer el pin fisico.
+
+**¿Que hace `BSR`?**
+
+Selecciona el banco de RAM (0–15) al acceder a una direccion. Muchos SFR no lo necesitan porque estan en banco ACCESS.
+
+**¿Para que sirve `INTCON.GIE`?**
+
+Habilita o deshabilita **todas** las interrupciones globalmente.
 
 <TopicQuiz slug="fundamentos/registros" />

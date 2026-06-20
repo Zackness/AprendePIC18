@@ -1,10 +1,39 @@
 ---
-title: 'Tutorial — Practice 6'
-description: 'Stepper motor.'
+title: 'Tutorial — Practice 6: Stepper motor'
+description: 'Control a stepper motor with full-step sequence, ULN2003 driver, and timed steps.'
 ---
 
-import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-6" locale="en" />
+<PracticeLabPage tutorialSlug="practica-6" locale="en">
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+<PracticeBox title="Lab Practice 6" level="UNEXPO">
+Control a stepper motor with coil energization sequences. May combine PWM or timed digital outputs.
+</PracticeBox>
+
+<AIExplain title="Step sequence">
+Unipolar/bipolar motors need phase patterns (full step or half step). Use timers to control speed between steps.
+</AIExplain>
+
+## Typical elements
+
+- Driver (ULN2003 or similar)
+- 4 PIC outputs to coils
+- Buttons for direction and speed
+- Timer for step delay
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-6-motor-paso-a-paso"
+	filename="practica-6-motor-paso-a-paso.asm"
+	locale="en"
+	note="Requires an active CALETAS subscription. Full-step sequence on RC0–RC3 via ULN2003. RA0 reverses direction."
+/>
+
+</PracticeLabPage>
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)

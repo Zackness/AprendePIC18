@@ -13,7 +13,9 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 
 
-En el PIC18F4550 casi todo se configura modificando bits individuales dentro de registros de 8 bits. Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio.
+En el PIC18F4550 casi todo se configura modificando bits individuales dentro de registros de **8 bits** (un byte: **2⁸ = 256** estados, del **0 al 255**). Si necesitas repasar la idea de digitales, empieza por [Que significa 8 bits](/introduccion/pic18f4550/#que-significa-8-bits).
+
+Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio.
 
 <AIExplain title="Regla practica">
 Un byte = 8 bits. En ensamblador MPASM escribes valores con `B'10101010'` (binario) o `0xAA` (hexadecimal). Para encender el bit 3 usas `BSF`; para apagarlo `BCF`.

@@ -1,10 +1,21 @@
 ---
-title: 'Tutorial — Practica 5'
-description: 'Timers e interrupciones.'
+title: 'Tutorial — Práctica 5: Timers e interrupciones'
+description: 'Usa Timer0 e interrupciones para retardos precisos sin bloquear el programa principal.'
 ---
 
 import PracticeTutorial from '../../../components/PracticeTutorial.astro';
 
 <PracticeTutorial slug="practica-5" locale="es" />
+
+## Teoría de apoyo
+
+Repasa [Timer 0](/timers/timer0/), [Timer 1 y 2](/timers/timer1-timer2/) e [Interrupciones](/interrupciones/) antes de escribir la ISR.
+
+## Qué debes lograr en código
+
+1. Configurar **Timer0** (o Timer1) para un retardo conocido.
+2. Habilitar **GIE** y la bandera de interrupción del timer.
+3. Escribir una **ISR** que guarde y restaure contexto (`WREG`, `STATUS`, banco).
+4. Responder a un pulsador con **INT0** o **RB4–RB7** sin polling en el bucle principal.
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

@@ -381,6 +381,450 @@
 	margin-top: 1rem;
 }
 
+.practice-lab-page__intro {
+	color: var(--sl-color-gray-2);
+	font-size: 0.95rem;
+	line-height: 1.65;
+	margin: 0 0 1.25rem;
+	max-width: 52rem;
+}
+
+/* Tutorial flow — pasos estilo Astro */
+.tutorial-flow {
+	margin: 1.5rem 0 2rem;
+}
+
+.tutorial-flow__goal {
+	background: linear-gradient(145deg, var(--ap-surface-2), rgba(34, 211, 238, 0.06));
+	border: 1px solid var(--ap-border-accent);
+	border-radius: var(--ap-radius-lg);
+	margin-bottom: 1.25rem;
+	padding: 1rem 1.15rem;
+}
+
+.tutorial-flow__goal-label {
+	color: var(--ap-cyan-400);
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	margin: 0 0 0.35rem;
+	text-transform: uppercase;
+}
+
+.tutorial-flow__goal-text {
+	font-size: 0.95rem;
+	line-height: 1.55;
+	margin: 0;
+}
+
+.tutorial-flow__outline {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-md);
+	margin-bottom: 1.25rem;
+	padding: 0.85rem 1rem;
+}
+
+.tutorial-flow__outline-title {
+	font-size: 0.82rem;
+	font-weight: 800;
+	margin: 0 0 0.5rem;
+	text-transform: uppercase;
+}
+
+.tutorial-flow__outline-list {
+	font-size: 0.9rem;
+	line-height: 1.5;
+	margin: 0;
+	padding-left: 1.2rem;
+}
+
+.tutorial-flow__outline-list a {
+	color: var(--sl-color-text-accent);
+	text-decoration: none;
+}
+
+.tutorial-flow__outline-list a:hover {
+	text-decoration: underline;
+}
+
+.tutorial-flow__steps {
+	display: grid;
+	gap: 1rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.tutorial-flow__step {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-lg);
+	padding: 1rem 1.1rem 1.1rem;
+	scroll-margin-top: 5rem;
+}
+
+.tutorial-flow__step-header {
+	align-items: center;
+	display: flex;
+	gap: 0.65rem;
+	margin-bottom: 0.65rem;
+}
+
+.tutorial-flow__step-num {
+	align-items: center;
+	background: var(--ap-amber-500);
+	border-radius: 999px;
+	color: var(--sl-color-black);
+	display: inline-flex;
+	font-size: 0.82rem;
+	font-weight: 800;
+	height: 1.65rem;
+	justify-content: center;
+	min-width: 1.65rem;
+}
+
+.tutorial-flow__step-title {
+	font-size: 1.02rem;
+	font-weight: 800;
+	margin: 0;
+}
+
+.tutorial-flow__step-body {
+	color: var(--sl-color-gray-2);
+	font-size: 0.92rem;
+	line-height: 1.65;
+	margin: 0 0 0.75rem;
+}
+
+.tutorial-flow__code {
+	background: var(--sl-color-gray-6);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-md);
+	font-size: 0.82rem;
+	margin: 0 0 0.75rem;
+	overflow-x: auto;
+	padding: 0.75rem 0.85rem;
+}
+
+.tutorial-flow__tip {
+	color: var(--sl-color-gray-3);
+	font-size: 0.85rem;
+	margin: 0 0 0.75rem;
+}
+
+.tutorial-flow__check {
+	align-items: flex-start;
+	cursor: pointer;
+	display: flex;
+	font-size: 0.88rem;
+	font-weight: 700;
+	gap: 0.55rem;
+	margin: 0;
+}
+
+.tutorial-flow__check-input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.tutorial-flow__check-box {
+	border: 2px solid var(--ap-border-accent);
+	border-radius: 4px;
+	flex-shrink: 0;
+	height: 1.1rem;
+	margin-top: 0.1rem;
+	width: 1.1rem;
+}
+
+.tutorial-flow__check-input:checked + .tutorial-flow__check-box {
+	background: var(--ap-amber-500);
+	box-shadow: inset 0 0 0 2px var(--sl-color-black);
+}
+
+.tutorial-flow__check-input:checked ~ span:last-child {
+	opacity: 0.75;
+	text-decoration: line-through;
+}
+
+.tutorial-flow__progress {
+	color: var(--sl-color-gray-3);
+	font-size: 0.82rem;
+	font-weight: 700;
+	margin: 0.75rem 0 0;
+}
+
+.tutorial-flow--done .tutorial-flow__progress {
+	color: var(--ap-cyan-400);
+}
+
+/* Skill guides — tutoriales tipo Astro / Expo */
+.skill-hub {
+	margin: 1.5rem 0 2rem;
+}
+
+.skill-hub__eyebrow,
+.skill-series__eyebrow,
+.skill-step__unit {
+	color: var(--ap-cyan-400);
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.skill-hub__title,
+.skill-series__title,
+.skill-step__title {
+	font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+	font-weight: 800;
+	line-height: 1.2;
+	margin: 0.35rem 0 0.75rem;
+}
+
+.skill-hub__intro,
+.skill-series__desc {
+	color: var(--sl-color-gray-2);
+	line-height: 1.65;
+	margin: 0 0 1.25rem;
+	max-width: 52rem;
+}
+
+.skill-hub__grid {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.skill-hub__card {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-lg);
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 1rem 1.1rem;
+}
+
+.skill-hub__level,
+.skill-series__level {
+	border-radius: 999px;
+	display: inline-block;
+	font-size: 0.68rem;
+	font-weight: 800;
+	padding: 0.2rem 0.55rem;
+	text-transform: uppercase;
+}
+
+.skill-hub__level--basico,
+.skill-series__level--basico {
+	background: rgba(34, 211, 238, 0.15);
+	color: var(--ap-cyan-400);
+}
+
+.skill-hub__level--intermedio,
+.skill-series__level--intermedio {
+	background: rgba(245, 158, 11, 0.15);
+	color: var(--ap-amber-500);
+}
+
+.skill-hub__card-title {
+	font-size: 1.05rem;
+	margin: 0;
+}
+
+.skill-hub__card-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.skill-hub__card-title a:hover {
+	color: var(--sl-color-text-accent);
+}
+
+.skill-hub__card-desc,
+.skill-hub__meta {
+	color: var(--sl-color-gray-3);
+	font-size: 0.88rem;
+	line-height: 1.5;
+	margin: 0;
+}
+
+.skill-hub__progress-bar,
+.skill-series__progress-bar {
+	background: var(--sl-color-gray-6);
+	border-radius: 999px;
+	height: 4px;
+	overflow: hidden;
+}
+
+.skill-hub__progress-fill,
+.skill-series__progress-fill {
+	background: var(--ap-amber-500);
+	height: 100%;
+	transition: width 0.25s ease;
+}
+
+.skill-hub__cta,
+.skill-series__cta {
+	align-self: flex-start;
+	color: var(--sl-color-text-accent);
+	font-size: 0.88rem;
+	font-weight: 700;
+	margin-top: 0.25rem;
+	text-decoration: none;
+}
+
+.skill-series {
+	margin: 0.5rem 0 2rem;
+}
+
+.skill-series__header {
+	margin-bottom: 1.25rem;
+}
+
+.skill-series__steps {
+	display: grid;
+	gap: 0.5rem;
+	list-style: none;
+	margin: 0 0 1.25rem;
+	padding: 0;
+}
+
+.skill-series__step {
+	align-items: center;
+	display: flex;
+	gap: 0.65rem;
+}
+
+.skill-series__step-num {
+	align-items: center;
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: 999px;
+	display: inline-flex;
+	font-size: 0.78rem;
+	font-weight: 800;
+	height: 1.5rem;
+	justify-content: center;
+	min-width: 1.5rem;
+}
+
+.skill-series__step-link {
+	color: var(--sl-color-text);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.skill-series__step-link:hover {
+	color: var(--sl-color-text-accent);
+}
+
+.skill-step__crumb {
+	color: var(--sl-color-gray-3);
+	font-size: 0.82rem;
+	margin-bottom: 0.75rem;
+}
+
+.skill-step__crumb a {
+	color: var(--sl-color-text-accent);
+}
+
+.skill-step__goal,
+.skill-step__challenge {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-md);
+	margin: 1rem 0;
+	padding: 0.85rem 1rem;
+}
+
+.skill-step__goal-label,
+.skill-step__challenge-label {
+	color: var(--ap-cyan-400);
+	font-size: 0.72rem;
+	font-weight: 800;
+	margin: 0 0 0.35rem;
+	text-transform: uppercase;
+}
+
+.skill-step__body p {
+	color: var(--sl-color-gray-2);
+	line-height: 1.65;
+	margin: 0 0 0.75rem;
+}
+
+.skill-step__code {
+	background: var(--sl-color-gray-6);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-md);
+	font-size: 0.82rem;
+	margin: 0.75rem 0;
+	overflow-x: auto;
+	padding: 0.75rem 0.85rem;
+}
+
+.skill-step__tip {
+	color: var(--sl-color-gray-3);
+	font-size: 0.88rem;
+}
+
+.skill-step__done {
+	align-items: flex-start;
+	cursor: pointer;
+	display: flex;
+	font-size: 0.88rem;
+	font-weight: 700;
+	gap: 0.55rem;
+	margin: 1.25rem 0;
+}
+
+.skill-step__done-input {
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+}
+
+.skill-step__done-box {
+	border: 2px solid var(--ap-border-accent);
+	border-radius: 4px;
+	flex-shrink: 0;
+	height: 1.1rem;
+	margin-top: 0.1rem;
+	width: 1.1rem;
+}
+
+.skill-step__done-input:checked + .skill-step__done-box {
+	background: var(--ap-amber-500);
+}
+
+.skill-step__pager {
+	border-top: 1px solid var(--ap-border);
+	display: grid;
+	gap: 0.75rem;
+	grid-template-columns: 1fr 1fr;
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.skill-step__prev,
+.skill-step__next {
+	color: var(--sl-color-text-accent);
+	font-size: 0.88rem;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.skill-step__next {
+	justify-self: end;
+	text-align: right;
+}
+
+.skill-step__next--finish {
+	color: var(--ap-cyan-400);
+}
+
 /* Study path — estilo ruta Platzi */
 .study-path {
 	margin: 2rem 0;
@@ -489,6 +933,99 @@
 	font-size: 0.88rem;
 	margin: 0 0 1.5rem;
 	padding: 0.65rem 0.85rem;
+}
+
+.study-path__phase {
+	list-style: none;
+	margin: 2rem 0 1rem;
+	padding: 0;
+}
+
+.study-path__phase-title {
+	font-size: 1.15rem;
+	font-weight: 700;
+	margin: 0 0 0.35rem;
+	color: var(--sl-color-white);
+}
+
+.study-path__phase-intro {
+	margin: 0 0 0.5rem;
+	color: var(--sl-color-gray-3);
+	font-size: 0.92rem;
+	line-height: 1.5;
+	max-width: 52rem;
+}
+
+.tutorial-catalog__lead {
+	font-size: 1rem;
+	line-height: 1.6;
+	margin-bottom: 1.5rem;
+}
+
+.tutorial-catalog__section {
+	margin-bottom: 2rem;
+}
+
+.tutorial-catalog__section--muted {
+	opacity: 0.95;
+}
+
+.tutorial-catalog__hint {
+	color: var(--sl-color-gray-3);
+	font-size: 0.9rem;
+	margin: 0 0 1rem;
+}
+
+.tutorial-catalog__list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: 1rem;
+}
+
+.tutorial-catalog__list li {
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	padding: 1rem;
+}
+
+.tutorial-catalog__meta {
+	display: inline-block;
+	margin-left: 0.5rem;
+	font-size: 0.75rem;
+	color: var(--sl-color-gray-4);
+}
+
+.tutorial-catalog__list p {
+	margin: 0.35rem 0 0;
+	font-size: 0.88rem;
+	color: var(--sl-color-gray-3);
+}
+
+.tutorial-catalog__table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9rem;
+}
+
+.tutorial-catalog__table th,
+.tutorial-catalog__table td {
+	border: 1px solid var(--sl-color-gray-5);
+	padding: 0.5rem 0.75rem;
+	text-align: left;
+}
+
+.tutorial-catalog__path-note {
+	font-size: 0.8rem;
+}
+
+.tutorial-catalog__credit {
+	margin-top: 2rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--sl-color-gray-5);
+	font-size: 0.85rem;
+	color: var(--sl-color-gray-3);
 }
 
 .study-path__courses {
@@ -809,6 +1346,25 @@
 .study-path__type--reference {
 	background: rgba(34, 211, 238, 0.12);
 	color: var(--ap-cyan-400);
+}
+
+.study-path__type--guide {
+	background: rgba(56, 189, 248, 0.12);
+	color: rgb(56, 189, 248);
+}
+
+.study-path__canonical {
+	margin: 0.75rem 0 0;
+	font-size: 0.9rem;
+}
+
+.study-path__canonical a {
+	color: var(--sl-color-accent);
+	text-decoration: none;
+}
+
+.study-path__canonical a:hover {
+	text-decoration: underline;
 }
 
 .study-path__minutes {

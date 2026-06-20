@@ -1,23 +1,51 @@
 ---
 title: Ruta de estudio
-description: Ruta guiada estilo escuela para dominar el PIC18F4550 — teoria, laboratorio y parcial alineados al curso UNEXPO.
+description: Ruta guiada estilo escuela para dominar el PIC18F4550 — teoria, tutoriales intercalados y parcial alineados al curso UNEXPO.
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-import AIExplain from '../../components/AIExplain.astro';
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
 import StudyPath from '../../components/StudyPath.astro';
+
+## Que es una ruta de estudio
+
+Una **ruta de estudio** no es leer el sitio al azar ni hacer todos los tutoriales sin contexto. Es el orden recomendado del curso de **Microcontroladores** (UNEXPO · Ing. Mecatronica): primero entiendes el concepto, luego aplicas con un tutorial y despues preparas el parcial.
+
+El flujo tiene fases claras:
+
+1. **Comienzo** — conceptos del microcontrolador, que es el PIC18F4550 y comparacion con otras plataformas.
+2. **Fundamentos** — arquitectura, registros, ensamblador y tu primer programa: MPLAB, guia de puertos y tutorial Primer LED.
+3. **Curso** — perifericos con guias y laboratorios UNEXPO intercalados donde corresponde.
+4. **Parciales** — repaso y examen interactivo justo despues de los temas evaluados.
+
+## Tutoriales en la ruta
+
+<Aside type="tip" title="Clase, guia y laboratorio en el mismo orden">
+La lista de abajo mezcla a proposito tres tipos de leccion:
+
+- **Clase** — teoria del curso: registros, conceptos, diagramas.
+- **Guia practica** — pasos cortos para practicar una habilidad antes del lab oficial.
+- **Laboratorio** — practica UNEXPO con codigo, Proteus, reto de diseno y examen.
+
+No saltes al [catalogo de tutoriales](/tutoriales/) sin haber leido la teoria previa. En la ruta, cada tutorial va **justo despues** de lo que lo prepara: tras ensamblador y MPLAB, el Primer LED; mas adelante, tras interrupciones, la guia de interrupciones y luego el lab.
+</Aside>
+
+AprendePIC18 es una plataforma open-source de [zackness](https://zackness.pages.dev), mantenida por [StartupVen](https://startupven.com) dentro del ecosistema [CALETAS](https://caleta.top). Puedes leer mas sobre quien desarrolla el sitio y que significan los tutoriales interactivos en [Ecosistema CALETAS y StartupVen](/sobre/ecosistema/).
+
+## Tu progreso
+
+Marca cada leccion o dejala que se marque sola al completar guias, checklists de tutoriales o examenes.
 
 <StudyPath locale="es" />
 
-<AIExplain title="Por que una ruta y no leer todo de golpe">
-El PIC18F4550 se estudia mejor por capas. Esta ruta sigue el orden del curso de **Microcontroladores** (UNEXPO · Ing. Mecatronica) y se basa en los temas de clase, practicas de laboratorio, ejercicios de parcial y el datasheet Microchip del curso.
-</AIExplain>
+## Catalogo de tutoriales
+
+Si buscas un laboratorio concreto sin recorrer la ruta, usa el [catalogo de tutoriales](/tutoriales/). Ahi estan todos; la ruta de arriba indica **cuando** conviene hacer cada uno.
 
 ## Atajos por objetivo
 
 <CardGrid>
 	<Card title="Parcial I (T1–T3)" icon="approve-check">
-		Tras los cursos 1–3: [Preparacion Parcial I](/parcial/parcial-1/) con examen interactivo.
+		Tras Comienzo y Fundamentos: [Preparacion Parcial I](/parcial/parcial-1/) con examen interactivo.
 	</Card>
 	<Card title="Parcial II (T4–T5)" icon="approve-check">
 		Tras GPIO y Practica 1: [Preparacion Parcial II](/parcial/parcial-2/).
@@ -28,8 +56,8 @@ El PIC18F4550 se estudia mejor por capas. Esta ruta sigue el orden del curso de 
 	<Card title="Parcial IV (ADC + serial)" icon="approve-check">
 		Tras ADC y UART: [Parcial IV](/parcial/parcial-4/) y [proyecto final](/parcial/proyecto-final/).
 	</Card>
-	<Card title="Desde cero" icon="document">
-		Empieza en el curso 1 y sigue el orden. Cada parcial aparece justo despues de sus temas y practicas.
+	<Card title="Ecosistema" icon="open-book">
+		[Quien mantiene la plataforma](/sobre/ecosistema/) — zackness, StartupVen y CALETAS.
 	</Card>
 	<Card title="Repaso rapido" icon="setting">
 		[Glosario](/referencia/glosario/), [guia de registros](/referencia/guia-registros/) y [guia teorica](/parcial/guia-teorica/).
@@ -41,20 +69,3 @@ El PIC18F4550 se estudia mejor por capas. Esta ruta sigue el orden del curso de 
 No memorices tablas completas al principio. La habilidad clave del parcial es responder:
 
 **Que quiero controlar → que registro lo configura → que bit debo modificar**
-
-## Material de referencia del curso
-
-El contenido de AprendePIC18 se alinea con estos materiales del curso UNEXPO:
-
-| Tipo | Archivos |
-| --- | --- |
-| Teoria | Tema 1, Tema 2-3, Tema 6-10, instrucciones PIC |
-| Laboratorio | Practica 1, 2, 3, 6, 7, 8 |
-| Parcial | Ejercicios II parcial 20252 |
-| Referencia | PIC18LF4455-I-PT.PDF (datasheet) |
-
-AprendePIC18 traduce ese material a paginas navegables, diagramas y tutoriales interactivos.
-
-## Tutoriales con checklist
-
-Complementa la ruta con [Tutoriales interactivos](/tutoriales/): el progreso de la ruta y el de los tutoriales se guardan por separado en tu navegador.

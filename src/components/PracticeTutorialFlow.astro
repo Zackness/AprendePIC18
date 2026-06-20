@@ -1,0 +1,156 @@
+---
+import Figure from './Figure.astro';
+import { getTutorialSteps } from '../data/tutorial-steps';
+import { practiceTutorials } from '../data/tutorials';
+
+interface Props {
+	slug: string;
+	locale?: 'es' | 'en';
+}
+
+const { slug, locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+const practice = practiceTutorials.find((p) => p.slug === slug);
+
+if (!practice) {
+	throw new Error(`Practice tutorial not found: ${slug}`);
+}
+
+const steps = getTutorialSteps(practice);
+const goal = isEn ? practice.goalEn : practice.goalEs;
+const checklistId = `practice-${practice.slug}`;
+---
+
+<section class="tutorial-flow" data-tutorial-flow={checklistId} aria-label={isEn ? 'Programming steps' : 'Pasos de programacion'}>
+	{
+		goal && (
+			<div class="tutorial-flow__goal">
+				<p class="tutorial-flow__goal-label">{isEn ? 'What you will build' : 'Lo que vas a construir'}</p>
+				<p class="tutorial-flow__goal-text">{goal}</p>
+			</div>
+		)
+	}
+
+	{
+		practice.figures?.map((fig) => (
+			<Figure
+				src={fig.src}
+				alt={isEn ? fig.altEn : fig.altEs}
+				caption={isEn ? fig.captionEn : fig.captionEs}
+				credit={fig.credit}
+			/>
+		))
+	}
+
+	<nav class="tutorial-flow__outline" aria-label={isEn ? 'Step outline' : 'Indice de pasos'}>
+		<p class="tutorial-flow__outline-title">{isEn ? 'Steps in this tutorial' : 'Pasos de este tutorial'}</p>
+		<ol class="tutorial-flow__outline-list">
+			{
+				steps.map((step, index) => (
+					<li>
+						<a href={`#${checklistId}-${step.id}`}>
+							{index + 1}. {isEn ? step.titleEn : step.titleEs}
+						</a>
+					</li>
+				))
+			}
+		</ol>
+	</nav>
+
+	<ol class="tutorial-flow__steps">
+		{
+			steps.map((step, index) => (
+				<li class="tutorial-flow__step" id={`${checklistId}-${step.id}`}>
+					<header class="tutorial-flow__step-header">
+						<span class="tutorial-flow__step-num">{index + 1}</span>
+						<h3 class="tutorial-flow__step-title">{isEn ? step.titleEn : step.titleEs}</h3>
+					</header>
+					<div class="tutorial-flow__step-body" set:html={(isEn ? step.bodyEn : step.bodyEs).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')} />
+					{
+						step.code && (
+							<pre class="tutorial-flow__code">
+								<code>{step.code}</code>
+							</pre>
+						)
+					}
+					{
+						(isEn ? step.tipEn : step.tipEs) && (
+							<p class="tutorial-flow__tip">
+								<strong>{isEn ? 'Tip:' : 'Consejo:'}</strong>{' '}
+								{isEn ? step.tipEn : step.tipEs}
+							</p>
+						)
+					}
+					<label class="tutorial-flow__check">
+						<input type="checkbox" class="tutorial-flow__check-input" data-step-id={step.id} />
+						<span class="tutorial-flow__check-box" aria-hidden="true" />
+						<span>{isEn ? 'I completed this step' : 'Complete este paso'}</span>
+					</label>
+				</li>
+			))
+		}
+	</ol>
+
+	<p class="tutorial-flow__progress" data-flow-progress aria-live="polite" />
+</section>
+
+<script>
+	function initTutorialFlows() {
+		const STORAGE_KEY = 'aprende-pic18-checklists';
+
+		function loadAll() {
+			try {
+				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+			} catch {
+				return {};
+			}
+		}
+
+		function saveAll(data: Record<string, unknown>) {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
+		}
+
+		document.querySelectorAll('[data-tutorial-flow]').forEach((root) => {
+			const checklistId = root.getAttribute('data-tutorial-flow');
+			if (!checklistId) return;
+
+			const inputs = root.querySelectorAll<HTMLInputElement>('.tutorial-flow__check-input');
+			const progressEl = root.querySelector('[data-flow-progress]');
+			const all = loadAll();
+			const saved = (all[checklistId] as Record<string, boolean>) || {};
+
+			function updateProgress() {
+				const total = inputs.length;
+				const done = [...inputs].filter((i) => i.checked).length;
+				const pct = total ? Math.round((done / total) * 100) : 0;
+				const isEn = document.documentElement.lang?.startsWith('en');
+				if (progressEl) {
+					progressEl.textContent = isEn
+						? `${done}/${total} steps completed (${pct}%)`
+						: `${done}/${total} pasos completados (${pct}%)`;
+				}
+				root.classList.toggle('tutorial-flow--done', done === total && total > 0);
+			}
+
+			inputs.forEach((input) => {
+				const stepId = input.getAttribute('data-step-id');
+				if (stepId && saved[stepId]) input.checked = true;
+				input.addEventListener('change', () => {
+					const stepId = input.getAttribute('data-step-id');
+					if (!stepId) return;
+					const data = loadAll();
+					if (!data[checklistId]) data[checklistId] = {};
+					(data[checklistId] as Record<string, boolean>)[stepId] = input.checked;
+					saveAll(data);
+					updateProgress();
+				});
+			});
+
+			updateProgress();
+		});
+	}
+
+	initTutorialFlows();
+	document.addEventListener('astro:page-load', initTutorialFlows);
+</script>

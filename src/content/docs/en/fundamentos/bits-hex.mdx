@@ -13,7 +13,9 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 
 
-On the PIC18F4550 almost everything is configured by modifying individual bits inside 8-bit registers.
+On the PIC18F4550 almost everything is configured by modifying individual bits inside **8-bit** registers (one byte: **2⁸ = 256** states, **0 through 255**). To review the digital-systems idea, start with [What 8-bit means](/en/introduccion/pic18f4550/#what-8-bit-means).
+
+Mastering binary, hexadecimal, and masks is essential for the exam and lab work.
 
 <AIExplain title="Practical rule">
 One byte = 8 bits. In MPASM you write `B'10101010'` or `0xAA`. Use `BSF` to set a bit and `BCF` to clear it.

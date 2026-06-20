@@ -1,10 +1,38 @@
 ---
-title: 'Tutorial — Practica 6'
-description: 'Motor paso a paso.'
+title: 'Tutorial — Práctica 6: Motor paso a paso'
+description: 'Controla un motor paso a paso con secuencia full-step, ULN2003 y temporizador entre pasos.'
 ---
 
-import PracticeTutorial from '../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
+import AIExplain from '../../../components/AIExplain.astro';
+import AsmDownload from '../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-6" locale="es" />
+<PracticeLabPage tutorialSlug="practica-6">
+
+<PracticeBox title="Práctica 6 de Laboratorio" level="UNEXPO">
+Controlar un motor paso a paso mediante secuencia de energización de bobinas. Puede combinarse con PWM o salidas digitales temporizadas.
+</PracticeBox>
+
+<AIExplain title="Secuencia de pasos">
+Motores unipolares/bipolares requieren patrones en fase (full step o half step). Usa timers para controlar velocidad entre pasos.
+</AIExplain>
+
+## Elementos típicos
+
+- Driver (ULN2003 o similar)
+- 4 salidas del PIC a las bobinas
+- Botones para dirección y velocidad
+- Timer para retardo entre pasos
+
+## Código fuente de referencia
+
+<AsmDownload
+	downloadSlug="practica-6-motor-paso-a-paso"
+	filename="practica-6-motor-paso-a-paso.asm"
+	note="Requiere suscripción activa en CALETAS. Secuencia full-step en RC0–RC3 vía ULN2003. RA0 invierte el sentido de giro."
+/>
+
+</PracticeLabPage>
 
 [Panel de tutoriales](/tutoriales/) · [Ejercicios](/tutoriales/ejercicios/)

@@ -1,10 +1,39 @@
 ---
-title: 'Tutorial — Practice 7'
-description: '10-bit A/D converter.'
+title: 'Tutorial — Practice 7: A/D converter'
+description: 'Read a potentiometer on AN0 with the 10-bit ADC and display the value on LCD.'
 ---
 
-import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import AsmDownload from '../../../../components/AsmDownload.astro';
 
-<PracticeTutorial slug="practica-7" locale="en" />
+<PracticeLabPage tutorialSlug="practica-7" locale="en">
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+<PracticeBox title="Lab Practice 7" level="UNEXPO">
+Implement analog-to-digital conversion: read a potentiometer or sensor, process the value, and display on LCD or LEDs.
+</PracticeBox>
+
+## Required steps in your code
+
+1. Configure ADCON1 (analog pins)
+2. Configure ADCON2 (clock, format)
+3. Select channel in ADCON0
+4. Start conversion and wait for GO/DONE
+5. Read and scale to voltage or units
+
+## 20 MHz crystal
+
+Select ADCS = 101 (16 Tosc) in ADCON2 per Topic 9 ADC.
+
+## Reference source code
+
+<AsmDownload
+	downloadSlug="practica-7-convertidor-ad"
+	filename="practica-7-convertidor-ad.asm"
+	locale="en"
+	note="Requires an active CALETAS subscription. AN0 read, ADCON setup, and LCD display (4-bit bus on RB/RE)."
+/>
+
+</PracticeLabPage>
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)

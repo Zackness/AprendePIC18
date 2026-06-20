@@ -20,8 +20,8 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# PDFs del curso UNEXPO (carpeta raíz; no se publican en el repositorio)
-/docs/
+# PDFs del curso UNEXPO (carpeta raíz) — incluidos temporalmente en el repo
+# /docs/
 
 # artefactos locales de scripts
 /tmp/

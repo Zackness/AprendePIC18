@@ -5,6 +5,22 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://pic18.caleta.top',
+	redirects: {
+		'/practicas/primer-led': '/tutoriales/primer-led',
+		'/practicas/operaciones-matematicas': '/tutoriales/practica-1',
+		'/practicas/teclado-lcd': '/tutoriales/practica-2',
+		'/practicas/frecuencimetro': '/tutoriales/practica-3',
+		'/practicas/motor-paso-a-paso': '/tutoriales/practica-6',
+		'/practicas/convertidor-ad': '/tutoriales/practica-7',
+		'/practicas/comunicacion-serial': '/tutoriales/practica-8',
+		'/en/practicas/primer-led': '/en/tutoriales/primer-led',
+		'/en/practicas/operaciones-matematicas': '/en/tutoriales/practica-1',
+		'/en/practicas/teclado-lcd': '/en/tutoriales/practica-2',
+		'/en/practicas/frecuencimetro': '/en/tutoriales/practica-3',
+		'/en/practicas/motor-paso-a-paso': '/en/tutoriales/practica-6',
+		'/en/practicas/convertidor-ad': '/en/tutoriales/practica-7',
+		'/en/practicas/comunicacion-serial': '/en/tutoriales/practica-8',
+	},
 	integrations: [
 		starlight({
 			title: 'AprendePIC18',
@@ -42,33 +58,9 @@ export default defineConfig({
 					items: [
 						{ slug: 'ruta-de-estudio' },
 						{ slug: 'sobre/ecosistema' },
+						{ slug: 'introduccion/conceptos-basicos' },
 						{ slug: 'introduccion/pic18f4550' },
 						{ slug: 'introduccion/comparaciones' },
-					],
-				},
-				{
-					label: 'Tutoriales',
-					translations: { en: 'Tutorials' },
-					items: [
-						{ slug: 'tutoriales' },
-						{ slug: 'tutoriales/ejercicios' },
-						{
-							label: 'Practicas paso a paso',
-							translations: { en: 'Step-by-step practices' },
-							collapsed: true,
-							items: [
-								{ slug: 'tutoriales/primer-led' },
-								{ slug: 'tutoriales/practica-1' },
-								{ slug: 'tutoriales/practica-2' },
-								{ slug: 'tutoriales/practica-3' },
-								{ slug: 'tutoriales/practica-4' },
-								{ slug: 'tutoriales/practica-5' },
-								{ slug: 'tutoriales/practica-6' },
-								{ slug: 'tutoriales/practica-7' },
-								{ slug: 'tutoriales/practica-8' },
-								{ slug: 'tutoriales/practica-9' },
-							],
-						},
 					],
 				},
 				{
@@ -76,8 +68,8 @@ export default defineConfig({
 					translations: { en: 'Foundations' },
 					items: [
 						{ slug: 'fundamentos/arquitectura' },
-						{ slug: 'fundamentos/bits-hex' },
 						{ slug: 'fundamentos/registros' },
+						{ slug: 'fundamentos/bits-hex' },
 						{ slug: 'fundamentos/ensamblador' },
 						{ slug: 'fundamentos/config-bits' },
 						{ slug: 'fundamentos/mplab-proteus' },
@@ -125,19 +117,6 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Practicas de laboratorio',
-					translations: { en: 'Lab practices' },
-					items: [
-						{ slug: 'practicas/primer-led' },
-						{ slug: 'practicas/operaciones-matematicas' },
-						{ slug: 'practicas/teclado-lcd' },
-						{ slug: 'practicas/frecuencimetro' },
-						{ slug: 'practicas/motor-paso-a-paso' },
-						{ slug: 'practicas/convertidor-ad' },
-						{ slug: 'practicas/comunicacion-serial' },
-					],
-				},
-				{
 					label: 'Proyectos',
 					translations: { en: 'Projects' },
 					items: [
@@ -164,6 +143,43 @@ export default defineConfig({
 					items: [
 						{ slug: 'referencia/guia-registros' },
 						{ slug: 'referencia/glosario' },
+					],
+				},
+				{
+					label: 'Catalogo de tutoriales',
+					translations: { en: 'Tutorial catalog' },
+					collapsed: true,
+					items: [
+						{ slug: 'tutoriales' },
+						{ slug: 'tutoriales/ejercicios' },
+						{
+							label: 'Guias practicas',
+							translations: { en: 'Practical guides' },
+							collapsed: true,
+							items: [
+								{ slug: 'tutoriales/guias' },
+								{ slug: 'tutoriales/guias/puertos' },
+								{ slug: 'tutoriales/guias/alu' },
+								{ slug: 'tutoriales/guias/interrupciones' },
+							],
+						},
+						{
+							label: 'Laboratorios UNEXPO',
+							translations: { en: 'UNEXPO labs' },
+							collapsed: true,
+							items: [
+								{ slug: 'tutoriales/primer-led' },
+								{ slug: 'tutoriales/practica-1' },
+								{ slug: 'tutoriales/practica-2' },
+								{ slug: 'tutoriales/practica-3' },
+								{ slug: 'tutoriales/practica-4' },
+								{ slug: 'tutoriales/practica-5' },
+								{ slug: 'tutoriales/practica-6' },
+								{ slug: 'tutoriales/practica-7' },
+								{ slug: 'tutoriales/practica-8' },
+								{ slug: 'tutoriales/practica-9' },
+							],
+						},
 					],
 				},
 			],

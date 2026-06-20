@@ -14,7 +14,9 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 
 
-The **PIC18F4550** is an 8-bit microcontroller from Microchip. It integrates CPU, memory, input/output ports, and peripherals in a single chip. It is popular in courses because it forces you to understand the machine from the inside: registers, bits, ports, interrupts, and timers.
+The **PIC18F4550** is the **8-bit** microcontroller you will use in this course. If you have not read [basic microcontroller concepts](/en/introduccion/conceptos-basicos/) (μC vs μP, memory, and peripherals) yet, start there.
+
+It integrates CPU, Flash/RAM/EEPROM memory, I/O ports, and internal peripherals in a single chip. It is popular in courses because it forces you to understand the machine from the inside: registers, bits, ports, interrupts, and timers.
 
 <Figure
 	src="/images/pdf/pinout/page-4.png"
@@ -24,14 +26,57 @@ The **PIC18F4550** is an 8-bit microcontroller from Microchip. It integrates CPU
 />
 
 <AIExplain title="Core idea">
-A PIC does not run an operating system like a Raspberry Pi. It directly executes the program you store in its Flash memory. That is why every instruction, register, and bit matters.
+A PIC does not run an operating system like a mini PC (Raspberry Pi). It directly executes the program you store in its Flash memory. That is why every instruction, register, and bit matters.
 </AIExplain>
+
+## What 8-bit means
+
+In **digital systems**, each bit is a position that holds **0 or 1**. With **n** bits, the number of distinct combinations is **2ⁿ** (two to the power of n).
+
+| n (bits) | Combinations **2ⁿ** | Numbers you can represent (unsigned) |
+| --- | --- | --- |
+| 1 | 2 | 0 to 1 |
+| 2 | 4 | 0 to 3 |
+| 3 | 8 | 0 to 7 |
+| **8** | **256** | **0 to 255** |
+
+With **3 bits** you get the **combination table** used in digital courses (each row is a distinct state):
+
+| bit 2 | bit 1 | bit 0 | Decimal |
+| --- | --- | --- | --- |
+| 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 |
+| 0 | 1 | 0 | 2 |
+| 0 | 1 | 1 | 3 |
+| 1 | 0 | 0 | 4 |
+| 1 | 0 | 1 | 5 |
+| 1 | 1 | 0 | 6 |
+| 1 | 1 | 1 | 7 |
+
+That is **8 rows** = **2³ = 8** states, numbered **0 through 7**.
+
+The PIC18F4550 uses **8 bits per register** (one **byte**). Same idea at scale: **2⁸ = 256** combinations, numbered **0 through 255**. That is why `WREG`, `PORTB`, and most data registers fit in a single byte.
+
+Each bit in the byte has a **weight** (power of 2). If the bit is **1**, you add that weight:
+
+| bit 7 | bit 6 | bit 5 | bit 4 | bit 3 | bit 2 | bit 1 | bit 0 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 128 | 64 | 32 | 16 | 8 | 4 | 2 | 1 |
+
+Examples:
+
+| Decimal | Binary (8 bits) | Calculation |
+| --- | --- | --- |
+| 5 | `00000101` | 4 + 1 = 5 |
+| 255 | `11111111` | 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255 |
+
+In [Basic architecture](/en/fundamentos/arquitectura/) you will see why a sum like **200 + 100 = 300** does not fit in 8 bits and sets carry flag **C**. In [Bits and hexadecimal](/en/fundamentos/bits-hex/) you go deeper into conversions and masks.
 
 ## Basic blocks
 
 <CardGrid>
 	<Card title="8-bit CPU" icon="cpu">
-		Executes instructions from the PIC18 instruction set. It works with registers like `WREG`, `STATUS`, `BSR`, and the program counter.
+		Executes instructions from the PIC18 instruction set. It works with one-byte registers (0–255), such as `WREG`, `STATUS`, `BSR`, and the program counter.
 	</Card>
 	<Card title="Flash memory" icon="document">
 		Stores the program. When you burn the `.hex` file, its content is stored here.

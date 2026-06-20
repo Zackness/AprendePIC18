@@ -1,0 +1,126 @@
+---
+import { skillTutorialSeries } from '../data/skill-tutorials';
+import { practiceTutorials } from '../data/tutorials';
+
+interface Props {
+	locale?: 'es' | 'en';
+}
+
+const { locale = 'es' } = Astro.props;
+const isEn = locale === 'en';
+
+function t(es: string, en: string) {
+	return isEn ? en : es;
+}
+
+const pathHref = isEn ? '/en/ruta-de-estudio/' : '/ruta-de-estudio/';
+const readyLabs = practiceTutorials.filter((p) => p.ready);
+---
+
+<div class="tutorial-catalog">
+	<p class="tutorial-catalog__lead">
+		{t(
+			'Estos tutoriales no son una lista aparte del curso: aparecen en la ruta de estudio justo despues de la teoria que los prepara. Usa este catalogo para buscar uno concreto o repasar; para estudiar desde cero, sigue la ',
+			'These tutorials are not separate from the course: they appear on the study path right after the theory that prepares you. Use this catalog to find a specific lab or review; to learn from scratch, follow the ',
+		)}
+		<a href={pathHref}>{t('ruta de estudio', 'study path')}</a>.
+	</p>
+
+	<section class="tutorial-catalog__section">
+		<h2>{t('Guias practicas (paso a paso)', 'Practical guides (step by step)')}</h2>
+		<p class="tutorial-catalog__hint">
+			{t(
+				'Mini-cursos en varias paginas (estilo Astro/Expo). Se insertan en la ruta antes del laboratorio relacionado.',
+				'Multi-page mini-courses (Astro/Expo style). Inserted on the path before the related lab.',
+			)}
+		</p>
+		<ul class="tutorial-catalog__list">
+			{
+				skillTutorialSeries.map((series) => (
+					<li>
+						<a href={isEn ? `/en/tutoriales/guias/${series.id}/` : `/tutoriales/guias/${series.id}/`}>
+							<strong>{isEn ? series.titleEn : series.titleEs}</strong>
+						</a>
+						<span class="tutorial-catalog__meta">
+							{series.steps.length} {t('pasos', 'steps')}
+						</span>
+						<p>{isEn ? series.descriptionEn : series.descriptionEs}</p>
+					</li>
+				))
+			}
+		</ul>
+		<p>
+			<a href={isEn ? '/en/tutoriales/guias/' : '/tutoriales/guias/'}>
+				{t('Ver indice de guias →', 'View guides index →')}
+			</a>
+		</p>
+	</section>
+
+	<section class="tutorial-catalog__section">
+		<h2>{t('Laboratorios UNEXPO (0–9)', 'UNEXPO labs (0–9)')}</h2>
+		<p class="tutorial-catalog__hint">
+			{t(
+				'Cada laboratorio incluye pasos de programacion, preguntas de lab, reto de diseno, codigo y examen.',
+				'Each lab includes programming steps, lab questions, design challenge, code, and exam.',
+			)}
+		</p>
+		<table class="tutorial-catalog__table">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>{t('Tutorial', 'Tutorial')}</th>
+					<th>{t('En la ruta', 'On path')}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					readyLabs.map((lab) => (
+						<tr>
+							<td>{lab.number}</td>
+							<td>
+								<a href={isEn ? `/en/tutoriales/${lab.slug}/` : `/tutoriales/${lab.slug}/`}>
+									{isEn ? lab.titleEn : lab.titleEs}
+								</a>
+							</td>
+							<td class="tutorial-catalog__path-note">
+								<a href={pathHref}>{t('Ver orden', 'See order')}</a>
+							</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</section>
+
+	<section class="tutorial-catalog__section tutorial-catalog__section--muted">
+		<h2>{t('Ejercicios interactivos', 'Interactive exercises')}</h2>
+		<p>
+			{t(
+				'Checklists de repaso que complementan la teoria. Tambien aparecen al final de la ruta.',
+				'Review checklists that complement theory. Also listed at the end of the study path.',
+			)}
+		</p>
+		<p>
+			<a href={isEn ? '/en/tutoriales/ejercicios/' : '/tutoriales/ejercicios/'}>
+				{t('Ir a ejercicios →', 'Go to exercises →')}
+			</a>
+		</p>
+	</section>
+
+	<aside class="tutorial-catalog__credit">
+		<p>
+			{t(
+				'Tutoriales interactivos desarrollados para AprendePIC18 por ',
+				'Interactive tutorials built for AprendePIC18 by ',
+			)}
+			<a href="https://zackness.pages.dev">zackness</a>
+			{t(', mantenidos por ', ', maintained by ')}
+			<a href="https://startupven.com">StartupVen</a>
+			{t(' en el ecosistema ', ' in the ')}
+			<a href="https://caleta.top">CALETAS</a>.
+			<a href={isEn ? '/en/sobre/ecosistema/' : '/sobre/ecosistema/'}>
+				{t(' Mas sobre el ecosistema →', ' More about the ecosystem →')}
+			</a>
+		</p>
+	</aside>
+</div>

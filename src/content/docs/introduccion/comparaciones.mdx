@@ -12,10 +12,10 @@ import AIExplain from '../../../components/AIExplain.astro';
 
 
 
-Comparar el PIC18F4550 con Arduino, ESP32 y Raspberry Pi ayuda a entender que no todas las placas resuelven el mismo problema.
+Comparar el PIC18F4550 con Arduino, ESP32 y Raspberry Pi ayuda a entender que no todas las placas resuelven el mismo problema. Los conceptos de [microcontrolador vs microprocesador](/introduccion/conceptos-basicos/) ya los viste en el Tema 1; aqui los aplicamos a plataformas concretas.
 
 <AIExplain title="Diferencia clave">
-Arduino y ESP32 tambien usan microcontroladores. Raspberry Pi usa un microprocesador capaz de correr Linux. El PIC18F4550 se estudia mas cerca del hardware: registros, bits e instrucciones.
+Arduino y ESP32 son placas con **microcontrolador** dentro. La Raspberry Pi es una **computadora de placa unica (SBC)**: mini PC con SoC, RAM en la placa, almacenamiento en SD y Linux — no un μC como el PIC. El PIC18F4550 se estudia al nivel de registros, bits e instrucciones.
 </AIExplain>
 
 <CompareTable rows={[
@@ -39,15 +39,15 @@ Arduino y ESP32 tambien usan microcontroladores. Raspberry Pi usa un microproces
 	},
 	{
 		name: 'Raspberry Pi',
-		role: 'Computadora de placa reducida',
-		strength: 'Corre Linux, sirve para vision, servidores, Python y aplicaciones completas.',
-		limit: 'No es ideal para aprender registros de microcontrolador a bajo nivel.',
+		role: 'Computadora de placa unica (SBC / mini PC)',
+		strength: 'SoC + RAM en placa, SD para el SO, Linux, Python, vision por computadora y aplicaciones completas.',
+		limit: 'No es un microcontrolador; no sirve para aprender registros y ensamblador como en el PIC.',
 	},
 ]} />
 
 ## Como explicarlo en un parcial
 
-Un **microcontrolador** integra CPU, memoria y perifericos en un chip para controlar dispositivos. Un **microprocesador** normalmente necesita memoria y perifericos externos, y puede ejecutar sistemas operativos completos.
+Un **microcontrolador** integra CPU, memoria y perifericos en **un chip** (PIC18F4550). Un **microprocesador** es solo la CPU; en un sistema clasico la RAM y el resto van en la placa madre. La **Raspberry Pi** es otra categoria: **SBC** con SoC, RAM y conectores ya montados, ejecutando Linux.
 
 El PIC18F4550 es buena herramienta academica porque permite ver como se configura el hardware desde registros, sin depender de librerias de alto nivel.
 

@@ -21,6 +21,10 @@ export interface PracticeTutorial {
 	titleEs: string;
 	titleEn: string;
 	slug: string;
+	/** Slug del laboratorio UNEXPO (pre/post, diseno, examen). */
+	practiceSlug?: string;
+	goalEs?: string;
+	goalEn?: string;
 	stepsEs: string[];
 	stepsEn: string[];
 	docHrefEs: string;
@@ -157,8 +161,13 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Tutorial previo — Primer LED',
 		titleEn: 'Warm-up — First LED',
 		slug: 'primer-led',
-		docHrefEs: '/practicas/primer-led/',
-		docHrefEn: '/en/practicas/primer-led/',
+		practiceSlug: 'practicas/primer-led',
+		goalEs:
+			'Un programa en ensamblador que configura RB0 como salida y enciende un LED. Es la base de casi todo lo demas en el curso.',
+		goalEn:
+			'An assembly program that configures RB0 as output and turns on an LED. This is the foundation for most of the course.',
+		docHrefEs: '/tutoriales/primer-led/',
+		docHrefEn: '/en/tutoriales/primer-led/',
 		ready: true,
 		stepsEs: [
 			'Crear proyecto en MPLAB con PIC18F4550',
@@ -181,8 +190,13 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 1 — Operaciones matematicas',
 		titleEn: 'Practice 1 — Math operations',
 		slug: 'practica-1',
-		docHrefEs: '/practicas/operaciones-matematicas/',
-		docHrefEn: '/en/practicas/operaciones-matematicas/',
+		practiceSlug: 'practicas/operaciones-matematicas',
+		goalEs:
+			'Una calculadora ALU con switches en PORTB/PORTD, resultado en LEDs y cambio de operacion con RA0.',
+		goalEn:
+			'An ALU calculator with switches on PORTB/PORTD, result on LEDs, and operation change via RA0.',
+		docHrefEs: '/tutoriales/practica-1/',
+		docHrefEn: '/en/tutoriales/practica-1/',
 		ready: true,
 		figures: [
 			{
@@ -223,8 +237,13 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 2 — Teclado y LCD',
 		titleEn: 'Practice 2 — Keyboard and LCD',
 		slug: 'practica-2',
-		docHrefEs: '/practicas/teclado-lcd/',
-		docHrefEn: '/en/practicas/teclado-lcd/',
+		practiceSlug: 'practicas/teclado-lcd',
+		goalEs:
+			'Leer un teclado matricial 4x4 y mostrar las teclas pulsadas en un LCD 16x2 por bus de 4 bits.',
+		goalEn:
+			'Read a 4x4 matrix keyboard and display pressed keys on a 16x2 LCD in 4-bit mode.',
+		docHrefEs: '/tutoriales/practica-2/',
+		docHrefEn: '/en/tutoriales/practica-2/',
 		ready: true,
 		figures: [
 			{
@@ -263,8 +282,13 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 3 — Frecuencimetro',
 		titleEn: 'Practice 3 — Frequency meter',
 		slug: 'practica-3',
-		docHrefEs: '/practicas/frecuencimetro/',
-		docHrefEn: '/en/practicas/frecuencimetro/',
+		practiceSlug: 'practicas/frecuencimetro',
+		goalEs:
+			'Medir frecuencia con Timer0 como contador, ventana de 1 s con Timer1 e ISR, y multiplexar tres displays.',
+		goalEn:
+			'Measure frequency with Timer0 as counter, 1 s window via Timer1 ISR, and multiplex three displays.',
+		docHrefEs: '/tutoriales/practica-3/',
+		docHrefEn: '/en/tutoriales/practica-3/',
 		ready: true,
 		stepsEs: [
 			'Disenar multiplexado de displays 7 segmentos',
@@ -289,8 +313,10 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 4 — PWM y control analogico',
 		titleEn: 'Practice 4 — PWM and analog control',
 		slug: 'practica-4',
-		docHrefEs: '/pwm/',
-		docHrefEn: '/en/pwm/',
+		goalEs: 'Generar PWM con Timer2 y CCP1 para controlar brillo o velocidad de un motor.',
+		goalEn: 'Generate PWM with Timer2 and CCP1 to control brightness or motor speed.',
+		docHrefEs: '/tutoriales/practica-4/',
+		docHrefEn: '/en/tutoriales/practica-4/',
 		ready: true,
 		stepsEs: [
 			'Calcular PR2 y duty para frecuencia deseada',
@@ -315,8 +341,10 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 5 — Timers e interrupciones',
 		titleEn: 'Practice 5 — Timers and interrupts',
 		slug: 'practica-5',
-		docHrefEs: '/interrupciones/',
-		docHrefEn: '/en/interrupciones/',
+		goalEs: 'Usar Timer0 e interrupciones para retardos precisos sin bloquear el bucle principal.',
+		goalEn: 'Use Timer0 and interrupts for precise delays without blocking the main loop.',
+		docHrefEs: '/tutoriales/practica-5/',
+		docHrefEn: '/en/tutoriales/practica-5/',
 		ready: true,
 		stepsEs: [
 			'Configurar Timer0 para retardo preciso',
@@ -341,8 +369,11 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 6 — Motor paso a paso',
 		titleEn: 'Practice 6 — Stepper motor',
 		slug: 'practica-6',
-		docHrefEs: '/practicas/motor-paso-a-paso/',
-		docHrefEn: '/en/practicas/motor-paso-a-paso/',
+		practiceSlug: 'practicas/motor-paso-a-paso',
+		goalEs: 'Girar un motor paso a paso con secuencia full-step, driver ULN2003 y control de direccion.',
+		goalEn: 'Drive a stepper motor with full-step sequence, ULN2003 driver, and direction control.',
+		docHrefEs: '/tutoriales/practica-6/',
+		docHrefEn: '/en/tutoriales/practica-6/',
 		ready: true,
 		stepsEs: [
 			'Conectar driver (ULN2003) a 4 salidas del PIC',
@@ -367,8 +398,11 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 7 — Convertidor AD',
 		titleEn: 'Practice 7 — A/D converter',
 		slug: 'practica-7',
-		docHrefEs: '/practicas/convertidor-ad/',
-		docHrefEn: '/en/practicas/convertidor-ad/',
+		practiceSlug: 'practicas/convertidor-ad',
+		goalEs: 'Leer un potenciometro en AN0 con el ADC y mostrar el valor en LCD o LEDs.',
+		goalEn: 'Read a potentiometer on AN0 with the ADC and display the value on LCD or LEDs.',
+		docHrefEs: '/tutoriales/practica-7/',
+		docHrefEn: '/en/tutoriales/practica-7/',
 		ready: true,
 		figures: [
 			{
@@ -405,8 +439,11 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 8 — Comunicacion serial',
 		titleEn: 'Practice 8 — Serial communication',
 		slug: 'practica-8',
-		docHrefEs: '/practicas/comunicacion-serial/',
-		docHrefEn: '/en/practicas/comunicacion-serial/',
+		practiceSlug: 'practicas/comunicacion-serial',
+		goalEs: 'Enviar y recibir datos por UART a 9600 baud entre el PIC y una PC.',
+		goalEn: 'Send and receive UART data at 9600 baud between the PIC and a PC.',
+		docHrefEs: '/tutoriales/practica-8/',
+		docHrefEn: '/en/tutoriales/practica-8/',
 		ready: true,
 		figures: [
 			{
@@ -443,8 +480,10 @@ export const practiceTutorials: PracticeTutorial[] = [
 		titleEs: 'Practica 9 — Proyecto integrador',
 		titleEn: 'Practice 9 — Integrator project',
 		slug: 'practica-9',
-		docHrefEs: '/parcial/proyecto-final/',
-		docHrefEn: '/en/parcial/proyecto-final/',
+		goalEs: 'Integrar GPIO, timers, ADC o serial en un proyecto propio con simulacion y demostracion.',
+		goalEn: 'Integrate GPIO, timers, ADC, or serial in your own project with simulation and demo.',
+		docHrefEs: '/tutoriales/practica-9/',
+		docHrefEn: '/en/tutoriales/practica-9/',
 		ready: true,
 		stepsEs: [
 			'Elegir proyecto: semaforo, nivel, estacion, etc.',

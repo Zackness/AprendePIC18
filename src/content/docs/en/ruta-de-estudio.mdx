@@ -1,23 +1,51 @@
 ---
 title: Study path
-description: School-style guided path to master the PIC18F4550 — theory, lab, and exam aligned with the UNEXPO course.
+description: School-style guided path to master the PIC18F4550 — theory, interleaved tutorials, and exams aligned with the UNEXPO course.
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-import AIExplain from '../../../components/AIExplain.astro';
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
 import StudyPath from '../../../components/StudyPath.astro';
+
+## What is a study path
+
+A **study path** is not browsing the site at random or doing every tutorial without context. It is the recommended order of the **Microcontrollers** course (UNEXPO · Mechatronics): understand the concept, apply it with a tutorial, then prepare for the partial exam.
+
+The flow has clear phases:
+
+1. **Getting started** — microcontroller concepts, what the PIC18F4550 is, and comparison with other platforms.
+2. **Foundations** — architecture, registers, assembly, and your first program: MPLAB, ports guide, and First LED tutorial.
+3. **Course** — peripherals with guides and UNEXPO labs interleaved where they belong.
+4. **Partials** — review and interactive exam right after the covered topics.
+
+## Tutorials on the path
+
+<Aside type="tip" title="Class, guide, and lab in the same order">
+The list below deliberately mixes three lesson types:
+
+- **Class** — course theory: registers, concepts, diagrams.
+- **Practical guide** — short steps to practice a skill before the official lab.
+- **Lab** — UNEXPO practice with code, Proteus, design challenge, and exam.
+
+Do not jump to the [tutorial catalog](/en/tutoriales/) without reading the prior theory. On the path, each tutorial comes **right after** what prepares you: after assembly and MPLAB, First LED; later, after interrupts, the interrupts guide and then the lab.
+</Aside>
+
+AprendePIC18 is an open-source platform by [zackness](https://zackness.pages.dev), maintained by [StartupVen](https://startupven.com) within the [CALETAS](https://caleta.top) ecosystem. Read more about who builds the site and what interactive tutorials mean in [CALETAS ecosystem and StartupVen](/en/sobre/ecosistema/).
+
+## Your progress
+
+Check each lesson or let it auto-check when you finish guides, tutorial checklists, or exams.
 
 <StudyPath locale="en" />
 
-<AIExplain title="Why a path instead of reading everything at once">
-The PIC18F4550 is easier to study in layers. This path follows the **Microcontrollers** course order (UNEXPO · Mechatronics) and is based on class topics, lab practices, exam exercises, and the course Microchip datasheet.
-</AIExplain>
+## Tutorial catalog
+
+To find a specific lab without walking the full path, use the [tutorial catalog](/en/tutoriales/). Everything is listed there; the path above shows **when** to do each item.
 
 ## Shortcuts by goal
 
 <CardGrid>
 	<Card title="Partial I (T1–T3)" icon="approve-check">
-		After courses 1–3: [Partial I prep](/en/parcial/parcial-1/) with interactive exam.
+		After Getting started and Foundations: [Partial I prep](/en/parcial/parcial-1/) with interactive exam.
 	</Card>
 	<Card title="Partial II (T4–T5)" icon="approve-check">
 		After GPIO and Practice 1: [Partial II prep](/en/parcial/parcial-2/).
@@ -28,8 +56,8 @@ The PIC18F4550 is easier to study in layers. This path follows the **Microcontro
 	<Card title="Partial IV (ADC + serial)" icon="approve-check">
 		After ADC and UART: [Partial IV](/en/parcial/parcial-4/) and [final project](/en/parcial/proyecto-final/).
 	</Card>
-	<Card title="From scratch" icon="document">
-		Start at course 1 and follow the order. Each partial appears right after its topics and labs.
+	<Card title="Ecosystem" icon="open-book">
+		[Who maintains the platform](/en/sobre/ecosistema/) — zackness, StartupVen, and CALETAS.
 	</Card>
 	<Card title="Quick review" icon="setting">
 		[Glossary](/en/referencia/glosario/), [register guide](/en/referencia/guia-registros/), and [theory guide](/en/parcial/guia-teorica/).
@@ -41,20 +69,3 @@ The PIC18F4550 is easier to study in layers. This path follows the **Microcontro
 Do not memorize full tables at first. The key exam skill is answering:
 
 **What do I want to control → which register configures it → which bit must I modify**
-
-## Course reference material
-
-AprendePIC18 content is aligned with these UNEXPO course materials:
-
-| Type | Files |
-| --- | --- |
-| Theory | Topic 1, Topics 2-3, Topics 6-10, PIC instructions |
-| Lab | Practices 1, 2, 3, 6, 7, 8 |
-| Exam | Ejercicios II parcial 20252 |
-| Reference | PIC18LF4455-I-PT.PDF (datasheet) |
-
-AprendePIC18 turns that material into navigable pages, diagrams, and interactive tutorials.
-
-## Interactive tutorials
-
-Complement the path with [Interactive tutorials](/en/tutoriales/): path progress and tutorial progress are saved separately in your browser.

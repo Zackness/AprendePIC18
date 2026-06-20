@@ -1,4 +1,11 @@
-export type LessonType = 'theory' | 'practice' | 'lab' | 'exam' | 'tool' | 'reference';
+export type LessonType =
+	| 'theory'
+	| 'practice'
+	| 'lab'
+	| 'exam'
+	| 'tool'
+	| 'reference'
+	| 'guide';
 export type StudyLevel = 'beginner' | 'intermediate' | 'advanced' | 'applied';
 
 export interface StudyLesson {
@@ -12,11 +19,70 @@ export interface StudyLesson {
 	/** PDF de referencia del curso UNEXPO (nombre del archivo) */
 	sourceDoc?: string;
 	optional?: boolean;
+	/** Marca la leccion al completar todos los pasos de una guia practica (puertos, alu, …) */
+	autoSkillSeries?: string;
+	/** Marca la leccion al completar todos los pasos del tutorial interactivo */
+	autoPracticeSlug?: string;
 }
+
+export type StudyPhaseId = 'comienzo' | 'fundamentos' | 'curso' | 'parcial' | 'referencia';
+
+export interface StudyPhaseMeta {
+	id: StudyPhaseId;
+	titleEs: string;
+	titleEn: string;
+	introEs: string;
+	introEn: string;
+}
+
+export const studyPathPhases: StudyPhaseMeta[] = [
+	{
+		id: 'comienzo',
+		titleEs: 'Comienzo',
+		titleEn: 'Getting started',
+		introEs:
+			'Que es el PIC18F4550 y como se compara con otras plataformas. Lee esto antes de tocar registros o MPLAB.',
+		introEn:
+			'What the PIC18F4550 is and how it compares to other platforms. Read this before registers or MPLAB.',
+	},
+	{
+		id: 'fundamentos',
+		titleEs: 'Fundamentos (Temas 2 y 3)',
+		titleEn: 'Foundations (Topics 2 and 3)',
+		introEs:
+			'Arquitectura, registros, ensamblador y tu primer programa. La teoria va seguida de MPLAB, una guia practica y el tutorial del Primer LED.',
+		introEn:
+			'Architecture, registers, assembly, and your first program. Theory is followed by MPLAB, a practical guide, and the First LED tutorial.',
+	},
+	{
+		id: 'parcial',
+		titleEs: 'Preparacion de parcial',
+		titleEn: 'Exam preparation',
+		introEs: 'Repaso y examen interactivo justo despues de los temas que evalua cada parcial.',
+		introEn: 'Review and interactive exam right after the topics each partial covers.',
+	},
+	{
+		id: 'curso',
+		titleEs: 'Curso — teoria y laboratorio',
+		titleEn: 'Course — theory and lab',
+		introEs:
+			'Perifericos, practicas UNEXPO y guias intercaladas. Sigue el orden: clase → guia (si aplica) → laboratorio.',
+		introEn:
+			'Peripherals, UNEXPO labs, and interleaved guides. Follow: class → guide (if any) → lab.',
+	},
+	{
+		id: 'referencia',
+		titleEs: 'Referencia y repaso',
+		titleEn: 'Reference and review',
+		introEs: 'Consulta rapida durante todo el semestre. No forma parte del flujo obligatorio inicial.',
+		introEn: 'Quick lookup throughout the semester. Not part of the mandatory initial flow.',
+	},
+];
 
 export interface StudyCourse {
 	id: string;
 	order: number;
+	phase: StudyPhaseId;
 	titleEs: string;
 	titleEn: string;
 	descriptionEs: string;
@@ -35,15 +101,16 @@ export const studyPathMeta = {
 	titleEs: 'Ruta de estudio PIC18F4550',
 	titleEn: 'PIC18F4550 Study Path',
 	subtitleEs:
-		'Secuencia guiada alineada al curso UNEXPO: estudias los temas, haces la practica de laboratorio y preparas cada parcial en el momento — no todo al final.',
+		'Sigue el orden del curso UNEXPO: Comienzo → Fundamentos → teoria con tutoriales intercalados. Un solo progreso para clases, guias y laboratorios.',
 	subtitleEn:
-		'Guided sequence aligned with UNEXPO: study topics, complete the lab practice, and prepare each partial exam along the way — not everything at the end.',
+		'Follow the UNEXPO course order: Getting started → Foundations → theory with interleaved tutorials. One progress bar for classes, guides, and labs.',
 };
 
 export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c01',
 		order: 1,
+		phase: 'comienzo',
 		titleEs: 'Tema 1 — Conceptos del PIC18F4550',
 		titleEn: 'Topic 1 — PIC18F4550 concepts',
 		descriptionEs:
@@ -54,15 +121,27 @@ export const studyPathCourses: StudyCourse[] = [
 		sourceDocs: ['Tema 1. Conceptos Básicos (1).pdf'],
 		outcomesEs: [
 			'Diferenciar microcontrolador y microprocesador',
+			'Clasificar memorias ROM, Flash, RAM y EEPROM',
+			'Distinguir perifericos internos y externos',
 			'Describir bloques internos del PIC18F4550',
-			'Relacionar el Tema 1 con las clases de la ruta',
 		],
 		outcomesEn: [
 			'Distinguish microcontroller from microprocessor',
+			'Classify ROM, Flash, RAM, and EEPROM memories',
+			'Tell internal peripherals from external ones',
 			'Describe PIC18F4550 internal blocks',
-			'Relate Topic 1 to the lessons on the study path',
 		],
 		lessons: [
+			{
+				id: 'c01-l0',
+				titleEs: 'Conceptos basicos del microcontrolador',
+				titleEn: 'Basic microcontroller concepts',
+				hrefEs: '/introduccion/conceptos-basicos/',
+				hrefEn: '/en/introduccion/conceptos-basicos/',
+				minutes: 35,
+				type: 'theory',
+				sourceDoc: 'Tema 1. Conceptos Básicos (1).pdf',
+			},
 			{
 				id: 'c01-l1',
 				titleEs: 'Que es el PIC18F4550',
@@ -88,6 +167,7 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c02',
 		order: 2,
+		phase: 'fundamentos',
 		titleEs: 'Temas 2 y 3 — Arquitectura, registros y bits',
 		titleEn: 'Topics 2 and 3 — Architecture, registers, and bits',
 		descriptionEs:
@@ -113,7 +193,7 @@ export const studyPathCourses: StudyCourse[] = [
 				titleEn: 'Harvard architecture and minimum system',
 				hrefEs: '/fundamentos/arquitectura/',
 				hrefEn: '/en/fundamentos/arquitectura/',
-				minutes: 35,
+				minutes: 50,
 				type: 'theory',
 				sourceDoc: 'Clase Tema 2 y 3 (1).pdf',
 			},
@@ -123,7 +203,7 @@ export const studyPathCourses: StudyCourse[] = [
 				titleEn: 'SFR, GPR registers and banks',
 				hrefEs: '/fundamentos/registros/',
 				hrefEn: '/en/fundamentos/registros/',
-				minutes: 30,
+				minutes: 45,
 				type: 'theory',
 				sourceDoc: 'Clase Tema 2 y 3 (1).pdf',
 			},
@@ -142,23 +222,24 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c03',
 		order: 3,
-		titleEs: 'Temas 2 y 3 — Ensamblador MPASM',
-		titleEn: 'Topics 2 and 3 — MPASM assembly',
+		phase: 'fundamentos',
+		titleEs: 'Temas 2 y 3 — Ensamblador y primer programa',
+		titleEn: 'Topics 2 and 3 — Assembly and first program',
 		descriptionEs:
-			'Lenguaje ensamblador del PIC18: directivas, etiquetas, instrucciones y config bits.',
+			'Lenguaje ensamblador, config bits, herramientas MPLAB/Proteus y tu primer .ASM que enciende un LED.',
 		descriptionEn:
-			'PIC18 assembly: directives, labels, instructions, and config bits.',
+			'Assembly language, config bits, MPLAB/Proteus tools, and your first .ASM that turns on an LED.',
 		level: 'beginner',
 		sourceDocs: ['instrucciones pic.pdf', 'Clase Tema 2 y 3 (1).pdf'],
 		outcomesEs: [
 			'Leer y escribir programas .ASM basicos',
-			'Usar operaciones ALU del PIC18',
-			'Configurar palabra CONFIG y cristal 20 MHz',
+			'Configurar MPLAB y simular en Proteus',
+			'Encender un LED aplicando TRIS y LAT (Primer LED)',
 		],
 		outcomesEn: [
 			'Read and write basic .ASM programs',
-			'Use PIC18 ALU operations',
-			'Configure CONFIG word and 20 MHz crystal',
+			'Set up MPLAB and simulate in Proteus',
+			'Turn on an LED using TRIS and LAT (First LED)',
 		],
 		lessons: [
 			{
@@ -181,11 +262,41 @@ export const studyPathCourses: StudyCourse[] = [
 				type: 'theory',
 				sourceDoc: 'PIC18LF4455-I-PT.PDF',
 			},
+			{
+				id: 'c03-l3',
+				titleEs: 'MPLAB v8, MPLAB X y Proteus',
+				titleEn: 'MPLAB v8, MPLAB X, and Proteus',
+				hrefEs: '/fundamentos/mplab-proteus/',
+				hrefEn: '/en/fundamentos/mplab-proteus/',
+				minutes: 45,
+				type: 'tool',
+			},
+			{
+				id: 'c03-l4g',
+				titleEs: 'Guia practica — Puertos GPIO',
+				titleEn: 'Practical guide — GPIO ports',
+				hrefEs: '/tutoriales/guias/puertos/',
+				hrefEn: '/en/tutoriales/guias/puertos/',
+				minutes: 60,
+				type: 'guide',
+				autoSkillSeries: 'puertos',
+			},
+			{
+				id: 'c03-l5',
+				titleEs: 'Tutorial — Primer LED (primer programa)',
+				titleEn: 'Tutorial — First LED (first program)',
+				hrefEs: '/tutoriales/primer-led/',
+				hrefEn: '/en/tutoriales/primer-led/',
+				minutes: 90,
+				type: 'lab',
+				autoPracticeSlug: 'primer-led',
+			},
 		],
 	},
 	{
 		id: 'c04',
 		order: 4,
+		phase: 'parcial',
 		titleEs: 'Preparacion Parcial I (Temas 1, 2 y 3)',
 		titleEn: 'Partial I preparation (Topics 1, 2, and 3)',
 		descriptionEs:
@@ -231,35 +342,27 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c05',
 		order: 5,
-		titleEs: 'Temas 4 y 5 — MPLAB, GPIO y primer contacto',
-		titleEn: 'Topics 4 and 5 — MPLAB, GPIO, and first hands-on',
+		phase: 'curso',
+		titleEs: 'Tema 4 — GPIO en profundidad',
+		titleEn: 'Topic 4 — GPIO in depth',
 		descriptionEs:
-			'Herramientas del laboratorio, GPIO (TRIS/PORT/LAT), botones y primer LED en Proteus/placa.',
+			'TRIS, PORT, LAT y botones. Profundiza lo que aplicaste en el Primer LED.',
 		descriptionEn:
-			'Lab tools, GPIO (TRIS/PORT/LAT), buttons, and first LED in Proteus/board.',
+			'TRIS, PORT, LAT, and buttons. Deepen what you applied in First LED.',
 		level: 'beginner',
 		outcomesEs: [
-			'Crear proyecto MPLAB para PIC18F4550',
-			'Simular en Proteus con cristal y MCLR',
-			'Configurar entradas y salidas digitales',
+			'Explicar diferencia entre PORT y LAT',
+			'Configurar entradas con pull-up interno',
+			'Implementar antirrebote basico',
 		],
 		outcomesEn: [
-			'Create MPLAB project for PIC18F4550',
-			'Simulate in Proteus with crystal and MCLR',
-			'Configure digital inputs and outputs',
+			'Explain PORT vs LAT difference',
+			'Configure inputs with internal pull-up',
+			'Implement basic debounce',
 		],
 		lessons: [
 			{
 				id: 'c05-l1',
-				titleEs: 'MPLAB v8, MPLAB X y Proteus',
-				titleEn: 'MPLAB v8, MPLAB X, and Proteus',
-				hrefEs: '/fundamentos/mplab-proteus/',
-				hrefEn: '/en/fundamentos/mplab-proteus/',
-				minutes: 30,
-				type: 'tool',
-			},
-			{
-				id: 'c05-l2',
 				titleEs: 'GPIO: TRIS, PORT y LAT',
 				titleEn: 'GPIO: TRIS, PORT, and LAT',
 				hrefEs: '/gpio/',
@@ -269,25 +372,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 2 y 3 (1).pdf',
 			},
 			{
-				id: 'c05-l3',
-				titleEs: 'Practica 0 — Primer LED',
-				titleEn: 'Practice 0 — First LED',
-				hrefEs: '/practicas/primer-led/',
-				hrefEn: '/en/practicas/primer-led/',
-				minutes: 45,
-				type: 'lab',
-			},
-			{
-				id: 'c05-l4',
-				titleEs: 'Tutorial paso a paso: Primer LED',
-				titleEn: 'Step-by-step tutorial: First LED',
-				hrefEs: '/tutoriales/primer-led/',
-				hrefEn: '/en/tutoriales/primer-led/',
-				minutes: 30,
-				type: 'lab',
-			},
-			{
-				id: 'c05-l5',
+				id: 'c05-l2',
 				titleEs: 'Botones, pull-up y antirrebote',
 				titleEn: 'Buttons, pull-up, and debounce',
 				hrefEs: '/gpio/botones/',
@@ -300,6 +385,7 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c06',
 		order: 6,
+		phase: 'curso',
 		titleEs: 'Tema 5 — Practica 1: operaciones matematicas',
 		titleEn: 'Topic 5 — Practice 1: math operations',
 		descriptionEs:
@@ -320,29 +406,32 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c06-l1',
-				titleEs: 'Practica 1 — Operaciones matematicas',
-				titleEn: 'Practice 1 — Math operations',
-				hrefEs: '/practicas/operaciones-matematicas/',
-				hrefEn: '/en/practicas/operaciones-matematicas/',
-				minutes: 180,
-				type: 'lab',
-				sourceDoc: 'Practica 1  Operacion matematia.pdf',
+				id: 'c06-l0g',
+				titleEs: 'Guia practica — Operaciones ALU',
+				titleEn: 'Practical guide — ALU operations',
+				hrefEs: '/tutoriales/guias/alu/',
+				hrefEn: '/en/tutoriales/guias/alu/',
+				minutes: 55,
+				type: 'guide',
+				autoSkillSeries: 'alu',
 			},
 			{
-				id: 'c06-l2',
-				titleEs: 'Tutorial practica 1',
-				titleEn: 'Practice 1 tutorial',
+				id: 'c06-l1',
+				titleEs: 'Tutorial — Práctica 1: operaciones matemáticas',
+				titleEn: 'Tutorial — Practice 1: math operations',
 				hrefEs: '/tutoriales/practica-1/',
 				hrefEn: '/en/tutoriales/practica-1/',
-				minutes: 40,
+				minutes: 240,
 				type: 'lab',
+				sourceDoc: 'Practica 1  Operacion matematia.pdf',
+				autoPracticeSlug: 'practica-1',
 			},
 		],
 	},
 	{
 		id: 'c07',
 		order: 7,
+		phase: 'parcial',
 		titleEs: 'Preparacion Parcial II (Temas 4 y 5)',
 		titleEn: 'Partial II preparation (Topics 4 and 5)',
 		descriptionEs:
@@ -389,6 +478,7 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c08',
 		order: 8,
+		phase: 'curso',
 		titleEs: 'Tema 6 — Interrupciones',
 		titleEn: 'Topic 6 — Interrupts',
 		descriptionEs:
@@ -419,20 +509,32 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 6. Interrupciones.pdf',
 			},
 			{
+				id: 'c08-l1g',
+				titleEs: 'Guia practica — Interrupciones',
+				titleEn: 'Practical guide — Interrupts',
+				hrefEs: '/tutoriales/guias/interrupciones/',
+				hrefEn: '/en/tutoriales/guias/interrupciones/',
+				minutes: 55,
+				type: 'guide',
+				autoSkillSeries: 'interrupciones',
+			},
+			{
 				id: 'c08-l2',
 				titleEs: 'Tutorial: Timers e interrupciones (practica 5)',
 				titleEn: 'Tutorial: Timers and interrupts (practice 5)',
 				hrefEs: '/tutoriales/practica-5/',
 				hrefEn: '/en/tutoriales/practica-5/',
-				minutes: 50,
+				minutes: 90,
 				type: 'lab',
 				optional: true,
+				autoPracticeSlug: 'practica-5',
 			},
 		],
 	},
 	{
 		id: 'c09',
 		order: 9,
+		phase: 'curso',
 		titleEs: 'Tema 7 — LCD y teclado matricial',
 		titleEn: 'Topic 7 — LCD and matrix keyboard',
 		descriptionEs:
@@ -467,28 +569,21 @@ export const studyPathCourses: StudyCourse[] = [
 			},
 			{
 				id: 'c09-l2',
-				titleEs: 'Practica 2 — Teclado y LCD',
-				titleEn: 'Practice 2 — Keyboard and LCD',
-				hrefEs: '/practicas/teclado-lcd/',
-				hrefEn: '/en/practicas/teclado-lcd/',
-				minutes: 180,
-				type: 'lab',
-				sourceDoc: 'Practica 2  Teclado y  LCD.pdf',
-			},
-			{
-				id: 'c09-l3',
-				titleEs: 'Tutorial practica 2',
-				titleEn: 'Practice 2 tutorial',
+				titleEs: 'Tutorial — Práctica 2: teclado y LCD',
+				titleEn: 'Tutorial — Practice 2: keyboard and LCD',
 				hrefEs: '/tutoriales/practica-2/',
 				hrefEn: '/en/tutoriales/practica-2/',
-				minutes: 40,
+				minutes: 240,
 				type: 'lab',
+				sourceDoc: 'Practica 2  Teclado y  LCD.pdf',
+				autoPracticeSlug: 'practica-2',
 			},
 		],
 	},
 	{
 		id: 'c10',
 		order: 10,
+		phase: 'curso',
 		titleEs: 'Tema 8 — Timers',
 		titleEn: 'Topic 8 — Timers',
 		descriptionEs:
@@ -533,28 +628,21 @@ export const studyPathCourses: StudyCourse[] = [
 			},
 			{
 				id: 'c10-l3',
-				titleEs: 'Practica 3 — Frecuencimetro',
-				titleEn: 'Practice 3 — Frequency meter',
-				hrefEs: '/practicas/frecuencimetro/',
-				hrefEn: '/en/practicas/frecuencimetro/',
-				minutes: 180,
-				type: 'lab',
-				sourceDoc: 'Practica 3  Frecuencimetro con  Displays Multiplexado.pdf',
-			},
-			{
-				id: 'c10-l4',
-				titleEs: 'Tutorial practica 3',
-				titleEn: 'Practice 3 tutorial',
+				titleEs: 'Tutorial — Práctica 3: frecuencímetro',
+				titleEn: 'Tutorial — Practice 3: frequency meter',
 				hrefEs: '/tutoriales/practica-3/',
 				hrefEn: '/en/tutoriales/practica-3/',
-				minutes: 40,
+				minutes: 240,
 				type: 'lab',
+				sourceDoc: 'Practica 3  Frecuencimetro con  Displays Multiplexado.pdf',
+				autoPracticeSlug: 'practica-3',
 			},
 		],
 	},
 	{
 		id: 'c11',
 		order: 11,
+		phase: 'curso',
 		titleEs: 'Tema 9 — PWM y modulo CCP',
 		titleEn: 'Topic 9 — PWM and CCP module',
 		descriptionEs:
@@ -593,33 +681,27 @@ export const studyPathCourses: StudyCourse[] = [
 				titleEn: 'Tutorial: PWM (practice 4)',
 				hrefEs: '/tutoriales/practica-4/',
 				hrefEn: '/en/tutoriales/practica-4/',
-				minutes: 50,
+				minutes: 90,
 				type: 'lab',
+				autoPracticeSlug: 'practica-4',
 			},
 			{
 				id: 'c11-l3',
-				titleEs: 'Practica 6 — Motor paso a paso',
-				titleEn: 'Practice 6 — Stepper motor',
-				hrefEs: '/practicas/motor-paso-a-paso/',
-				hrefEn: '/en/practicas/motor-paso-a-paso/',
-				minutes: 180,
-				type: 'lab',
-				sourceDoc: 'Practica 6 Motor Paso a Paso.pdf',
-			},
-			{
-				id: 'c11-l4',
-				titleEs: 'Tutorial practica 6',
-				titleEn: 'Practice 6 tutorial',
+				titleEs: 'Tutorial — Práctica 6: motor paso a paso',
+				titleEn: 'Tutorial — Practice 6: stepper motor',
 				hrefEs: '/tutoriales/practica-6/',
 				hrefEn: '/en/tutoriales/practica-6/',
-				minutes: 40,
+				minutes: 240,
 				type: 'lab',
+				sourceDoc: 'Practica 6 Motor Paso a Paso.pdf',
+				autoPracticeSlug: 'practica-6',
 			},
 		],
 	},
 	{
 		id: 'c12',
 		order: 12,
+		phase: 'parcial',
 		titleEs: 'Preparacion Parcial III (Temas 6, 7, 8 y 9 PWM)',
 		titleEn: 'Partial III preparation (Topics 6, 7, 8, and 9 PWM)',
 		descriptionEs:
@@ -664,6 +746,7 @@ export const studyPathCourses: StudyCourse[] = [
 	{
 		id: 'c13',
 		order: 13,
+		phase: 'curso',
 		titleEs: 'Tema 9 — Convertidor A/D (ADC)',
 		titleEn: 'Topic 9 — A/D converter (ADC)',
 		descriptionEs:
@@ -695,28 +778,21 @@ export const studyPathCourses: StudyCourse[] = [
 			},
 			{
 				id: 'c13-l2',
-				titleEs: 'Practica 7 — Convertidor AD',
-				titleEn: 'Practice 7 — A/D converter',
-				hrefEs: '/practicas/convertidor-ad/',
-				hrefEn: '/en/practicas/convertidor-ad/',
-				minutes: 120,
-				type: 'lab',
-				sourceDoc: 'Practica 7 Convertidor AD.pdf',
-			},
-			{
-				id: 'c13-l3',
-				titleEs: 'Tutorial paso a paso: Practica 7',
-				titleEn: 'Step-by-step tutorial: Practice 7',
+				titleEs: 'Tutorial — Práctica 7: convertidor A/D',
+				titleEn: 'Tutorial — Practice 7: A/D converter',
 				hrefEs: '/tutoriales/practica-7/',
 				hrefEn: '/en/tutoriales/practica-7/',
-				minutes: 45,
+				minutes: 180,
 				type: 'lab',
+				sourceDoc: 'Practica 7 Convertidor AD.pdf',
+				autoPracticeSlug: 'practica-7',
 			},
 		],
 	},
 	{
 		id: 'c14',
 		order: 14,
+		phase: 'curso',
 		titleEs: 'Tema 10 — Comunicacion serial',
 		titleEn: 'Topic 10 — Serial communication',
 		descriptionEs:
@@ -771,28 +847,21 @@ export const studyPathCourses: StudyCourse[] = [
 			},
 			{
 				id: 'c14-l4',
-				titleEs: 'Practica 8 — Comunicacion serial',
-				titleEn: 'Practice 8 — Serial communication',
-				hrefEs: '/practicas/comunicacion-serial/',
-				hrefEn: '/en/practicas/comunicacion-serial/',
-				minutes: 150,
-				type: 'lab',
-				sourceDoc: 'Practica 8  Comunicacion serial_M3.pdf',
-			},
-			{
-				id: 'c14-l5',
-				titleEs: 'Tutorial practica 8',
-				titleEn: 'Practice 8 tutorial',
+				titleEs: 'Tutorial — Práctica 8: comunicación serial',
+				titleEn: 'Tutorial — Practice 8: serial communication',
 				hrefEs: '/tutoriales/practica-8/',
 				hrefEn: '/en/tutoriales/practica-8/',
-				minutes: 40,
+				minutes: 210,
 				type: 'lab',
+				sourceDoc: 'Practica 8  Comunicacion serial_M3.pdf',
+				autoPracticeSlug: 'practica-8',
 			},
 		],
 	},
 	{
 		id: 'c15',
 		order: 15,
+		phase: 'parcial',
 		titleEs: 'Preparacion Parcial IV (ADC, serial y cierre)',
 		titleEn: 'Partial IV preparation (ADC, serial, and wrap-up)',
 		descriptionEs:
@@ -838,14 +907,16 @@ export const studyPathCourses: StudyCourse[] = [
 				titleEn: 'Integrator project tutorial (practice 9)',
 				hrefEs: '/tutoriales/practica-9/',
 				hrefEn: '/en/tutoriales/practica-9/',
-				minutes: 50,
+				minutes: 120,
 				type: 'lab',
+				autoPracticeSlug: 'practica-9',
 			},
 		],
 	},
 	{
 		id: 'c16',
 		order: 16,
+		phase: 'referencia',
 		titleEs: 'Referencia y repaso general',
 		titleEn: 'Reference and general review',
 		descriptionEs:
@@ -896,15 +967,40 @@ export const studyPathCourses: StudyCourse[] = [
 ];
 
 export function getStudyPathStats() {
-	const courses = studyPathCourses.length;
-	const lessons = studyPathCourses.reduce((n, c) => n + c.lessons.length, 0);
-	const minutes = studyPathCourses.reduce(
-		(n, c) => n + c.lessons.reduce((m, l) => m + l.minutes, 0),
-		0,
-	);
-	const hours = Math.round(minutes / 60);
+	const blocks = studyPathCourses.length;
+	const phases = new Set(studyPathCourses.map((c) => c.phase)).size;
+	let lessons = 0;
+	let coreLessons = 0;
+	let guides = 0;
+	let labs = 0;
+	let minutes = 0;
+
+	for (const course of studyPathCourses) {
+		for (const lesson of course.lessons) {
+			lessons += 1;
+			minutes += lesson.minutes;
+			if (!lesson.optional) coreLessons += 1;
+			if (lesson.type === 'guide') guides += 1;
+			if (lesson.type === 'lab') labs += 1;
+		}
+	}
+
+	const hours = Math.ceil(minutes / 60);
 	const parciales = studyPathCourses.filter((c) => c.isParcialCheckpoint).length;
-	return { courses, lessons, minutes, hours, parciales };
+
+	return {
+		blocks,
+		phases,
+		lessons,
+		coreLessons,
+		guides,
+		labs,
+		minutes,
+		hours,
+		parciales,
+		/** @deprecated use blocks */
+		courses: blocks,
+	};
 }
 
 export const levelLabels: Record<
@@ -927,4 +1023,5 @@ export const lessonTypeLabels: Record<
 	exam: { es: 'Parcial', en: 'Exam', icon: 'approve-check' },
 	tool: { es: 'Herramienta', en: 'Tool', icon: 'setting' },
 	reference: { es: 'Referencia', en: 'Reference', icon: 'open-book' },
+	guide: { es: 'Guia practica', en: 'Practical guide', icon: 'rocket' },
 };

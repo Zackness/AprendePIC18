@@ -1,10 +1,65 @@
 ---
 title: 'Tutorial — First LED'
-description: 'Step-by-step guide to turn on an LED on RB0.'
+description: 'Learn to turn on an LED on RB0: MPLAB project, CONFIG, TRISB and LATB step by step.'
 ---
 
-import PracticeTutorial from '../../../../components/PracticeTutorial.astro';
+import PracticeLabPage from '../../../../components/PracticeLabPage.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
+import AIExplain from '../../../../components/AIExplain.astro';
+import Figure from '../../../../components/Figure.astro';
 
-<PracticeTutorial slug="primer-led" locale="en" />
+<PracticeLabPage tutorialSlug="primer-led" locale="en">
 
-[Panel de tutoriales](/en/tutoriales/) · [Ejercicios](/en/tutoriales/ejercicios/)
+<PracticeBox title="Turn on an LED on RB0" level="Beginner">
+Goal: configure `RB0` as output and write a high level to turn on an LED connected correctly with its resistor.
+</PracticeBox>
+
+<Figure
+	src="/images/gpio/led-rb0.svg"
+	alt="LED on RB0 schematic with 330 ohm resistor"
+	caption="Basic wiring: RB0 as output, 220-330 ohm resistor and LED to ground."
+	credit="First LED practice — UNEXPO"
+/>
+
+<AIExplain title="Concept before code">
+`TRISB` decides whether each PORTB pin is input or output. A bit set to `1` means input; a bit set to `0` means output. To use `RB0` as output, bit 0 of `TRISB` must be `0`.
+</AIExplain>
+
+## Full reference code
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+
+        CONFIG  FOSC = HS
+        CONFIG  WDT = OFF
+        CONFIG  LVP = OFF
+
+        ORG     0x0000
+        GOTO    start
+
+start:
+        CLRF    LATB        ; Clear PORTB outputs
+        BCF     TRISB, 0    ; RB0 as output
+        BSF     LATB, 0     ; RB0 high
+
+loop:
+        GOTO    loop
+
+        END
+```
+
+## What you should be able to explain
+
+1. Why `TRISB` is used.
+2. Why `BCF TRISB, 0` makes `RB0` an output.
+3. Why the code writes to `LATB` and not necessarily to `PORTB`.
+4. Why the program ends in an infinite loop.
+
+## Exercise
+
+Modify the program so the LED is on `RB1`. Then explain which lines changed and why.
+
+</PracticeLabPage>
+
+[Tutorial hub](/en/tutoriales/) · [Exercises](/en/tutoriales/ejercicios/)
