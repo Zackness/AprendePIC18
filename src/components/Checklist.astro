@@ -48,13 +48,13 @@ const checklistId = `aprende-pic18-${id}`;
 
 		function loadAll() {
 			try {
-				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+				return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') as Record<string, Record<string, boolean>>;
 			} catch {
 				return {};
 			}
 		}
 
-		function saveAll(data) {
+		function saveAll(data: Record<string, Record<string, boolean>>) {
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 			window.dispatchEvent(new CustomEvent('aprende-checklist-update'));
 			scheduleProgressSync();
