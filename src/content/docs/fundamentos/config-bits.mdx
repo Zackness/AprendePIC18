@@ -241,17 +241,17 @@ Los config bits **no sustituyen** el circuito. Con `FOSC = HS` y `MCLRE = ON` ne
 | --- | --- | --- |
 | PIC18F4550 | — | Microcontrolador |
 | Cristal | **20 MHz** | Reloj principal (con `FOSC = HS`) |
-| Condensadores cristal | **~22 pF** c/u (consulta hoja de datos) | Carga del oscilador |
+| Condensadores cristal | **C1, C2** a tierra (consulta hoja de datos / practica) | Carga del oscilador — ver diagrama del Tema 2 |
 | Pull-up MCLR | **10 kΩ** a VDD | Reset estable (`MCLRE = ON`) |
 | Pulsador reset | Entre MCLR y GND | Reset manual |
 | Alimentacion | **5 V** (VDD/VSS) | VDD y VSS del PIC |
 | Desacople | **100 nF** (0,1 µF) cerca del PIC | Filtra ruido en VDD |
 
 <Figure
-	src="/images/arquitectura/sistema-minimo.svg"
-	alt="Diagrama del sistema minimo PIC18F4550 con cristal de 20 MHz y reset"
-	caption="Sistema minimo con cristal, condensadores, MCLR con pull-up de 10 kΩ y alimentacion de 5 V."
-	credit="Tema 2 Arquitectura del PIC — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+	src="/images/pdf/tema-2-3/page-19.png"
+	alt="Diagrama del sistema minimo PIC18F4550 del Tema 2: cristal, C1/C2, MCLR con 10 kΩ y pulsador, VDD y VSS"
+	caption="Sistema minimo segun la clase Tema 2: cristal entre OSC1/OSC2 con C1 y C2 a tierra, pull-up de 10 kΩ en MCLR, pulsador de reset y alimentacion +5 V en VDD/VSS."
+	credit="Clase Tema 2 y 3 — Arquitectura del PIC (UNEXPO · Prof. Ing. Yoel Pire)"
 />
 
 Relacion con [Ensamblador — ejemplo LED](/fundamentos/ensamblador/#ejemplo-completo--led-en-rb0): el `.ASM` configura **software** (`TRISB`, `LATB`); los config bits y el cristal configuran **hardware** para que ese software pueda ejecutarse.

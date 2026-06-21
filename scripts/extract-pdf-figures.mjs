@@ -81,6 +81,11 @@ const SOURCES = {
 		credit: 'Tema 9 — Convertidor A/D (UNEXPO)',
 		mode: 'embedded',
 	},
+	'tema-2-3': {
+		file: 'Clase Tema 2 y 3 (1).pdf',
+		pages: [8, 19, 20],
+		credit: 'Clase Tema 2 y 3 — Arquitectura del PIC (UNEXPO · Prof. Ing. Yoel Pire)',
+	},
 };
 
 function hasPdfimages() {

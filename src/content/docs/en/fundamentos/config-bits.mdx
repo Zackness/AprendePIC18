@@ -241,17 +241,17 @@ Config bits **do not replace** the circuit. With `FOSC = HS` and `MCLRE = ON` yo
 | --- | --- | --- |
 | PIC18F4550 | — | Microcontroller |
 | Crystal | **20 MHz** | Main clock (with `FOSC = HS`) |
-| Crystal caps | **~22 pF** each (check datasheet) | Oscillator load |
+| Crystal caps | **C1, C2** to ground (see datasheet / lab sheet) | Oscillator load — see Topic 2 diagram |
 | MCLR pull-up | **10 kΩ** to VDD | Stable reset (`MCLRE = ON`) |
 | Reset button | MCLR to GND | Manual reset |
 | Supply | **5 V** (VDD/VSS) | PIC power |
 | Decoupling | **100 nF** (0.1 µF) near PIC | Filters VDD noise |
 
 <Figure
-	src="/images/arquitectura/sistema-minimo.svg"
-	alt="Minimum system diagram for PIC18F4550 with 20 MHz crystal and reset"
-	caption="Minimum system with crystal, capacitors, MCLR with 10 kΩ pull-up, and 5 V supply."
-	credit="Topic 2 PIC Architecture — UNEXPO · Mechatronics Engineering · Microcontrollers"
+	src="/images/pdf/tema-2-3/page-19.png"
+	alt="Topic 2 minimum system diagram for PIC18F4550: crystal, C1/C2, MCLR with 10 kΩ and pushbutton, VDD and VSS"
+	caption="Minimum system per Topic 2 class slide: crystal between OSC1/OSC2 with C1 and C2 to ground, 10 kΩ pull-up on MCLR, reset button, and +5 V on VDD/VSS."
+	credit="Class Topic 2 and 3 — PIC Architecture (UNEXPO · Prof. Ing. Yoel Pire)"
 />
 
 Link to [Assembly — LED example](/en/fundamentos/ensamblador/#full-example--led-on-rb0): the `.ASM` configures **software** (`TRISB`, `LATB`); config bits and the crystal configure **hardware** so that software can run.
