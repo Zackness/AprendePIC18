@@ -4,6 +4,7 @@ description: Puertos digitales del PIC18F4550, entradas, salidas y configuracion
 ---
 
 import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
 import Figure from '../../../components/Figure.astro';
 import PracticeBox from '../../../components/PracticeBox.astro';
 import LessonProgress from '../../../components/LessonProgress.astro';
@@ -11,53 +12,240 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="gpio" />
 
-Los puertos GPIO permiten leer sensores, botones y controlar LEDs, displays y actuadores. En el PIC18F4550 cada puerto tiene tres registros clave.
+Ya viste los tres registros en [Registros — GPIO](/fundamentos/registros/#puertos-gpio--trisx-portx-latx), los aplicaste en la [guia de puertos](/tutoriales/guias/puertos/) y el [Primer LED](/tutoriales/primer-led/), y compilaste con [MPLAB y Proteus](/fundamentos/mplab-proteus/). Esta pagina es **Tema 4 en profundidad**: no repite solo definiciones — explica **como usar TRIS, PORT y LAT juntos** en codigo real y en las practicas UNEXPO.
 
 <AIExplain title="Trio fundamental">
-`TRISx` configura direccion. `LATx` escribe salidas. `PORTx` lee el estado de los pines.
+`TRISx` configura **direccion** (1 = entrada, 0 = salida). `LATx` **escribe** salidas. `PORTx` **lee** el nivel en el pin.
 </AIExplain>
+
+## Que es GPIO en el PIC18
+
+**GPIO** (*General Purpose Input/Output*) son pines que **tu programa** configura como entrada o salida digital. En el PIC18F4550 no controlas cada pin aislado con un cable distinto al CPU: controlas **puertos** — grupos de 8 pines (A, B, C, D, E) accesibles con tres SFR por puerto.
+
+### Paso 1 — Pin fisico ↔ bit del registro
+
+Cada pin tiene un nombre fijo del hardware:
+
+| Pin | Puerto | Bit en `TRISx` / `LATx` / `PORTx` |
+| --- | --- | --- |
+| RB0 | B | bit **0** |
+| RB3 | B | bit **3** |
+| RD7 | D | bit **7** |
+
+Regla del curso: **bit 0 = pin con numero 0**. `BCF TRISB, 0` afecta solo **RB0**; los bits 1–7 de `TRISB` no cambian ([Arquitectura — SFR](/fundamentos/arquitectura/#sfr--registros-de-funcion-especial)).
+
+### Paso 2 — Tres registros, tres roles
+
+| Registro | Escribes? | Para que sirve |
+| --- | --- | --- |
+| **`TRISx`** | Si | **Direccion** del pin: 1 = entrada, 0 = salida |
+| **`LATx`** | Si | **Valor de salida** en el latch interno |
+| **`PORTx`** | Lectura | **Nivel real** en el pin (entradas, switches) |
+
+No intercambies roles: **TRIS primero**, luego **LAT** para salidas o **PORT** para leer entradas.
+
+### Paso 3 — Flujo tipico en un programa
+
+```
+  Inicio / init_gpio
+       ↓  TRISx — define entradas y salidas
+       ↓  LATx  — estado inicial de salidas (LED apagado, etc.)
+  bucle principal
+       ↓  PORTx — lee switches / botones
+       ↓  LATx  — actualiza LEDs / actuadores
+       ↓  GOTO bucle
+```
+
+En estilo [sandwich](/fundamentos/ensamblador/#anatomia-de-un-archivo-mpasm--estilo-sandwich), `init_gpio` suele ir como subrutina **arriba**; el `programa:` llama `CALL init_gpio` y entra al bucle.
+
+### Paso 4 — Donde encaja con config bits
+
+Los [config bits](/fundamentos/config-bits/#resumen--plantilla-del-curso-20-mhz) (`PBADEN = OFF`, `LVP = OFF`…) preparan el hardware **al encender**. Los registros GPIO (`TRISB`, `LATB`…) lo configuras **mientras corre** tu codigo. Si el LED no responde, revisa **ambas capas**: cristal/`FOSC` **y** `BCF TRISB, 0`.
 
 <Figure
 	src="/images/gpio/led-rb0.svg"
 	alt="Circuito de LED conectado a RB0 con resistencia limitadora"
-	caption="Ejemplo de salida digital: TRISB,0=0 y LATB,0=1 encienden el LED."
+	caption="Salida digital: TRISB,0 = 0 (salida) y LATB,0 = 1 encienden el LED en RB0."
 	credit="Practica LED — UNEXPO"
 />
 
-## Registros por puerto
+## Registros por puerto — TRIS, PORT y LAT
 
-| Puerto | Pines | TRIS | PORT | LAT | Notas |
+| Puerto | Pines | TRIS | PORT | LAT | Notas del curso |
 | --- | --- | --- | --- | --- | --- |
-| A | RA0-RA5 | TRISA | PORTA | LATA | RA4 no es analogico |
-| B | RB0-RB7 | TRISB | PORTB | LATB | RB0=INT0, RB4-RB7 interrupciones |
-| C | RC0-RC7 | TRISC | PORTC | LATC | RC6/RC7 = UART |
-| D | RD0-RD7 | TRISD | PORTD | LATD | Usado en practicas LCD |
-| E | RE0-RE2 | TRISE | PORTE | LATE | Entradas analogicas |
+| A | RA0–RA5 | TRISA | PORTA | LATA | RA4 no es analogico; varios pines pueden ser ANx |
+| B | RB0–RB7 | TRISB | PORTB | LATB | RB0 = INT0; RB4–RB7 = interrupcion por cambio |
+| C | RC0–RC7 | TRISC | PORTC | LATC | RC6/RC7 = UART (TX/RX) |
+| D | RD0–RD7 | TRISD | PORTD | LATD | LCD en practicas |
+| E | RE0–RE2 | TRISE | PORTE | LATE | Entradas analogicas RE0–RE2 |
 
-## Configurar salida
+Los tres registros comparten **numeracion de bits**: el bit 3 de `TRISB`, `PORTB` y `LATB` siempre es el pin **RB3**.
+
+## Paso 1 — Configurar direccion con TRIS
+
+Antes de leer o escribir, declara cada pin como entrada o salida.
+
+**Un pin a la vez** (recomendado al aprender):
 
 ```asm
+        BCF     TRISB, 0        ; RB0 → salida (bit = 0)
+        BSF     TRISB, 3        ; RB3 → entrada (bit = 1)
+```
+
+**Todo el puerto de una vez** (Practica 1 — PORTB y PORTD como entradas):
+
+```asm
+        MOVLW   B'11111111'     ; todos los bits = 1 → todo entrada
+        MOVWF   TRISB
+        MOVWF   TRISD
+```
+
+En `TRISx`, **1 = entrada** y **0 = salida**. Si `TRISB = 0xFF`, todo PORTB es entrada — pregunta clasica de parcial.
+
+Mas ejercicios en la guia [Configurar direccion con TRIS](/tutoriales/guias/puertos/1-tris-direccion/).
+
+## Paso 2 — Escribir salidas con LAT
+
+Para **controlar** un LED, rele o linea digital, escribe en **`LATx`**, no en `PORTx`:
+
+```asm
+        CLRF    LATB            ; apaga todas las salidas de PORTB
+        BCF     TRISB, 0        ; RB0 salida
+        BSF     LATB, 0         ; RB0 alto → LED ON
+        BCF     LATB, 0         ; RB0 bajo → LED OFF
+```
+
+`BSF`/`BCF` sobre `LATB` solo tocan **un bit** — util cuando mezclas entradas y salidas en el mismo puerto ([Bits y hex — mascaras](/fundamentos/bits-hex/#mascaras-de-bits--modificar-varios-bits-a-la-vez)).
+
+Guia practica: [Escribir salidas con LAT](/tutoriales/guias/puertos/2-lat-salidas/) y [Tutorial Primer LED](/tutoriales/primer-led/).
+
+## Paso 3 — Leer entradas con PORT
+
+Para **switches, botones o sensores digitales**, lee **`PORTx`**:
+
+```asm
+        BSF     TRISB, 3        ; RB3 entrada
+        BTFSS   PORTB, 3        ; salta si RB3 = 1 (suelto, con pull-up)
+        GOTO    boton_presionado   ; salto → destino boton_presionado:
+        ; RB3 = 1 — boton no presionado ...
+        GOTO    fin_lectura
+boton_presionado:
+        ; RB3 = 0 — boton presionado ...
+fin_lectura:
+```
+
+`BTFSS PORTB, n` / `BTFSC PORTB, n` son la forma mas comun en el curso. Tambien puedes `MOVF PORTB, W` y enmascarar el bit ([Bits y hex](/fundamentos/bits-hex/)).
+
+Guia practica: [Leer entradas con PORT](/tutoriales/guias/puertos/3-port-entradas/).
+
+## Paso 4 — PORT vs LAT — diferencia clave
+
+| Accion | Registro correcto | Error tipico |
+| --- | --- | --- |
+| Encender LED en RB0 | `BSF LATB, 0` | `BSF PORTB, 0` |
+| Leer pulsador en RB3 | `BTFSS PORTB, 3` | `BTFSS LATB, 3` |
+| Apagar todo PORTC | `CLRF LATC` | `CLRF PORTC` |
+
+<AIExplain title="Pregunta de parcial">
+**LAT** es el **latch de salida** — lo que tu quieres que el pin **conduzca** hacia afuera. **PORT** refleja el **nivel electrico real** en el pin — esencial para entradas y para leer lo que hay conectado (pull-up, boton a GND, etc.).
+</AIExplain>
+
+En salidas puras, escribir en `PORTx` a veces “funciona” porque comparte hardware con el latch, pero en el curso y en el datasheet la practica correcta es **`LATx` para escribir** y **`PORTx` para leer**.
+
+## Configurar varios pines a la vez
+
+Quieres RB0–RB3 como **salidas** y RB4–RB7 como **entradas**:
+
+```asm
+        MOVLW   B'11110000'     ; bits 7..4 = 1 (entrada), 3..0 = 0 (salida)
+        MOVWF   TRISB
+```
+
+Equivalente pin a pin:
+
+```asm
+        BCF     TRISB, 0
+        BCF     TRISB, 1
+        BCF     TRISB, 2
+        BCF     TRISB, 3
+        BSF     TRISB, 4
+        BSF     TRISB, 5
+        BSF     TRISB, 6
+        BSF     TRISB, 7
+```
+
+En TRIS, diseña la **mascara invertida** respecto a lo que quieres como salida: salida = **0**, entrada = **1**.
+
+## Pines analogicos y GPIO digital
+
+Varios pines de PORTA/PORTB arrancan como **entradas analogicas** si `PBADEN = ON` en los config bits. Para GPIO digital del curso usa **`PBADEN = OFF`** en el bloque `CONFIG` ([Config bits — PBADEN](/fundamentos/config-bits/#pbaden--puertos-ab-analogicos-al-arranque)).
+
+Si necesitas mezclar ADC y digital en la misma practica, configura **`ADCON1`** para declarar que pines son analogicos y cuales digitales — si no, `PORTx` puede leer valores incoherentes aunque `TRISx` este bien.
+
+## Recorrido completo — LED en RB0
+
+Fragmento minimo enlazado con [Ensamblador — ejemplo LED](/fundamentos/ensamblador/#ejemplo-completo--led-en-rb0):
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+        CONFIG  FOSC = HS, WDT = OFF, LVP = OFF, PBADEN = OFF
+
+        ORG     0x0000
+        GOTO    programa         ; salto al main
+
+init_gpio:
         CLRF    LATB
-        BCF     TRISB, 0    ; RB0 salida
-        BSF     LATB, 0     ; RB0 alto
+        BCF     TRISB, 0         ; RB0 salida
+        RETURN
+
+programa:
+        CALL    init_gpio
+loop:
+        BSF     LATB, 0          ; LED ON
+        GOTO    loop             ; salto → destino loop: (arriba)
+
+        END
 ```
 
-## Configurar entrada
-
-```asm
-        BSF     TRISB, 3    ; RB3 entrada
-        BTFSS   PORTB, 3    ; Lee RB3
-        GOTO    pin_bajo
-```
-
-<PracticeBox title="Practica 1 UNEXPO" level="Laboratorio">
-Puerto B y D como operandos (switches), puerto C y E para LEDs de resultado, RA0 como pulsador para cambiar operacion. Implementa suma, resta, multiplicacion, OR, AND, XOR, complemento, rotacion y division por software.
-</PracticeBox>
+Flujo: **config bits** (hardware al encender) → **TRIS** (direccion) → **LAT** (estado de salida) → simular en Proteus con el `.HEX` de [MPLAB](/fundamentos/mplab-proteus/).
 
 ## Errores comunes
 
-- Escribir en PORTx en lugar de LATx para salidas.
-- No configurar ADCON1 cuando usas pines analogicos como digitales.
-- Olvidar resistencias limitadoras en LEDs (330 o 220 ohm).
+| Error | Sintoma | Solucion |
+| --- | --- | --- |
+| Escribir en `PORTx` en vez de `LATx` | Salida erratica o lectura rara | Usa `BSF`/`BCF`/`CLRF` sobre `LATx` |
+| No configurar `TRISx` | Pin no responde como esperas | Siempre TRIS antes de LAT/PORT |
+| `PBADEN = ON` sin `ADCON1` | GPIO digital “muerto” en RA/RB | `PBADEN = OFF` o configura `ADCON1` |
+| LED sin resistencia | Pin sobrecargado | 220 Ω o 330 Ω en serie |
+| Mezclar bit y pin | “Configure bit 3 pero miro RB0” | Bit **n** = pin **Rn** del mismo puerto |
+
+## Practica 1 UNEXPO — como encajan los puertos
+
+<PracticeBox title="Practica 1 UNEXPO" level="Laboratorio">
+**PORTB** y **PORTD** como entradas (operandos en switches). **PORTC** y **PORTE** como salidas (LEDs de resultado). **RA0** como pulsador para cambiar operacion. Implementa suma, resta, multiplicacion, OR, AND, XOR, complemento, rotacion y division por software. Antes del lab, repasa la [guia ALU](/tutoriales/guias/alu/) si usaras la ALU del PIC.
+</PracticeBox>
+
+## Siguiente paso — botones
+
+Cuando un pin es **entrada** con pulsador, necesitas **pull-up** y **antirrebote**. Eso es la leccion [Botones, pull-up y antirrebote](/gpio/botones/).
+
+## Preguntas estilo parcial
+
+**¿Que significa `TRISB = 0xFF`?**
+
+Todo PORTB configurado como **entrada** (cada bit de TRIS en 1).
+
+**¿Por que escribes el LED en `LATB` y lees el boton en `PORTB`?**
+
+`LATB` controla la **salida deseada** del latch; `PORTB` refleja el **nivel real** en el pin — necesario para entradas con pull-up o cableado externo.
+
+**¿Que problema causa olvidar `BCF TRISB, 0` antes de `BSF LATB, 0`?**
+
+RB0 puede seguir como **entrada**; el latch cambia pero el pin no conduce correctamente hacia el LED.
+
+<Exercise title="Traza el flujo">
+En Proteus, cambia `BSF LATB, 0` por `BSF PORTB, 0` con RB0 como salida. ¿El LED se comporta igual? Anota por que el curso prefiere `LATB`.
+</Exercise>
 
 <TopicQuiz slug="gpio" />

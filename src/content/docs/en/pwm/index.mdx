@@ -6,15 +6,18 @@ description: Pulse width modulation, CCP1/CCP2 and motor control on PIC18F4550.
 import AIExplain from '../../../../components/AIExplain.astro';
 import Exercise from '../../../../components/Exercise.astro';
 import Figure from '../../../../components/Figure.astro';
+import PracticeBox from '../../../../components/PracticeBox.astro';
 import LessonProgress from '../../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="pwm" locale="en" />
 
-The CCP module has three modes: **Capture**, **Compare**, and **PWM**. PWM is the most common for motor speed and LED dimming.
+The **CCP** module (*Capture / Compare / PWM*) has three modes; the course focuses on **PWM** — **motor speed**, **LED dimming**, and **servo** control. The time base is **[Timer2 + PR2](/en/timers/timer1-timer2/#timer-2--fixed-period-and-pwm)**, not Timer0.
+
+This page completes **Topic 9 CCP (PWM)**: PDF formulas, registers, and **5 kHz at 50%** example with **20 MHz** crystal. Labs: [Practice 4](/en/tutoriales/practica-4/) and [Practice 6 — Stepper motor](/en/tutoriales/practica-6/).
 
 <AIExplain title="CCP pins">
-CCP1 on RC2, CCP2 on RC1. PWM uses Timer2 as the time base.
+**CCP1** → **RC2**. **CCP2** → **RC1**. In PWM mode hardware drives the pin; you load **PR2** (period) and **CCPR1L** (duty).
 </AIExplain>
 
 <Figure
@@ -27,35 +30,160 @@ CCP1 on RC2, CCP2 on RC1. PWM uses Timer2 as the time base.
 <Figure
 	src="/images/pdf/pwm/page-3.png"
 	alt="CCP module modes table: capture, compare and PWM"
-	caption="CCP1 and CCP2: capture and compare use Timer1; PWM uses Timer2 with PR2 and CCPRxL."
+	caption="CCP1/CCP2: capture and compare use Timer1; PWM uses Timer2 with PR2 and CCPRxL."
 	credit="Class Topic 9 — CCP Module (PWM) · UNEXPO"
 />
 
 <Figure
 	src="/images/pdf/pwm/page-4.png"
 	alt="CCP module structure with CCPRxH, CCPRxL and CCPxCON registers"
-	caption="CCPRxH:CCPRxL (16 bits) and CCPxCON registers. PWM mode uses Timer2."
+	caption="CCPRxH:CCPRxL and CCPxCON. PWM mode uses Timer2."
 	credit="Class Topic 9 — CCP Module (PWM) · UNEXPO"
 />
 
-## Formulas (Topic 9 CCP)
+## What PWM is
 
-**Period:**
-`T_PWM = 4 * (PR2 + 1) * Tosc * Timer2 prescaler`
+**PWM** (*Pulse Width Modulation*) repeats a digital waveform: the pin toggles **high** and **low** with fixed period **T_PWM**. You change **duty cycle** — high time as a percentage of T_PWM — to simulate analog power to a motor or LED.
 
-**Duty cycle:**
-`CCPR1L:CCP1CON<5:4> = (T_PWM * X%) / (Tosc * prescaler)`
+### Step 1 — Period and duty
 
-## PWM setup (5 steps)
+| Parameter | Symbol | What it controls |
+| --- | --- | --- |
+| **Period** | T_PWM | Frequency F_PWM = 1/T_PWM |
+| **Duty cycle** | X % | High time / T_PWM |
+| **Resolution** | effective bits | How many duty steps you can program |
 
-1. `BCF TRISC, 2` — RC2 as output
-2. Load PR2 for target frequency
-3. Configure T2CON (prescaler, TMR2ON)
-4. Load CCPR1L and DC1B1:DC1B0 bits
-5. `CCP1CON = 0x0C` — PWM mode (CCP1M3:CCP1M0 = 11xx)
+### Step 2 — Three CCP modes
+
+| Mode | Timer base | Use |
+| --- | --- | --- |
+| **Capture** | Timer1 | Measure pulse width / frequency |
+| **Compare** | Timer1 | Trigger at precise instant |
+| **PWM** | **Timer2 + PR2** | Motor, LED, servo — **course focus** |
+
+Capture/compare are covered in [Timer 1](/en/timers/timer1-timer2/#timer1-in-ccp--capture-and-compare); PWM uses **Timer2** separately.
+
+### Step 3 — Key PWM registers
+
+| Register | Function |
+| --- | --- |
+| **`PR2`** | Period — TMR2 counts 0 → PR2 → reset |
+| **`T2CON`** | Timer2 prescaler, **TMR2ON** |
+| **`CCPR1L`** + **`CCP1CON<5:4>`** | Duty cycle (10 bits on PIC18) |
+| **`CCP1CON`** | CCP mode — PWM = `CCP1M3:0 = 1100` → **`0x0C`** |
+
+### Step 4 — Hardware output
+
+With `CCP1CON = 0x0C` and Timer2 active, **RC2** toggles automatically — no `BSF LATC, 2` loop needed. Set **`BCF TRISC, 2`** (output) once at init.
+
+## Topic 9 formulas
+
+**PWM period:**
+
+```
+  T_PWM = 4 × (PR2 + 1) × Tosc × Timer2_Prescaler
+```
+
+**Duty cycle (value to load):**
+
+```
+  CCPR1L : CCP1CON<5:4> = (T_PWM × X%) / (Tosc × Prescaler)
+```
+
+**Resolution (effective bits):**
+
+```
+  log2( Fosc / (F_PWM × Prescaler) )
+```
+
+With **Fosc = 20 MHz**, **Timer2 prescaler = 1:4**, **F_PWM = 5 kHz**:
+
+```
+  PR2 = 1 / (5 kHz × 4 × Tosc × 4) − 1 = 249
+  50% duty → CCPR1L = 124
+```
+
+## PWM setup — 5 steps
+
+1. **`BCF TRISC, 2`** — RC2/CCP1 as output
+2. Load **`PR2`** for target frequency
+3. Configure **`T2CON`** (prescaler, **TMR2ON = 1**)
+4. Load **`CCPR1L`** and **DC1B1:DC1B0** in `CCP1CON` if needed
+5. **`CCP1CON = 0x0C`** — PWM mode
+
+## Full example — 5 kHz, 50% duty @ 20 MHz
+
+```asm
+config_pwm_5khz_50:
+        BCF     TRISC, 2            ; RC2 output (CCP1)
+        MOVLW   D'249'
+        MOVWF   PR2                 ; period ~5 kHz, PS=1:4
+        MOVLW   D'124'
+        MOVWF   CCPR1L              ; duty ~50%
+        MOVLW   B'00001101'         ; TMR2ON, prescaler 1:4
+        MOVWF   T2CON
+        MOVLW   0x0C                ; CCP1 PWM mode
+        MOVWF   CCP1CON
+        RETURN
+```
+
+To change motor speed: modify **`CCPR1L`** (duty) without recalculating PR2 if PWM frequency stays the same.
+
+## CCP1 vs CCP2
+
+| Module | Pin | Practice |
+| --- | --- | --- |
+| **CCP1** | RC2 | Practice 4 PWM, Practice 6 motor |
+| **CCP2** | RC1 | Second PWM output if design requires |
+
+Both in PWM mode share **Timer2** and **PR2** — same frequency, different duty in `CCPR1L` / `CCPR2L`.
+
+## Common mistakes
+
+| Mistake | Consequence |
+| --- | --- |
+| PWM without **TMR2ON** | RC2 idle |
+| Skip **TRISC** | Pin does not drive |
+| **`CCP1CON` in capture mode** | No PWM waveform |
+| Wrong PR2 | Unexpected frequency |
+| Mix Timer1 with PWM | Capture uses T1; **PWM uses T2** |
+
+## UNEXPO practices
+
+<PracticeBox title="Practice 4 — PWM" level="Laboratory">
+Calculate **PR2** and **CCPR1L**, configure Timer2 and CCP1, connect load on **RC2**. Tutorial: [Practice 4](/en/tutoriales/practica-4/).
+</PracticeBox>
+
+<PracticeBox title="Practice 6 — Stepper motor" level="Laboratory">
+Use PWM or coil sequence to drive the motor. Requires correct CCP/Timer2 setup. Tutorial: [Practice 6](/en/tutoriales/practica-6/).
+</PracticeBox>
+
+## Next step
+
+- [ADC](/en/adc/) — read potentiometer to adjust duty live (optional in Practice 4)
+- [Partial III](/en/parcial/parcial-3/) — timers + PWM review
+- [Quick guide — PWM/CCP](/en/referencia/guia-registros/)
+
+## Exam-style questions
+
+**Which timer does CCP PWM use?**
+
+**Timer2** with period register **PR2**.
+
+**What value typically sets CCP1 to PWM mode?**
+
+**`CCP1CON = 0x0C`** (mode bits 1100).
+
+**Which pin outputs CCP1?**
+
+**RC2**.
+
+**For 50% duty with PR2 = 249, CCPR1L ≈ ?**
+
+**124** (half the period in duty counts).
 
 <Exercise title="Calculate PR2 for F_PWM=5kHz, Fosc=20MHz, prescaler 1:4">
-PR2 = 249 according to the UNEXPO Microcontrollers course example.
+PR2 = 1/(5kHz) / (4 × 1/20MHz × 4) − 1 = **249** per the UNEXPO Microcontrollers course example.
 </Exercise>
 
 <TopicQuiz slug="pwm" locale="en" />

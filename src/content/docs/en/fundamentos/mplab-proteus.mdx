@@ -14,13 +14,68 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
 
-So far you learned **what to write** in assembly ([MPASM](/en/fundamentos/ensamblador/)) and **how to configure hardware at power-on** ([config bits](/en/fundamentos/config-bits/)). This page explains **which tools** you use to build, simulate, and test in the UNEXPO course.
+So far you learned **what to write** in assembly ([MPASM](/en/fundamentos/ensamblador/)), **how the configuration word works** ([config bits](/en/fundamentos/config-bits/)), and the PIC **minimum system**. This page closes Foundations: **which tools** you use to build, simulate, and test in the UNEXPO course.
 
-The academic workflow focuses on **MPLAB v8 + MPASM + Proteus**. You will also see **MPLAB X** so you recognize the modern IDE if you use it on another machine.
+The academic workflow focuses on **MPLAB v8 + MPASM + Proteus**. You will also see **MPLAB X** so you recognize the modern IDE on another machine.
 
 <AIExplain title="Real workflow">
 Write `.ASM` in MPLAB → MPASM produces `.HEX` → load `.HEX` in Proteus (simulation) or a programmer (physical board) → compare behavior with what you expect.
 </AIExplain>
+
+## What MPLAB is (and what it is not)
+
+Reports and labs mix three names. Keep them separate:
+
+| Tool | What it is | Course role |
+| --- | --- | --- |
+| **MPLAB v8 / X** | **IDE** — development environment | Edit `.ASM`, create project, run build, program with PICkit |
+| **MPASM** | **Assembler** | Translates `.ASM` → `.HEX` (program + [configuration word](/en/fundamentos/config-bits/#what-is-the-configuration-word)) |
+| **Proteus ISIS** | **Simulator** | Runs `.HEX` in a virtual circuit — **does not compile** |
+| **PICkit / programmer** | **Burner** | Writes `.HEX` to real PIC Flash |
+
+**MPLAB is not the assembler.** MPLAB is the **workspace**; when you click **Build**, MPLAB calls **MPASM** for you.
+
+### Step 1 — Write the `.ASM` in MPLAB
+
+Create a **PIC18F4550** project and edit source using the [sandwich](/en/fundamentos/ensamblador/#anatomy-of-an-mpasm-file--sandwich-layout) layout: `LIST`, `#include`, `CONFIG`, `ORG`, subroutines, `programa:` at the bottom.
+
+The file on disk is plain text (`.ASM` / `.asm`). MPLAB **saves and highlights** it — there is no `.HEX` yet.
+
+### Step 2 — Build with MPASM
+
+**Project → Build All** invokes MPASM. If there are no errors, you get the **`.HEX`**:
+
+```
+  your_program.ASM
+       ↓  MPASM (from MPLAB)
+  your_program.HEX   ← Flash program + config bits
+  your_program.COD   ← listing (optional, debug)
+```
+
+If `END` is missing, a symbol lacks `#include`, or a label is wrong, the build **fails** — **do not simulate** until you fix the **Output** window.
+
+### Step 3 — Simulate in Proteus
+
+Wire the [minimum system](/en/fundamentos/config-bits/#minimum-system--hardware-that-goes-with-config-bits) + LED, load the **same `.HEX`** into the virtual PIC, and press **Play**. Proteus **interprets** `.HEX` bytes; it does not read your `.ASM` directly.
+
+### Step 4 — Physical board
+
+With the **same `.HEX`** (rebuilt if you changed code), connect PICkit, **Program** in MPLAB, and validate the LED or peripheral on the breadboard.
+
+<AIExplain title="Course golden rule">
+**Build without errors → simulate in Proteus → breadboard.** Not the other way around. Proteus never replaces MPASM.
+</AIExplain>
+
+## What the `.HEX` file contains
+
+The `.HEX` is the **bridge** between software and hardware. It is not readable `.ASM` — Intel HEX format with **two conceptual blocks**:
+
+| `.HEX` content | Source in your `.ASM` | Destination |
+| --- | --- | --- |
+| **Program** (instructions) | `ORG`, `GOTO`, `MOVLW`, `BSF`… | Executable Flash |
+| **Configuration word** | `CONFIG` directives | Config memory (startup) |
+
+One file feeds Proteus **and** the programmer: both need program **and** config bits matching the **20 MHz** crystal and course template.
 
 ## Full chain — from text to the PIC
 
@@ -43,7 +98,36 @@ Virtual LED, logic pins       UNEXPO physical board
 | Simulate | **Proteus ISIS** | `.HEX` + schematic | Virtual behavior |
 | Program | PICkit 2/3, etc. | `.HEX` | PIC18F4550 Flash |
 
-The `.HEX` is the **bridge** between software and hardware: it holds instructions and the configuration word from your `CONFIG` directives.
+## Full walkthrough — minimal example (First LED)
+
+Suppose you turn on RB0. The full flow:
+
+**1. Source in MPLAB** — minimal fragment (see [Assembly — LED](/en/fundamentos/ensamblador/#full-example--led-on-rb0)):
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+        CONFIG  FOSC = HS, WDT = OFF, LVP = OFF, PBADEN = OFF
+
+        ORG     0x0000
+        GOTO    programa         ; jump to main
+
+programa:
+        BCF     TRISB, 0
+        BSF     LATB, 0
+loop:
+        GOTO    loop               ; jump → destination loop: (above)
+
+        END
+```
+
+**2. Build in MPLAB** → `project.hex` appears with no errors in **Output**.
+
+**3. Proteus** — PIC18F4550 + 20 MHz crystal + LED on RB0 → **Program File** = that `.HEX` → **Clock Frequency** = **20 MHz** → **Play**.
+
+**4. Board** — same `.HEX`, PICkit, **Program** → LED on if wiring and [config bits](/en/fundamentos/config-bits/#summary--course-template-20-mhz) match.
+
+If you change one `.ASM` line, **go back to step 2** before Proteus or the board. An old `.HEX` is the #1 cause of “simulation does not show my change”.
 
 ## MPASM — what happens when you build
 
@@ -65,9 +149,32 @@ MPASM reads your [assembly file](/en/fundamentos/ensamblador/#anatomy-of-an-mpas
 
 If the build fails, **there is no useful `.HEX`** — fix errors in the output window before simulating.
 
+### MPASM errors you will see in MPLAB
+
+| Output message | Common cause | Review |
+| --- | --- | --- |
+| `Symbol not defined` | Missing `#include <P18F4550.INC>` or typo (`TRISB`) | [Assembly — directives](/en/fundamentos/ensamblador/#directives-you-must-know) |
+| `Label required` | Label without `:` (`programa` vs `programa:`) | [Labels](/en/fundamentos/ensamblador/#labels-and-comments) |
+| `END directive required` | Missing `END` at end | [Sandwich layout](/en/fundamentos/ensamblador/#anatomy-of-an-mpasm-file--sandwich-layout) |
+| `Bank select error` | Variable in another bank without `BSR` | [Registers — banks](/en/fundamentos/registros/#data-memory-map) |
+| `Argument out of range` | Literal outside 0–255 | [Literals](/en/fundamentos/ensamblador/#mpasm-notations-for-literals) |
+
 <AIExplain title="Next step on the path">
-After this page, the [study path](/en/ruta-de-estudio/) takes you to the ports practical guide and the [First LED tutorial](/en/tutoriales/primer-led/), where you create the MPLAB project and simulate in Proteus step by step.
+After this page, the [study path](/en/ruta-de-estudio/) takes you to the ports practical guide and the [First LED tutorial](/en/tutoriales/primer-led/), where you create the MPLAB project and simulate in Proteus step by step with screenshots.
 </AIExplain>
+
+## MPLAB v8 project — what the wizard creates
+
+The **Project Wizard** does not write code for you; it organizes files and tells MPASM which MCU and tool to use:
+
+| Project element | Function |
+| --- | --- |
+| **PIC18F4550 device** | MPASM generates correct opcodes for that chip |
+| **MPASM toolchain** | Not XC8 if the course is pure assembly |
+| **Added `.asm` file** | Source you build |
+| **Project folder** | Where `.HEX` appears after **Build All** |
+
+After building, find the `.HEX` in the project folder (sometimes `Debug/`, sometimes root). That path is what you load in Proteus → **Program File**.
 
 ## MPLAB v8 — main course IDE
 
@@ -212,6 +319,10 @@ Correct order for the First LED practice:
 - **Treating Proteus as compiler**: Proteus **does not replace** MPASM — it only runs `.HEX`.
 
 ## Exam-style questions
+
+**What is the difference between MPLAB and MPASM?**
+
+**MPLAB** is the **environment** (editor, project, programmer). **MPASM** is the **assembler** that translates `.ASM` → `.HEX` when you Build.
 
 **What file does MPASM produce on a successful build?**
 

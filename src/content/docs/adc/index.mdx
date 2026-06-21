@@ -4,14 +4,17 @@ description: ADC de 10 bits, 13 canales, ADCON y Practica 7 del curso UNEXPO.
 ---
 
 import AIExplain from '../../../components/AIExplain.astro';
-import PracticeBox from '../../../components/PracticeBox.astro';
+import Exercise from '../../../components/Exercise.astro';
 import Figure from '../../../components/Figure.astro';
+import PracticeBox from '../../../components/PracticeBox.astro';
 import LessonProgress from '../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="adc" />
 
-El PIC18F4550 integra un ADC de **10 bits** con **13 canales** analogicos.
+El PIC18F4550 integra un **ADC de 10 bits** con **13 canales analogicos** (AN0–AN12). Convierte una **tension analogica** (potenciometro, LM35, divisor resistivo) en un **numero digital** que tu programa lee desde `ADRESH:ADRESL`.
+
+Esta pagina cierra **Tema 9 CAD** del curso: registros `ADCON0/1/2`, flujo de conversion y enlace con [GPIO](/gpio/#pines-analogicos-y-gpio-digital) y [config bits](/fundamentos/config-bits/#pbaden--puertos-ab-analogicos-al-arranque). La aplicacion oficial es [Practica 7 — Convertidor AD](/tutoriales/practica-7/).
 
 <Figure
 	src="/images/adc/canales-analogicos.svg"
@@ -23,59 +26,195 @@ El PIC18F4550 integra un ADC de **10 bits** con **13 canales** analogicos.
 <Figure
 	src="/images/pdf/adc/page-3.png"
 	alt="Figura 9.1: funciones basicas en un sistema de medida"
-	caption="Cadena sensor → procesador → comunicacion. El ADC digitaliza la senal analogica del sensor."
+	caption="Cadena sensor → acondicionamiento → ADC → procesador. El ADC digitaliza la senal analogica."
 	credit="Tema 9 — Convertidor A/D · UNEXPO"
 />
 
 <Figure
 	src="/images/pdf/adc/page-5.png"
 	alt="Figuras 9.2 y 9.3: acondicionamiento de senal y caracteristica de transferencia del ADC"
-	caption="Acondicionador de senal antes del ADC y curva de cuantizacion (aproximaciones sucesivas)."
+	caption="Acondicionador antes del ADC y curva de cuantizacion (aproximaciones sucesivas)."
 	credit="Tema 9 — Convertidor A/D · UNEXPO"
 />
 
 <AIExplain title="Voltaje digital">
-Con Vref=5V y 10 bits, 1 LSB ≈ 4,88 mV. Resultado en ADRESH:ADRESL segun formato ADFM.
+Con **Vref = VDD = 5 V** y **10 bits**, 1 LSB ≈ **4,88 mV**. El resultado vive en **ADRESH:ADRESL** segun **ADFM** (justificacion izquierda o derecha).
 </AIExplain>
 
-## Canales analogicos
+## Que hace el ADC
 
-| Puerto | Pines |
+El **convertidor A/D** mide una tension en un pin analogico y la representa como entero **0–1023** (10 bits).
+
+### Paso 1 — Del mundo analogico al digital
+
+```
+  Sensor (potenciometro, LM35…)
+       ↓  tension 0 V – Vref (tipico 5 V)
+  Pin ANx del PIC (RA0, RE0…)
+       ↓  modulo ADC (aproximaciones sucesivas)
+  ADRESH:ADRESL  →  valor 0..1023 en tu programa
+```
+
+Sin ADC tendrias que construir conversion externa; el PIC18F4550 la trae **integrada**.
+
+### Paso 2 — Resolucion y LSB
+
+| Concepto | Valor en PIC18F4550 |
 | --- | --- |
-| A | RA0/AN0, RA1/AN1, RA2/AN2, RA3/AN3, RA5/AN4 |
-| B | RB0/AN12, RB1/AN10, RB2/AN8, RB3/AN9, RB4/AN11 |
-| E | RE0/AN5, RE1/AN6, RE2/AN7 |
+| **Resolucion** | 10 bits → **1024 niveles** (0 a 1023) |
+| **1 LSB** | Vref / 1024 ≈ **4,88 mV** con Vref = 5 V |
+| **Tension estimada** | `V ≈ (ADRES / 1023) × Vref` |
 
-**Nota:** RA4 no es analogico.
+Ejemplo: ADRES = 512 → V ≈ 2,5 V con Vref = 5 V.
 
-## Registros
+### Paso 3 — Tres registros de configuracion
 
-- `ADCON0` — canal, GO/DONE, ADON
-- `ADCON1` — configuracion digital/analogico (PCFG)
-- `ADCON2` — reloj de conversion y formato (ADFM)
-- `ADRESH`, `ADRESL` — resultado
+| Registro | Funcion principal |
+| --- | --- |
+| **`ADCON1`** | Que pines son **analogicos** vs **digitales** (`PCFG`) |
+| **`ADCON2`** | Reloj de conversion (`ADCS`), formato (`ADFM`), tiempo de adquisicion |
+| **`ADCON0`** | **Canal** (`CHS`), encendido (`ADON`), inicio/fin (`GO/DONE`) |
 
-## Pasos de conversion
+Configuras **ADCON1/2 una vez** al inicio; en cada lectura tocas **ADCON0** (canal + GO).
 
-1. Configurar entradas analogicas (`ADCON1`)
-2. Configurar pines como entrada (`TRIS`)
-3. Seleccionar canal y encender ADC (`ADCON0`)
-4. Esperar tiempo de adquisicion (TACQ)
-5. Iniciar conversion (`GO/DONE = 1`)
-6. Esperar `GO/DONE = 0`
-7. Leer `ADRESH:ADRESL`
+### Paso 4 — Relacion con GPIO y config bits
+
+- **`TRISx`** — el pin ANx debe ser **entrada**.
+- **`ADCON1`** — declara el pin como **analogico**; el resto del puerto puede quedar **digital** (LCD, LEDs).
+- **`PBADEN = OFF`** en `CONFIG` — evita que RA/RB arranquen analogicos sin querer ([Config bits](/fundamentos/config-bits/)).
+
+## Canales analogicos AN0–AN12
+
+| Puerto | Pines analogicos | Notas |
+| --- | --- | --- |
+| A | RA0/AN0, RA1/AN1, RA2/AN2, RA3/AN3, RA5/AN4 | **RA4 no es analogico** (T0CKI digital) |
+| B | RB0/AN12, RB1/AN10, RB2/AN8, RB3/AN9, RB4/AN11 | Comparten puerto con GPIO e interrupciones |
+| E | RE0/AN5, RE1/AN6, RE2/AN7 | Comunes en practicas con LCD en RE |
+
+**Practica 7:** potenciometro en **AN0 (RA0)**; LCD y pines de control en **digital** via `ADCON1`.
+
+## ADCON0 — canal, encendido y GO/DONE
+
+| Campo | Funcion |
+| --- | --- |
+| **`CHS3:CHS0`** | Selecciona canal AN0–AN12 |
+| **`ADON`** | 1 = modulo ADC encendido |
+| **`GO/DONE`** | 1 = conversion en curso; **0 = terminada** |
+
+Flujo de una lectura:
+
+```
+  BSF ADCON0, GO     ; inicia conversion
+       ↓
+  Esperar GO = 0     ; hardware termina
+       ↓
+  Leer ADRESH:ADRESL
+```
+
+## ADCON1 — pines analogicos vs digitales
+
+`PCFG` en **ADCON1** define que pines son ANx y cuales GPIO digital. Valor tipico **Practica 7** — solo **AN0** analogico:
 
 ```asm
-CONFIGURAR_ADC:
-        MOVLW   B'00001110'   ; AN0 analogico, resto digital
+        MOVLW   0x0E                ; RA0 analogico, resto digital
         MOVWF   ADCON1
+```
+
+En practicas solo GPIO (Practica 1, teclado LCD) suele usarse **`ADCON1 = 0x0F`** para dejar todos los pines como **digitales**.
+
+## ADCON2 — reloj, formato y adquisicion
+
+| Campo | Funcion |
+| --- | --- |
+| **`ADCS2:0`** | Reloj de conversion (depende de Fosc) |
+| **`ADFM`** | 0 = justificado a la **derecha**; 1 = a la **izquierda** |
+| **`ACQT2:0`** | Tiempo de **adquisicion** (sample & hold) |
+
+**Cristal 20 MHz (curso UNEXPO):** `ADCS = 101` en ADCON2. Codigo de referencia [Practica 7](/tutoriales/practica-7/):
+
+```asm
+        MOVLW   B'10100010'         ; ADFM=1, ADCS=101
+        MOVWF   ADCON2
+        MOVLW   B'00000001'         ; canal AN0, ADON=1
+        MOVWF   ADCON0
+        BSF     TRISA, 0            ; RA0 entrada
+```
+
+## Recorrido completo — leer AN0 (potenciometro)
+
+Subrutinas estilo [sandwich](/fundamentos/ensamblador/#anatomia-de-un-archivo-mpasm--estilo-sandwich):
+
+```asm
+config_adc:
+        MOVLW   0x0E
+        MOVWF   ADCON1
+        MOVLW   B'10100010'
+        MOVWF   ADCON2
         MOVLW   B'00000001'
-        MOVWF   TRISA        ; RA0 entrada
+        MOVWF   ADCON0
+        BSF     TRISA, 0
+        RETURN
+
+leer_an0:
+        BSF     ADCON0, GO          ; inicia conversion
+espera_adc:
+        BTFSC   ADCON0, GO          ; salta si GO=0 (listo)
+        GOTO    espera_adc          ; salto → bucle hasta terminar
+        MOVF    ADRESL, W           ; lee resultado (segun ADFM)
+        MOVWF   adc_l
+        MOVF    ADRESH, W
+        MOVWF   adc_h
         RETURN
 ```
 
-<PracticeBox title="Practica 7 - Convertidor AD" level="Laboratorio">
-Lee un potenciometro o sensor analogico, convierte el valor y muestralo en LCD o LEDs. Usa cristal 20 MHz: selecciona 16 Tosc en ADCS (101 en ADCON2).
+Desde `programa:`: `CALL config_adc` una vez; en bucle `CALL leer_an0` y muestra en LCD o convierte a voltaje.
+
+## Interrupcion ADC (opcional)
+
+Puedes usar **`ADIE`** en PIE1 + **`PEIE`** + **`GIE`** para leer el resultado en una ISR cuando **`ADIF`** se activa — misma cadena que [Timer1](/timers/timer1-timer2/). En Practica 7 el curso suele usar **polling** sobre `GO/DONE`.
+
+## Errores comunes
+
+| Error | Sintoma |
+| --- | --- |
+| No configurar **ADCON1** | Lecturas erraticas o pines LCD afectados |
+| Pin como **salida** (`TRIS=0`) | ADC no mide correctamente |
+| **GO** sin **ADON** | Conversion no arranca |
+| **ADCS** incorrecto para Fosc | Conversion lenta o imprecisa |
+| Confundir **RA4** con analogico | AN4 esta en **RA5**, no RA4 |
+
+## Practica 7 UNEXPO
+
+<PracticeBox title="Practica 7 — Convertidor AD" level="Laboratorio">
+Lee un **potenciometro** o sensor en **AN0**, convierte el valor y muestralo en **LCD** o LEDs. Cristal **20 MHz**: `ADCS = 101` en ADCON2. Tutorial completo: [Practica 7](/tutoriales/practica-7/).
 </PracticeBox>
+
+## Siguiente paso
+
+- [PWM / CCP](/pwm/) — otro modulo del Tema 9 (salida analogica por duty cycle)
+- [UART](/comunicacion/uart/) — enviar el valor ADC al PC (Practica 8)
+- [Parcial IV](/parcial/parcial-4/) — repaso ADC + serial
+
+## Preguntas estilo parcial
+
+**¿Cuantos bits tiene el ADC del PIC18F4550?**
+
+**10 bits** → valores 0–1023.
+
+**¿Que hace `BSF ADCON0, GO`?**
+
+**Inicia** una conversion; el bit queda en 1 hasta que termina (**GO/DONE = 0**).
+
+**¿Para que sirve ADCON1?**
+
+Configura que pines son **entrada analogica** y cuales **GPIO digital**.
+
+**¿Que pin NO es analogico en PORTA?**
+
+**RA4** — es T0CKI (entrada digital del Timer0).
+
+<Exercise title="Calcula la tension">
+Si Vref = 5 V y ADRES = 768, ¿aproximadamente cuantos voltios mide el canal? (768/1023 × 5 V)
+</Exercise>
 
 <TopicQuiz slug="adc" />

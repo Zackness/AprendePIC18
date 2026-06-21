@@ -11,61 +11,226 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="interrupciones" />
 
-Las interrupciones permiten atender eventos sin polling continuo. Son obligatorias en practicas como teclado matricial y altamente valoradas en el parcial.
+Ya dominas [GPIO](/gpio/) y [botones](/gpio/botones/) con polling (`BTFSS PORTB` en bucle). Las **interrupciones** permiten que el PIC **salte a una rutina de servicio (ISR)** cuando ocurre un evento — Timer0, teclado, UART — sin revisar banderas todo el tiempo. Son obligatorias en **Practica 2** (teclado), **Practica 3** (frecuencimetro) y **Practica 5** (timers + ISR).
+
+Viste los registros base en [Registros — interrupciones](/fundamentos/registros/#registros-de-interrupciones). Aquí cierras **Tema 6**: vectores, cadena de habilitacion, ISR correcta y enlace con [Timer 0](/timers/timer0/).
 
 <Figure
 	src="/images/interrupciones/flujo-isr.svg"
 	alt="Diagrama de flujo de una interrupcion desde el evento hasta RETFIE"
 	caption="Secuencia completa: detectar evento, guardar contexto, ejecutar ISR, limpiar bandera y retornar con RETFIE."
-	credit="Tema 6 Interrupciones — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+	credit="Tema 6 Interrupciones — UNEXPO · Ing. Mecatronica · Microcontroladores"
 />
 
 <AIExplain title="Flujo de una ISR">
-1. Detectar evento → 2. Guardar contexto → 3. Saltar al vector → 4. Ejecutar ISR → 5. Limpiar bandera → 6. RETFIE
+1. Evento hardware → 2. Bandera IF en 1 → 3. CPU salta al vector → 4. Guardar contexto → 5. Atender → 6. Limpiar bandera → 7. **RETFIE**
 </AIExplain>
 
-## Vectores en PIC18F4550
+## Que es una interrupcion
+
+Una **interrupcion** interrumpe temporalmente el programa principal para ejecutar codigo urgente. Al terminar, el PIC **vuelve exactamente** donde estaba gracias a la **pila** y la instruccion **RETFIE**.
+
+### Paso 1 — Polling vs interrupcion
+
+| Enfoque | Como funciona | Cuando usarlo |
+| --- | --- | --- |
+| **Polling** | `BTFSS TMR0IF` / `PORTB` en bucle infinito | Retardos simples, un solo boton |
+| **Interrupcion** | Hardware salta a ISR cuando la bandera se activa | Teclado, timers precisos, UART, frecuencimetro |
+
+En [Botones](/gpio/botones/) el antirrebote con `CALL retardo_20ms` es polling. En **Practica 2** el teclado matricial usa **RBIE** para no bloquear la CPU escaneando columnas.
+
+### Paso 2 — Tres capas de habilitacion
+
+Para que una ISR de periferico se ejecute (ej. Timer1), enciendes **tres interruptores**:
+
+```
+  GIE = 1          ; maestro global (INTCON)
+       ↓
+  PEIE = 1         ; perifericos (INTCON) — timers 1/2/3, UART, ADC…
+       ↓
+  TMR1IE = 1       ; fuente concreta (PIE1)
+       ↓
+  Periferico listo ; Timer1 corriendo, overflow → TMR1IF
+```
+
+**Timer0 es especial:** `TMR0IE` y `TMR0IF` estan en **`INTCON`** (no en PIE1). Para Timer0 necesitas **GIE + TMR0IE**; `PEIE` no aplica a Timer0 en el PIC18.
+
+### Paso 3 — Bandera, vector e ISR
+
+1. El evento pone una **bandera** (`TMR0IF`, `RBIF`, `ADIF`…) en 1.
+2. Si la fuente esta habilitada y **GIE = 1**, el CPU salta al **vector** (`0x0008` alta o `0x0018` baja).
+3. Tu codigo en la **ISR** atiende el evento, **limpia la bandera** y ejecuta **RETFIE**.
+
+Si no limpias la bandera, el PIC **reentra** a la ISR inmediatamente.
+
+### Paso 4 — Guardar contexto
+
+La ISR puede usar `WREG`, `STATUS` y otros registros que el programa principal necesitaba. **Minimo del curso:** guardar **WREG** y **STATUS** al entrar y restaurarlos **antes** de `RETFIE`. Detalle en la [guia practica — contexto](/tutoriales/guias/interrupciones/3-contexto/).
+
+## Vectores en el `.ASM` — estilo sandwich
+
+Los vectores van **arriba**, despues de `CONFIG` y antes del codigo principal:
 
 ```asm
         ORG     0x0000
-        GOTO    INICIO
+        GOTO    programa         ; reset → main
+
         ORG     0x0008
-        GOTO    ATENDER_INTERRUPCIONES_H
+        GOTO    isr_alta         ; salto → vector alta prioridad
+
         ORG     0x0018
-        GOTO    ATENDER_INTERRUPCIONES_L
+        GOTO    isr_baja         ; salto → vector baja prioridad
+
+; ── Subrutinas e ISR ──────────────────────────────────
+isr_alta:
+        ; atender fuentes de alta prioridad
+        RETFIE
+
+isr_baja:
+        ; atender fuentes de baja prioridad
+        RETFIE
+
+programa:
+        ; codigo principal
+        END
 ```
 
-## Fuentes principales
-
-1. **Externas:** INT0 (RB0), INT1 (RB1), INT2 (RB2)
-2. **Puerto B:** RB4-RB7 (cambio de estado)
-3. **Timers:** TMR0, TMR1, TMR2, TMR3 overflow
-4. **CCP:** Captura, comparacion, PWM
-5. **ADC:** ADIF al completar conversion
-6. **Serial:** USART, SPI, I2C
-7. **USB**
+En laboratorio muchas practicas usan **solo prioridad alta** (`ORG 0x0008`) con todas las fuentes en `isr_alta`.
 
 ## Registros clave
 
-- `INTCON.GIE` — habilitacion global
-- `INTCON.PEIE` — interrupciones perifericas
-- `PIE1/PIE2` — habilitar por periferico
-- `PIR1/PIR2` — banderas de interrupcion
+| Registro | Funcion |
+| --- | --- |
+| **`INTCON.GIE`** | Habilitacion **global** — sin GIE no hay interrupciones |
+| **`INTCON.PEIE`** | Habilita interrupciones **perifericas** (Timer1/2/3, UART, ADC…) |
+| **`INTCON.TMR0IE` / `TMR0IF`** | Habilitacion y bandera de **Timer0** |
+| **`INTCON.RBIE` / `RBIF`** | Interrupcion por cambio en **RB4–RB7** |
+| **`PIE1`, `PIE2`** | Habilita cada fuente periferica (`TMR1IE`, `ADIE`…) |
+| **`PIR1`, `PIR2`** | Banderas de evento periferico |
+| **`IPR1`, `IPR2`** | Prioridad alta/baja de cada fuente |
 
-## ISR minima para Timer0
+Cadena resumida — Timer0:
 
 ```asm
-ATENDER_TIMER0:
-        BCF     T0CON, TMR0ON
-        BCF     INTCON, TMR0IF
-        ; recargar TMR0H/TMR0L
-        ; codigo de la tarea
-        BSF     T0CON, TMR0ON
-        RETFIE
+        BCF     INTCON, TMR0IF   ; limpia bandera antes de arrancar
+        BSF     INTCON, TMR0IE  ; habilita interrupcion Timer0
+        BSF     INTCON, GIE     ; enciende maestro global
+        BSF     T0CON, TMR0ON   ; arranca el timer
 ```
 
-<Exercise title="Por que se debe limpiar TMR0IF antes de salir de la ISR?">
-Si no limpias la bandera, el PIC reentra inmediatamente a la interrupcion creyendo que el evento sigue pendiente.
+Cadena — Timer1 (periferico):
+
+```asm
+        BCF     PIR1, TMR1IF
+        BSF     PIE1, TMR1IE
+        BSF     INTCON, PEIE
+        BSF     INTCON, GIE
+```
+
+## Fuentes principales del PIC18F4550
+
+| Fuente | Pin / modulo | Bandera tipica | Uso en el curso |
+| --- | --- | --- | --- |
+| **INT0–INT2** | RB0, RB1, RB2 | `INT0IF`… | Pulsador externo |
+| **RB puerto** | RB4–RB7 | `RBIF` | Teclado matricial — [Practica 2](/tutoriales/practica-2/) |
+| **Timer0** | Interno / RA4 | `TMR0IF` | Retardo, parpadeo — [Timer 0](/timers/timer0/) |
+| **Timer1/2/3** | Interno | `TMR1IF`, `TMR2IF`… | Frecuencimetro, PWM |
+| **CCP** | RC2, etc. | `CCP1IF` | Captura, comparacion, PWM |
+| **ADC** | Canales ANx | `ADIF` | Lectura analogica |
+| **USART** | RC6/RC7 | `RCIF`, `TXIF` | Serial |
+| **USB** | Modulo USB | varias | Proyectos avanzados |
+
+## ISR minima — Timer0 con contexto
+
+Ejemplo integrado (vector + guardado minimo + recarga):
+
+```asm
+        ORG     0x0008
+        GOTO    isr_alta
+
+isr_alta:
+        BTFSS   INTCON, TMR0IF
+        GOTO    fin_isr          ; no era Timer0 → salir
+
+        ; ── Guardar contexto (minimo) ──
+        MOVWF   temp_w           ; guarda WREG
+        SWAPF   STATUS, W
+        MOVWF   temp_status
+
+        BCF     T0CON, TMR0ON    ; pausa timer mientras recargas
+        BCF     INTCON, TMR0IF   ; limpia bandera
+        MOVLW   B'01100111'
+        MOVWF   TMR0H            ; recarga valor precalculado
+        MOVLW   B'01101010'
+        MOVWF   TMR0L
+        BSF     T0CON, TMR0ON
+
+        ; ── Tarea: toggle LED ──
+        BTFSC   LATB, 0
+        GOTO    apagar_led
+        BSF     LATB, 0
+        GOTO    restaurar
+apagar_led:
+        BCF     LATB, 0
+
+restaurar:
+        SWAPF   temp_status, W
+        MOVWF   STATUS
+        MOVF    temp_w, W
+fin_isr:
+        RETFIE                   ; retorna e re-habilita GIE
+```
+
+Configuracion previa del timer: ver [Timer 0 — 2 segundos](/timers/timer0/#ejemplo-2-segundos-con-cristal-20-mhz).
+
+## Interrupcion RB4–RB7 — vista previa teclado
+
+Para teclado matricial ([guia RB interrupt](/tutoriales/guias/interrupciones/4-rb-interrupt/)):
+
+```asm
+        BCF     INTCON2, RBPU    ; pull-ups internos PORTB (segun practica)
+        BSF     INTCON, RBIE     ; habilita cambio RB4-RB7
+        BSF     INTCON, GIE
+```
+
+En la ISR: escanear filas/columnas, **antirrebote**, y limpiar **`RBIF` leyendo `PORTB`** (requerimiento del hardware PIC18).
+
+## Errores comunes
+
+| Error | Consecuencia |
+| --- | --- |
+| Olvidar **GIE** | La ISR nunca se ejecuta |
+| No limpiar **TMR0IF** / **RBIF** | Reentrada infinita a la ISR |
+| `RETFIE` sin restaurar **WREG/STATUS** | Programa principal corrupto |
+| ISR demasiado larga | Pierde eventos, jitter en timers |
+| Confundir **polling** con **interrupcion** | CPU al 100% en bucle vacio |
+
+## Siguiente paso
+
+1. [Guia practica — Interrupciones](/tutoriales/guias/interrupciones/) — paso a paso con MPLAB/Proteus
+2. [Timer 0](/timers/timer0/) — formula, T0CON y retardo preciso
+3. [Practica 5 — Timers e interrupciones](/tutoriales/practica-5/) — laboratorio integrado
+
+## Preguntas estilo parcial
+
+**¿Para que sirve `INTCON.GIE`?**
+
+Habilita o deshabilita **todas** las interrupciones globalmente. Sin GIE = 1, ninguna ISR se ejecuta.
+
+**¿Por que limpiar `TMR0IF` antes de `RETFIE`?**
+
+Si la bandera sigue en 1, el hardware considera el evento **pendiente** y vuelve a entrar a la ISR.
+
+**¿Donde estan `TMR0IE` y `TMR0IF`?**
+
+En el registro **`INTCON`**, no en PIE1/PIR1.
+
+**¿Que hace `RETFIE`?**
+
+Retorna de la interrupcion, restaura el PC desde la pila y **re-habilita GIE** automaticamente.
+
+<Exercise title="Disena la cadena">
+Lista los registros que debes poner en 1 para que Timer1 genere interrupcion: ¿GIE? ¿PEIE? ¿TMR1IE? ¿TMR1ON?
 </Exercise>
 
 <TopicQuiz slug="interrupciones" />

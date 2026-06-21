@@ -3,14 +3,172 @@ title: Timer 1 and Timer 2
 description: 16-bit timers, CCP and PWM base with Timer2.
 ---
 
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
 import LessonProgress from '../../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../../components/TopicQuiz.astro';
-import AIExplain from '../../../../components/AIExplain.astro';
 
 <LessonProgress slug="timers/timer1-timer2" locale="en" />
 
+After [Timer 0](/en/timers/timer0/) (8/16 bit, `T0CON`, delay with polling or ISR), **Topic 8** continues with **Timer1** and **Timer2**. Timer1 drives **CCP capture and compare**; **Timer2** is the **PWM time base** with period register **PR2**. Both appear in **Practice 3** (frequency meter), **Practice 4/6** (PWM, stepper motor), and the [PWM](/en/pwm/) module.
 
+Timer1/2 interrupts require **`PEIE` + `PIE1`** plus **`GIE`** — unlike Timer0 which uses only `INTCON` ([Interrupts](/en/interrupciones/#step-2--three-enable-layers)).
 
-Timer2 with PR2 is the time base for PWM. Timer1 is used in CCP capture and compare modes.
+## Timer 1 — 16-bit timer
+
+| Feature | Detail |
+| --- | --- |
+| Registers | `TMR1H:TMR1L`, `T1CON` |
+| Resolution | 16 bit (65536 counts) |
+| Prescaler | 1, 2, 4, 8 (`T1CKPS1:0`) |
+| Clock | Fosc/4 internal or external on T1CKI (RC0) |
+| Interrupt | `TMR1IE` in **PIE1**, flag `TMR1IF` in **PIR1** |
+
+### Course formula
+
+```
+  Time = (4 / Fosc) × (65536 − TMR1H:TMR1L) × Prescaler
+```
+
+Same idea as Timer0 in 16 bit, but max prescaler **1:8** (not 1:256). For long delays use high prescaler or chain overflows in the ISR.
+
+### T1CON register (summary)
+
+| Bit / field | Function |
+| --- | --- |
+| **TMR1ON** | 1 = Timer1 active |
+| **T1CKPS1:0** | Prescaler 1:1, 1:2, 1:4, 1:8 |
+| **T1OSCEN** | External low-power oscillator (LP) |
+| **T1SYNC** | Sync in counter mode |
+| **T1CS** | 0 = Fosc/4; 1 = external source |
+
+### Timer1 in CCP — capture and compare
+
+The **CCP** module uses Timer1 as time reference:
+
+| CCP mode | What it measures / does | Practice |
+| --- | --- | --- |
+| **Capture** | Latches `TMR1H:L` on edge at RC2 | Pulse width, frequency |
+| **Compare** | Triggers when `TMR1 == CCPR1H:L` | Timed signals |
+
+In **Practice 3** (frequency meter), Timer1 often measures the **time window** while Timer0 **counts pulses**.
+
+### Example: enable Timer1 with interrupt
+
+```asm
+config_tmr1:
+        MOVLW   B'00000001'     ; TMR1ON=1, prescaler 1:1 (adjust as needed)
+        MOVWF   T1CON
+        MOVLW   HIGH(.65536-.1000)   ; reload for N=1000 counts (example)
+        MOVWF   TMR1H
+        MOVLW   LOW(.65536-.1000)
+        MOVWF   TMR1L
+        BCF     PIR1, TMR1IF
+        BSF     PIE1, TMR1IE
+        BSF     INTCON, PEIE
+        BSF     INTCON, GIE
+        RETURN
+```
+
+## Timer 2 — fixed period and PWM
+
+Timer2 is an **internal 8-bit timer only** with **period register PR2**:
+
+| Feature | Detail |
+| --- | --- |
+| Counter | `TMR2` (8 bit, 0 → PR2 → reset) |
+| Period | **`PR2`** defines match / overflow |
+| Prescaler | 1, 4, 16 (`T2CKPS1:0`) |
+| Postscaler | 1:1 to 1:16 (`TOUTPS3:0`) — delays interrupt |
+| Interrupt | `TMR2IE` / `TMR2IF` in PIE1/PIR1 |
+
+<AIExplain title="PWM uses Timer2">
+**PWM period** is set by **PR2** and Timer2 prescaler. **Duty cycle** loads in **`CCPR1L`** and **`CCP1CON<5:4>`**. Typical output: **RC2 / CCP1**.
+</AIExplain>
+
+### T2CON register (summary)
+
+| Bit / field | Function |
+| --- | --- |
+| **TMR2ON** | 1 = Timer2 active |
+| **T2CKPS1:0** | Prescaler 1, 4, 16 |
+| **TOUTPS3:0** | Postscaler for TMR2IF interrupt |
+
+### PWM period formula (intro)
+
+```
+  PWM_Period ≈ (4 / Fosc) × (PR2 + 1) × T2_Prescaler
+```
+
+Duty percentage:
+
+```
+  Duty ≈ (CCPR1L : extensions) / (4 × (PR2 + 1)) × 100%
+```
+
+Full detail in [PWM and CCP module](/en/pwm/).
+
+### Example: start Timer2
+
+```asm
+config_tmr2:
+        MOVLW   D'249'          ; PR2 → defines period
+        MOVWF   PR2
+        MOVLW   B'00000111'     ; TMR2ON, prescaler 1:16 (adjust)
+        MOVWF   T2CON
+        CLRF    TMR2
+        BCF     PIR1, TMR2IF
+        BSF     PIE1, TMR2IE
+        BSF     INTCON, PEIE
+        BSF     INTCON, GIE
+        RETURN
+```
+
+## Quick comparison — Timer0, 1, and 2
+
+| | Timer0 | Timer1 | Timer2 |
+| --- | --- | --- | --- |
+| Bits | 8 or 16 | 16 | 8 (+ PR2) |
+| Max prescaler | 1:256 | 1:8 | 1:16 (+ post) |
+| IE / IF | **INTCON** | **PIE1/PIR1** | **PIE1/PIR1** |
+| Key use | Delay, RA4 counter | CCP capture/compare | **PWM**, multiplexing |
+| Practice | 3, 5 | 3 | 3, 4, 6 |
+
+## Timer 3
+
+The PIC18F4550 includes **Timer3** (similar to Timer1). See the datasheet for advanced projects; the UNEXPO course focuses on Timer0–2.
+
+## Common mistakes
+
+| Mistake | Consequence |
+| --- | --- |
+| Timer1/2 without **PEIE** | ISR never runs even if `TMR1IE=1` |
+| Confuse **PR2** with **TMR2** | PR2 = desired period; TMR2 counts up to PR2 |
+| PWM without active Timer2 | No waveform on RC2 from CCP1 |
+| Wrong prescaler in formula | Incorrect calculated times |
+
+## Next step
+
+- [PWM and CCP module](/en/pwm/) — duty cycle, CCP1CON
+- [Practice 3 — Frequency meter](/en/tutoriales/practica-3/)
+- [Practice 6 — Stepper motor](/en/tutoriales/practica-6/)
+
+## Exam-style questions
+
+**Which timer does CCP PWM use?**
+
+**Timer2** with **PR2** as period.
+
+**Is Timer1 8 or 16 bits?**
+
+**16 bits** — used in CCP capture and compare.
+
+**Which registers enable Timer2 interrupt?**
+
+`TMR2IE` (PIE1), `PEIE` and `GIE` (INTCON); clear `TMR2IF` (PIR1) in the ISR.
+
+<Exercise title="Pick the timer">
+To count pulses on RA4 for 1 s then read the total: Timer0 as counter or Timer2? Who marks the 1 s window?
+</Exercise>
 
 <TopicQuiz slug="timers/timer1-timer2" locale="en" />

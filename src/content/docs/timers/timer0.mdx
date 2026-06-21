@@ -11,59 +11,171 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="timers/timer0" />
 
+**Timer0** es el primer temporizador del curso (**Tema 8**). Sirve para **retardos precisos** (sustituir bucles vacios), **contar pulsos externos** en RA4/T0CKI y generar **interrupciones periodicas** cuando desborda. Lo combinaras con [Interrupciones](/interrupciones/) en **Practica 3** (frecuencimetro) y **Practica 5**.
 
-
-
-Timer0 puede funcionar como temporizador (reloj interno Fosc/4) o contador (pulsos externos en RA4/T0CKI).
+Con cristal **20 MHz** y `FOSC = HS` ([config bits](/fundamentos/config-bits/#resumen--plantilla-del-curso-20-mhz)), el reloj interno del timer es **Fosc/4 = 5 MHz** — base de todas las formulas del Tema 8.
 
 <AIExplain title="Formula del curso">
-`Tiempo = (4/Fosc) * N * Pre-divisor` donde N = 256-TMR0L (8 bit) o N = 65536-TMR0H:TMR0L (16 bit).
+`Tiempo = (4 / Fosc) × N × Pre-divisor` donde **N** = cuentas hasta overflow: **256 − TMR0L** (8 bit) o **65536 − TMR0H:TMR0L** (16 bit).
 </AIExplain>
+
+## Que hace Timer0
+
+Timer0 puede operar en dos modos principales:
+
+| Modo | `T0CON.T0CS` | Entrada de reloj | Uso tipico |
+| --- | --- | --- | --- |
+| **Temporizador** | 0 | Fosc/4 (interno) | Retardos, parpadeo LED |
+| **Contador** | 1 | Pulsos en **RA4/T0CKI** | Contar eventos externos |
+
+### Paso 1 — El contador incrementa solo
+
+Escribes un valor inicial en **`TMR0L`** (y **`TMR0H`** si 16 bit). Con **`TMR0ON = 1`**, el hardware incrementa el contador cada ciclo de reloj (dividido por prescaler). Al pasar de **255 → 0** (8 bit) o **65535 → 0** (16 bit), hay **overflow** y **`TMR0IF = 1`**.
+
+### Paso 2 — Pre-escalador (prescaler)
+
+El prescaler **ralentiza** la cuenta. Valores en **`T0CON.PS2:PS0`**: 1:2, 1:4, …, 1:256. A mayor prescaler, **mas tiempo** hasta overflow con el mismo valor inicial.
+
+### Paso 3 — 8 bit vs 16 bit
+
+| Modo | Registro | Rango N max | Tiempo max @ 20 MHz, PS 1:256 |
+| --- | --- | --- | --- |
+| **8 bit** (`T08BIT = 1`) | `TMR0L` | 256 | ~13,1 ms |
+| **16 bit** (`T08BIT = 0`) | `TMR0H:TMR0L` | 65536 | ~3,36 s |
+
+Para **2 segundos** necesitas **16 bit** + prescaler **1:256**.
+
+### Paso 4 — Polling o interrupcion
+
+| Metodo | Codigo | Cuando |
+| --- | --- | --- |
+| **Polling** | `BTFSS INTCON, TMR0IF` en bucle | Retardo puntual, codigo simple |
+| **Interrupcion** | ISR en `ORG 0x0008`, `TMR0IE` + `GIE` | Parpadeo en background, frecuencimetro |
+
+Detalle ISR: [Interrupciones — Timer0](/interrupciones/#isr-minima--timer0-con-contexto).
 
 <Figure
 	src="/images/timers/t0con.svg"
 	alt="Mapa de bits del registro T0CON del Timer 0"
 	caption="Bits clave de T0CON: TMR0ON habilita el timer, T08BIT selecciona 8 u 16 bits, PS2:PS0 el pre-escalador."
-	credit="Tema 8 Temporizadores — UNEXPO · Ing. Mecatrónica · Microcontroladores"
+	credit="Tema 8 Temporizadores — UNEXPO · Ing. Mecatronica · Microcontroladores"
 />
 
 ## Registro T0CON
 
 | Bit | Nombre | Funcion |
 | --- | --- | --- |
-| 7 | TMR0ON | 1 = Timer activo |
-| 6 | T08BIT | 1 = modo 8 bit |
-| 5 | T0CS | 0 = interno, 1 = externo |
-| 4 | T0SE | Flanco activo externo |
-| 3 | PSA | 0 = pre-escalador al Timer0 |
-| 2-0 | PS2:PS0 | Pre-divisor 1:2 a 1:256 |
+| 7 | **TMR0ON** | 1 = Timer activo |
+| 6 | **T08BIT** | 1 = modo 8 bit; 0 = 16 bit |
+| 5 | **T0CS** | 0 = reloj interno Fosc/4; 1 = externo T0CKI |
+| 4 | **T0SE** | Flanco activo en modo contador (0 = subida) |
+| 3 | **PSA** | 0 = prescaler asignado a Timer0 |
+| 2–0 | **PS2:PS0** | Pre-divisor 1:2 a 1:256 |
+
+Ejemplo `MOVLW B'00000111'` → 16 bit, interno, prescaler 1:256:
+
+```
+  TMR0ON=0 (apagado al configurar)
+  T08BIT=0 → 16 bit
+  T0CS=0   → temporizador interno
+  PSA=0, PS=111 → prescaler 1:256
+```
+
+## Calcular N para un retardo
+
+**Objetivo:** 2 s con Fosc = 20 MHz, prescaler 1:256.
+
+```
+  Tiempo = (4 / Fosc) × N × PS
+  2 s    = (4 / 20×10⁶) × N × 256
+  N      = 2 / [(4/20×10⁶) × 256] = 39062 cuentas
+
+  Valor inicial = 65536 − 39062 = 26474 = 0x676A
+  TMR0H = 0x67 , TMR0L = 0x6A
+```
+
+Verifica: N = 65536 − 26474 = 39062 ✓
 
 ## Ejemplo: 2 segundos con cristal 20 MHz
 
-Con 16 bit y pre-divisor 1:256, TMR0H:TMR0L = 26474 (0x676A).
+**Polling** — subrutina reutilizable:
 
 ```asm
 CONFIGURAR_TIMER_0:
-        MOVLW   B'00000111'
+        MOVLW   B'00000111'     ; 16 bit, interno, PS 1:256
         MOVWF   T0CON
-        MOVLW   B'01100111'
+        MOVLW   B'01100111'     ; TMR0H = 0x67
         MOVWF   TMR0H
-        MOVLW   B'01101010'
+        MOVLW   B'01101010'     ; TMR0L = 0x6A
         MOVWF   TMR0L
         RETURN
 
 RETARDO_TMR0_2S:
-        BCF     INTCON, TMR0IF
-        BSF     T0CON, TMR0ON
-ESPERA:
-        BTFSS   INTCON, TMR0IF
-        GOTO    ESPERA
-        BCF     T0CON, TMR0ON
+        BCF     INTCON, TMR0IF  ; limpia bandera vieja
+        BSF     T0CON, TMR0ON   ; arranca timer
+espera_overflow:
+        BTFSS   INTCON, TMR0IF  ; espera overflow
+        GOTO    espera_overflow ; salto → bucle hasta TMR0IF=1
+        BCF     T0CON, TMR0ON   ; apaga timer
+        BCF     INTCON, TMR0IF  ; limpia bandera
         RETURN
 ```
 
+Uso desde `programa:`:
+
+```asm
+        CALL    CONFIGURAR_TIMER_0
+        CALL    RETARDO_TMR0_2S
+        BSF     LATB, 0         ; accion despues de 2 s
+```
+
+## Modo contador — pulsos en RA4
+
+Para contar pulsos externos (ej. frecuencimetro — [Practica 3](/tutoriales/practica-3/)):
+
+```asm
+        BSF     TRISA, 4        ; RA4 / T0CKI entrada
+        MOVLW   B'00100000'     ; T0CS=1, contador externo
+        MOVWF   T0CON
+        CLRF    TMR0H
+        CLRF    TMR0L
+        BSF     T0CON, TMR0ON
+        ; cada pulso en T0CKI incrementa el contador
+```
+
+Ventana de medicion: combina Timer0 como contador con Timer1 como **ventana de tiempo** — detalle en Practica 3.
+
+## Errores comunes
+
+| Error | Sintoma |
+| --- | --- |
+| Olvidar limpiar **TMR0IF** antes de esperar | Retardo inmediato o impredecible |
+| 8 bit para retardo largo | Overflow demasiado rapido (~13 ms max con PS 1:256) |
+| Fosc incorrecta en formula | Tiempos proporcionalmente mal (revisa cristal y Proteus) |
+| No apagar **TMR0ON** al recargar en ISR | Cuenta extra durante la recarga |
+
+## Siguiente paso
+
+- [Timer 1 y Timer 2](/timers/timer1-timer2/) — 16 bit, PR2, base del PWM
+- [Guia practica — Interrupciones](/tutoriales/guias/interrupciones/) — parpadeo con ISR
+- [Practica 3 — Frecuencimetro](/tutoriales/practica-3/)
+
+## Preguntas estilo parcial
+
+**¿Que indica `TMR0IF = 1`?**
+
+Timer0 **desbordo** (paso de FF→00 o FFFF→0000 segun modo).
+
+**¿Cual es el tiempo maximo en 8 bit, Fosc = 20 MHz, PS = 1:256?**
+
+`Tiempo = (4/20×10⁶) × 256 × 256 = 13,1072 ms`
+
+**¿Donde se configura el prescaler de Timer0?**
+
+En **`T0CON`** (bits PSA y PS2:PS0).
+
 <Exercise title="Calcula el tiempo maximo en 8 bit con Fosc=20MHz y pre-divisor 1:256">
-Tiempo = (4/20MHz) * 256 * 256 = 13,1072 ms segun el Tema 8 del el curso de Microcontroladores (UNEXPO).
+Tiempo = (4/20MHz) × 256 × 256 = **13,1072 ms** segun el Tema 8 del curso de Microcontroladores (UNEXPO).
 </Exercise>
 
 <TopicQuiz slug="timers/timer0" />

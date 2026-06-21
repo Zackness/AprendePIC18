@@ -332,6 +332,10 @@ A classmate programs this `.ASM` with a correctly wired 20 MHz crystal, but RB0 
 
 ## Exam-style questions
 
+**What is the configuration word?**
+
+The **startup bit block** that sets oscillator, WDT, MCLR, pin modes at power-on, etc. You define it with `CONFIG` in `.ASM` and it is programmed with the `.HEX` — **not executable code**.
+
 **Where are config bits stored?**
 
 In the PIC's **configuration memory**, not in normal executable Flash.

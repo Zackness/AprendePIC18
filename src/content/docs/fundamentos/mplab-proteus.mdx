@@ -14,13 +14,68 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
 
-Hasta aqui aprendiste **que escribir** en ensamblador ([MPASM](/fundamentos/ensamblador/)) y **como configurar el hardware al encender** ([config bits](/fundamentos/config-bits/)). Esta pagina explica **con que herramientas** lo compilas, simulas y pruebas en el curso UNEXPO.
+Hasta aqui aprendiste **que escribir** en ensamblador ([MPASM](/fundamentos/ensamblador/)), **como va la palabra de configuracion** ([config bits](/fundamentos/config-bits/)) y el **sistema minimo** del PIC. Esta pagina cierra Fundamentos: explica **con que herramientas** compilas, simulas y pruebas en el curso UNEXPO.
 
-En el flujo academico trabajamos principalmente con **MPLAB v8 + MPASM + Proteus**. Tambien veras **MPLAB X** para que reconozcas el entorno moderno si lo usas en otro equipo.
+En el flujo academico trabajamos principalmente con **MPLAB v8 + MPASM + Proteus**. Tambien veras **MPLAB X** para reconocer el entorno moderno si lo usas en otro equipo.
 
 <AIExplain title="Flujo real de trabajo">
 Escribes `.ASM` en MPLAB → MPASM genera `.HEX` → cargas el `.HEX` en Proteus (simulacion) o en un programador (placa fisica) → comparas el comportamiento con lo esperado.
 </AIExplain>
+
+## Que es MPLAB (y que no es)
+
+En informes y laboratorio se mezclan tres nombres. Conviene separarlos:
+
+| Herramienta | Que es | Que hace en el curso |
+| --- | --- | --- |
+| **MPLAB v8 / X** | **IDE** — entorno de desarrollo | Editar `.ASM`, crear proyecto, lanzar el build, grabar con PICkit |
+| **MPASM** | **Ensamblador** | Traduce `.ASM` → `.HEX` (programa + [palabra de configuracion](/fundamentos/config-bits/#que-es-la-palabra-de-configuracion)) |
+| **Proteus ISIS** | **Simulador** | Ejecuta el `.HEX` en un circuito virtual — **no compila** |
+| **PICkit / programador** | **Grabador** | Escribe el `.HEX` en la Flash del PIC real |
+
+**MPLAB no es el ensamblador.** MPLAB es la **carpeta de trabajo**; cuando pulsas **Build**, MPLAB llama a **MPASM** por ti.
+
+### Paso 1 — Escribir el `.ASM` en MPLAB
+
+Abres o creas un proyecto para **PIC18F4550** y editas tu fuente con el estilo [sandwich](/fundamentos/ensamblador/#anatomia-de-un-archivo-mpasm--estilo-sandwich): `LIST`, `#include`, `CONFIG`, `ORG`, subrutinas, `programa:` al final.
+
+El archivo en disco es texto plano (`.ASM` / `.asm`). MPLAB solo lo **guarda y colorea** — aun no hay `.HEX`.
+
+### Paso 2 — Compilar con MPASM (Build)
+
+**Project → Build All** invoca MPASM. Si no hay errores, obtienes el **`.HEX`**:
+
+```
+  tu_programa.ASM
+       ↓  MPASM (desde MPLAB)
+  tu_programa.HEX   ← programa Flash + config bits
+  tu_programa.COD   ← listado (opcional, depuracion)
+```
+
+Si falta `END`, hay un simbolo sin `#include` o una etiqueta mal escrita, el build **falla** y **no debes simular** hasta corregir la ventana **Output**.
+
+### Paso 3 — Simular en Proteus
+
+Montas el [sistema minimo](/fundamentos/config-bits/#sistema-minimo--hardware-que-acompania-los-config-bits) + LED, cargas el **mismo `.HEX`** en el PIC virtual y pulsas **Play**. Proteus **interpreta** bytes del `.HEX`; no lee tu `.ASM` directamente.
+
+### Paso 4 — Placa fisica
+
+Con el **mismo `.HEX`** (recompilado si cambiaste codigo), conectas PICkit, **Program** en MPLAB y validas el LED o periferico en protoboard.
+
+<AIExplain title="Regla de oro del curso">
+**Compilar sin errores → simular en Proteus → montar placa.** No al reves. Proteus nunca sustituye MPASM.
+</AIExplain>
+
+## Que lleva el archivo `.HEX`
+
+El `.HEX` es el **puente** entre software y hardware. No es el `.ASM` legible — es formato Intel HEX con **dos bloques conceptuales**:
+
+| Contenido del `.HEX` | Origen en tu `.ASM` | Donde termina |
+| --- | --- | --- |
+| **Programa** (instrucciones) | `ORG`, `GOTO`, `MOVLW`, `BSF`… | Flash ejecutable |
+| **Palabra de configuracion** | Directivas `CONFIG` | Memoria de config (arranque) |
+
+Por eso un solo archivo alimenta Proteus **y** el programador: ambos necesitan programa **y** config bits coherentes con el cristal de **20 MHz** y la plantilla del curso.
 
 ## Cadena completa — del texto al PIC
 
@@ -43,7 +98,36 @@ LED virtual, pines logicos    Placa fisica UNEXPO
 | Simular | **Proteus ISIS** | `.HEX` + esquematico | Comportamiento virtual |
 | Grabar | PICkit 2/3, etc. | `.HEX` | Flash del PIC18F4550 |
 
-El `.HEX` es el **puente** entre software y hardware: contiene las instrucciones y la palabra de configuracion que definiste con `CONFIG`.
+## Recorrido completo — ejemplo minimo (Primer LED)
+
+Supongamos encender RB0. El flujo entero seria:
+
+**1. Fuente en MPLAB** — fragmento minimo (ver [Ensamblador — LED](/fundamentos/ensamblador/#ejemplo-completo--led-en-rb0)):
+
+```asm
+        LIST    P=18F4550
+        #include <P18F4550.INC>
+        CONFIG  FOSC = HS, WDT = OFF, LVP = OFF, PBADEN = OFF
+
+        ORG     0x0000
+        GOTO    programa         ; salto al main
+
+programa:
+        BCF     TRISB, 0
+        BSF     LATB, 0
+bucle:
+        GOTO    bucle              ; salto → destino bucle: (arriba)
+
+        END
+```
+
+**2. Build en MPLAB** → aparece `proyecto.hex` sin errores en **Output**.
+
+**3. Proteus** — PIC18F4550 + cristal 20 MHz + LED en RB0 → **Program File** = ese `.HEX` → **Clock Frequency** = **20 MHz** → **Play**.
+
+**4. Placa** — mismo `.HEX`, PICkit, **Program** → LED encendido si cableado y [config bits](/fundamentos/config-bits/#resumen--plantilla-del-curso-20-mhz) coinciden.
+
+Si cambias una linea del `.ASM`, **vuelve al paso 2** antes de Proteus o placa. Un `.HEX` viejo es la causa nº1 de “en simulacion no se ve mi cambio”.
 
 ## MPASM — que hace al compilar
 
@@ -65,9 +149,32 @@ MPASM lee tu [archivo ensamblador](/fundamentos/ensamblador/#anatomia-de-un-arch
 
 Si el build falla, **no habra `.HEX` util** — corrige errores en la ventana de salida antes de simular.
 
+### Errores de MPASM que veras en MPLAB
+
+| Mensaje en Output | Causa frecuente | Donde repasar |
+| --- | --- | --- |
+| `Symbol not defined` | Falta `#include <P18F4550.INC>` o typo (`TRISB`) | [Ensamblador — directivas](/fundamentos/ensamblador/#directivas-que-debes-conocer) |
+| `Label required` | Etiqueta sin `:` (`programa` vs `programa:`) | [Etiquetas](/fundamentos/ensamblador/#etiquetas-y-comentarios) |
+| `END directive required` | Falta `END` al final | [Sandwich](/fundamentos/ensamblador/#anatomia-de-un-archivo-mpasm--estilo-sandwich) |
+| `Bank select error` | Variable en otro banco sin `BSR` | [Registros — bancos](/fundamentos/registros/#mapa-de-memoria-de-datos) |
+| `Argument out of range` | Literal fuera de 0–255 | [Literales](/fundamentos/ensamblador/#notaciones-mpasm-para-literales) |
+
 <AIExplain title="Siguiente paso en la ruta">
-Despues de esta pagina, la [ruta de estudio](/ruta-de-estudio/) te lleva a la guia practica de puertos y al [tutorial Primer LED](/tutoriales/primer-led/), donde creas el proyecto en MPLAB y simulas en Proteus paso a paso.
+Despues de esta pagina, la [ruta de estudio](/ruta-de-estudio/) te lleva a la guia practica de puertos y al [tutorial Primer LED](/tutoriales/primer-led/), donde creas el proyecto en MPLAB y simulas en Proteus paso a paso con capturas.
 </AIExplain>
+
+## Proyecto MPLAB v8 — que crea el asistente
+
+El **Project Wizard** no escribe codigo por ti; organiza archivos y le dice a MPASM que micro y que herramienta usar:
+
+| Elemento del proyecto | Funcion |
+| --- | --- |
+| **Dispositivo PIC18F4550** | MPASM genera opcodes correctos para ese chip |
+| **Toolchain MPASM** | No XC8 si el curso es ensamblador puro |
+| **Archivo `.asm` agregado** | Fuente que compilas |
+| **Carpeta del proyecto** | Ahi aparece el `.HEX` tras **Build All** |
+
+Tras compilar, busca el `.HEX` en la carpeta del proyecto (a veces `Debug/`, a veces la raiz). Esa ruta es la que cargas en Proteus → **Program File**.
 
 ## MPLAB v8 — entorno principal del curso
 
@@ -212,6 +319,10 @@ Orden correcto para la Practica del Primer LED:
 - **Confundir Proteus con compilador**: Proteus **no reemplaza** MPASM — solo ejecuta el `.HEX`.
 
 ## Preguntas tipo parcial
+
+**¿Cual es la diferencia entre MPLAB y MPASM?**
+
+**MPLAB** es el **entorno** (editor, proyecto, grabador). **MPASM** es el **ensamblador** que traduce `.ASM` → `.HEX` cuando haces Build.
 
 **¿Que archivo entrega MPASM al compilar correctamente?**
 

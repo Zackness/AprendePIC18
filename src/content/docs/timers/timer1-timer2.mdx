@@ -3,42 +3,172 @@ title: Timer 1 y Timer 2
 description: Temporizadores de 16 bit, CCP y PWM con Timer2 en PIC18F4550.
 ---
 
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
 import LessonProgress from '../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../components/TopicQuiz.astro';
-import AIExplain from '../../../components/AIExplain.astro';
 
 <LessonProgress slug="timers/timer1-timer2" />
 
+Despues de [Timer 0](/timers/timer0/) (8/16 bit, `T0CON`, retardo con polling o ISR), el **Tema 8** continua con **Timer1** y **Timer2**. Timer1 es el motor de **captura y comparacion** del modulo CCP; **Timer2** es la **base del PWM** con registro de periodo **PR2**. Ambos se usan en **Practica 3** (frecuencimetro), **Practica 4/6** (PWM, motor paso a paso) y el modulo [PWM](/pwm/).
 
+Las interrupciones de Timer1/2 requieren **`PEIE` + `PIE1`** ademas de **`GIE`** — a diferencia de Timer0 que usa solo `INTCON` ([Interrupciones](/interrupciones/#paso-2--tres-capas-de-habilitacion)).
 
-## Timer 1
+## Timer 1 — temporizador de 16 bit
 
-- 16 bit, registro T1CON
-- Pre-escalador: 1, 2, 4, 8
-- Formula: `Tiempo = (4/Fosc) * (65536-TMR1H:TMR1L) * Pre-divisor`
-- Usado en modo Captura y Comparacion del CCP
+| Caracteristica | Detalle |
+| --- | --- |
+| Registros | `TMR1H:TMR1L`, `T1CON` |
+| Resolucion | 16 bit (65536 cuentas) |
+| Prescaler | 1, 2, 4, 8 (`T1CKPS1:0`) |
+| Reloj | Fosc/4 interno o externo en T1CKI (RC0) |
+| Interrupcion | `TMR1IE` en **PIE1**, bandera `TMR1IF` en **PIR1** |
 
-## Timer 2
+### Formula del curso
 
-- 8 bit con registro de periodo PR2
-- Pre-escalador: 1, 4, 16
-- Post-escalador para interrupciones
-- **Base del PWM** en modulo CCP
+```
+  Tiempo = (4 / Fosc) × (65536 − TMR1H:TMR1L) × Pre-divisor
+```
+
+Misma idea que Timer0 en 16 bit, pero prescaler maximo **1:8** (no 1:256). Para retardos largos combina prescaler alto o encadena overflows en ISR.
+
+### Registro T1CON (resumen)
+
+| Bit / campo | Funcion |
+| --- | --- |
+| **TMR1ON** | 1 = Timer1 activo |
+| **T1CKPS1:0** | Prescaler 1:1, 1:2, 1:4, 1:8 |
+| **T1OSCEN** | Oscilador externo de baja potencia (LP) |
+| **T1SYNC** | Sincronizacion en modo contador |
+| **T1CS** | 0 = Fosc/4; 1 = fuente externa |
+
+### Timer1 en CCP — captura y comparacion
+
+El modulo **CCP** usa Timer1 como referencia de tiempo:
+
+| Modo CCP | Que mide / hace | Practica |
+| --- | --- | --- |
+| **Captura** | Anota `TMR1H:L` cuando hay flanco en RC2 | Ancho de pulso, frecuencia |
+| **Comparacion** | Dispara evento cuando `TMR1 == CCPR1H:L` | Señales temporizadas |
+
+En **Practica 3** (frecuencimetro) Timer1 suele medir la **ventana de tiempo** mientras Timer0 **cuenta pulsos**.
+
+### Ejemplo: habilitar Timer1 con interrupcion
+
+```asm
+config_tmr1:
+        MOVLW   B'00000001'     ; TMR1ON=1, prescaler 1:1 (ajusta segun necesidad)
+        MOVWF   T1CON
+        MOVLW   HIGH(.65536-.1000)   ; recarga para N=1000 cuentas (ejemplo)
+        MOVWF   TMR1H
+        MOVLW   LOW(.65536-.1000)
+        MOVWF   TMR1L
+        BCF     PIR1, TMR1IF
+        BSF     PIE1, TMR1IE
+        BSF     INTCON, PEIE
+        BSF     INTCON, GIE
+        RETURN
+```
+
+## Timer 2 — periodo fijo y PWM
+
+Timer2 es **solo temporizador interno 8 bit** con registro de **periodo PR2**:
+
+| Caracteristica | Detalle |
+| --- | --- |
+| Contador | `TMR2` (8 bit, 0 → PR2 → reset) |
+| Periodo | **`PR2`** define cuando hay match / overflow |
+| Prescaler | 1, 4, 16 (`T2CKPS1:0`) |
+| Post-escalador | 1:1 a 1:16 (`TOUTPS3:0`) — retrasa la interrupcion |
+| Interrupcion | `TMR2IE` / `TMR2IF` en PIE1/PIR1 |
 
 <AIExplain title="PWM usa Timer2">
-El periodo PWM depende de PR2 y el pre-escalador del Timer2. El ciclo util se carga en `CCPR1L` y `CCP1CON<5:4>`.
+El **periodo PWM** lo fija **PR2** y el prescaler de Timer2. El **duty cycle** se carga en **`CCPR1L`** y **`CCP1CON<5:4>`**. Salida tipica: **RC2 / CCP1**.
 </AIExplain>
 
-## Registro T2CON (resumen)
+### Registro T2CON (resumen)
 
-| Bit | Funcion |
+| Bit / campo | Funcion |
 | --- | --- |
-| TMR2ON | Habilita Timer2 |
-| T2CKPS1:0 | Pre-escalador |
-| TOUTPS3:0 | Post-escalador (interrupciones) |
+| **TMR2ON** | 1 = Timer2 activo |
+| **T2CKPS1:0** | Prescaler 1, 4, 16 |
+| **TOUTPS3:0** | Post-escalador para interrupcion TMR2IF |
+
+### Formula del periodo PWM (intro)
+
+```
+  Periodo_PWM ≈ (4 / Fosc) × (PR2 + 1) × Prescaler_T2
+```
+
+El duty en porcentaje:
+
+```
+  Duty ≈ (CCPR1L : extensiones) / (4 × (PR2 + 1)) × 100%
+```
+
+Detalle completo en [PWM y modulo CCP](/pwm/).
+
+### Ejemplo: arrancar Timer2
+
+```asm
+config_tmr2:
+        MOVLW   D'249'          ; PR2 → define periodo
+        MOVWF   PR2
+        MOVLW   B'00000111'     ; TMR2ON, prescaler 1:16 (ajusta)
+        MOVWF   T2CON
+        CLRF    TMR2
+        BCF     PIR1, TMR2IF
+        BSF     PIE1, TMR2IE
+        BSF     INTCON, PEIE
+        BSF     INTCON, GIE
+        RETURN
+```
+
+## Comparacion rapida — Timer0, 1 y 2
+
+| | Timer0 | Timer1 | Timer2 |
+| --- | --- | --- | --- |
+| Bits | 8 o 16 | 16 | 8 (+ PR2) |
+| Prescaler max | 1:256 | 1:8 | 1:16 (+ post) |
+| IE / IF | **INTCON** | **PIE1/PIR1** | **PIE1/PIR1** |
+| Uso clave | Retardo, contador RA4 | CCP captura/comparacion | **PWM**, multiplexado |
+| Practica | 3, 5 | 3 | 3, 4, 6 |
 
 ## Timer 3
 
-El PIC18F4550 tambien tiene Timer3 (similar a Timer1). Consulta el datasheet para aplicaciones avanzadas de captura.
+El PIC18F4550 incluye **Timer3** (similar a Timer1). Consulta el datasheet para proyectos avanzados; el curso UNEXPO se centra en Timer0–2.
+
+## Errores comunes
+
+| Error | Consecuencia |
+| --- | --- |
+| Timer1/2 sin **PEIE** | ISR nunca se ejecuta aunque `TMR1IE=1` |
+| Confundir **PR2** con **TMR2** | PR2 = periodo deseado; TMR2 cuenta hasta PR2 |
+| PWM sin Timer2 activo | CCP1 sin onda en RC2 |
+| Prescaler distinto en formula | Tiempos calculados incorrectos |
+
+## Siguiente paso
+
+- [PWM y modulo CCP](/pwm/) — duty cycle, CCP1CON
+- [Practica 3 — Frecuencimetro](/tutoriales/practica-3/)
+- [Practica 6 — Motor paso a paso](/tutoriales/practica-6/)
+
+## Preguntas estilo parcial
+
+**¿Que timer usa el PWM del CCP?**
+
+**Timer2** con **PR2** como periodo.
+
+**¿Timer1 es de 8 o 16 bits?**
+
+**16 bits** — usado en captura y comparacion CCP.
+
+**¿Que registros habilitas para interrupcion de Timer2?**
+
+`TMR2IE` (PIE1), `PEIE` y `GIE` (INTCON); limpias `TMR2IF` (PIR1) en la ISR.
+
+<Exercise title="Elige el timer">
+Para medir pulsos en RA4 durante 1 s y luego leer el total: ¿Timer0 como contador o Timer2? ¿Quien marca la ventana de 1 s?
+</Exercise>
 
 <TopicQuiz slug="timers/timer1-timer2" />
