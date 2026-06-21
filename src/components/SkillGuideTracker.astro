@@ -1,0 +1,130 @@
+---
+import { getSkillSeries, skillStepHref } from '../data/skill-tutorials';
+
+interface Props {
+	seriesId: string;
+	stepId: string;
+	locale?: 'es' | 'en';
+	variant?: 'default' | 'sidebar';
+}
+
+const { seriesId, stepId, locale = 'es', variant = 'default' } = Astro.props;
+const isEn = locale === 'en';
+const series = getSkillSeries(seriesId);
+
+if (!series) {
+	throw new Error(`Skill tutorial series not found: ${seriesId}`);
+}
+
+const steps = series.steps;
+const currentIndex = steps.findIndex((s) => s.id === stepId);
+const progressKeys = steps.map((s) => `${seriesId}/${s.id}`);
+const projectGoal = isEn ? series.projectGoalEn : series.projectGoalEs;
+---
+
+<aside
+	class:list={['skill-tracker', variant === 'sidebar' && 'skill-tracker--sidebar']}
+	data-skill-tracker
+	data-series-id={seriesId}
+	aria-label={isEn ? 'Guide tracker' : 'Rastreador de guia'}
+>
+	<p class="skill-tracker__eyebrow">{isEn ? 'Guide tracker' : 'Rastreador de guia'}</p>
+	<p class="skill-tracker__series">{isEn ? series.titleEn : series.titleEs}</p>
+
+	<div class="skill-tracker__dots" aria-hidden="true">
+		{
+			steps.map((step, i) => (
+				<span
+					class:list={[
+						'skill-tracker__dot',
+						i === currentIndex && 'skill-tracker__dot--current',
+						i < currentIndex && 'skill-tracker__dot--past',
+					]}
+					title={isEn ? step.titleEn : step.titleEs}
+				/>
+			))
+		}
+	</div>
+
+	<p class="skill-tracker__step-count" data-tracker-count>
+		{
+			isEn
+				? `Step ${currentIndex + 1} of ${steps.length}`
+				: `Paso ${currentIndex + 1} de ${steps.length}`
+		}
+	</p>
+
+	{
+		projectGoal && (
+			<div class="skill-tracker__goal">
+				<p class="skill-tracker__goal-label">{isEn ? 'You are building' : 'Estas construyendo'}</p>
+				<p class="skill-tracker__goal-text">{projectGoal}</p>
+			</div>
+		)
+	}
+
+	<nav class="skill-tracker__nav" aria-label={isEn ? 'Steps in this guide' : 'Pasos de esta guia'}>
+		<ol class="skill-tracker__list">
+			{
+				steps.map((step, i) => {
+					const isCurrent = step.id === stepId;
+					const key = `${seriesId}/${step.id}`;
+					return (
+						<li class:list={['skill-tracker__item', isCurrent && 'skill-tracker__item--current']}>
+							<span class="skill-tracker__item-check" data-tracker-key={key} aria-hidden="true" />
+							<a href={skillStepHref(seriesId, step.id, locale)} class="skill-tracker__item-link">
+								<span class="skill-tracker__item-num">{i + 1}</span>
+								<span>{isEn ? step.titleEn : step.titleEs}</span>
+							</a>
+						</li>
+					);
+				})
+			}
+		</ol>
+	</nav>
+
+	<div class="skill-tracker__bar-wrap" aria-hidden="true">
+		<div class="skill-tracker__bar">
+			<div class="skill-tracker__fill" data-tracker-fill style="width: 0%" />
+		</div>
+		<p class="skill-tracker__progress" data-tracker-progress />
+	</div>
+</aside>
+
+<script define:vars={{ STORAGE_KEY: 'aprende-pic18-skill-guides', progressKeys }}>
+	function paintTracker() {
+		let saved = {};
+		try {
+			saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+		} catch {
+			/* ignore */
+		}
+
+		const total = progressKeys.length;
+		let done = 0;
+		progressKeys.forEach((k) => {
+			const checked = Boolean(saved[k]);
+			if (checked) done += 1;
+			document.querySelectorAll(`[data-tracker-key="${k}"]`).forEach((el) => {
+				el.classList.toggle('skill-tracker__item-check--done', checked);
+			});
+		});
+
+		const pct = total ? Math.round((done / total) * 100) : 0;
+		const isEn = document.documentElement.lang?.startsWith('en');
+		const progressText = isEn
+			? `Guide progress: ${done}/${total} (${pct}%)`
+			: `Progreso de la guia: ${done}/${total} (${pct}%)`;
+
+		document.querySelectorAll('[data-tracker-fill]').forEach((fill) => {
+			fill.style.width = `${pct}%`;
+		});
+		document.querySelectorAll('[data-tracker-progress]').forEach((label) => {
+			label.textContent = progressText;
+		});
+	}
+
+	paintTracker();
+	document.addEventListener('astro:page-load', paintTracker);
+	window.addEventListener('aprende-skill-guide-update', paintTracker);
+</script>

@@ -43,6 +43,18 @@ const progressKeys = series.steps.map((s) => `${seriesId}/${s.id}`);
 			{levelLabel(series.level)}
 		</span>
 		<p class="skill-series__desc">{isEn ? series.descriptionEn : series.descriptionEs}</p>
+		{
+			(isEn ? series.projectGoalEn : series.projectGoalEs) && (
+				<div class="skill-series__project">
+					<p class="skill-series__project-label">
+						{isEn ? 'You will build' : 'Vas a construir'}
+					</p>
+					<p class="skill-series__project-text">
+						{isEn ? series.projectGoalEn : series.projectGoalEs}
+					</p>
+				</div>
+			)
+		}
 		<div class="skill-series__progress-wrap" aria-hidden="true">
 			<div class="skill-series__progress-bar">
 				<div class="skill-series__progress-fill" data-skill-bar style="width: 0%" />

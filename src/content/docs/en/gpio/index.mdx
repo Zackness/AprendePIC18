@@ -102,7 +102,7 @@ Before reading or writing, declare each pin as input or output.
 
 In `TRISx`, **1 = input** and **0 = output**. If `TRISB = 0xFF`, all of PORTB is input — classic partial exam question.
 
-More exercises in [Set direction with TRIS](/en/tutoriales/guias/puertos/1-tris-direccion/).
+More exercises in [Set direction with TRIS](/en/tutoriales/guias/puertos/5-tris-direccion/).
 
 ## Step 2 — Write outputs with LAT
 
@@ -117,7 +117,7 @@ To **drive** an LED, relay, or digital line, write **`LATx`**, not `PORTx`:
 
 `BSF`/`BCF` on `LATB` touch **one bit only** — useful when inputs and outputs share a port ([Bits and hex — masks](/en/fundamentos/bits-hex/#bit-masks--change-several-bits-at-once)).
 
-Practical guide: [Write outputs with LAT](/en/tutoriales/guias/puertos/2-lat-salidas/) and [First LED tutorial](/en/tutoriales/primer-led/).
+Practical guide: [Write outputs with LAT](/en/tutoriales/guias/puertos/7-lat-salidas/) and [First LED tutorial](/en/tutoriales/primer-led/).
 
 ## Step 3 — Read inputs with PORT
 
@@ -136,7 +136,7 @@ done_read:
 
 `BTFSS PORTB, n` / `BTFSC PORTB, n` are the most common course pattern. You can also `MOVF PORTB, W` and mask the bit ([Bits and hex](/en/fundamentos/bits-hex/)).
 
-Practical guide: [Read inputs with PORT](/en/tutoriales/guias/puertos/3-port-entradas/).
+Practical guide: [Read inputs with PORT](/en/tutoriales/guias/puertos/8-port-entradas/).
 
 ## Step 4 — PORT vs LAT — key difference
 

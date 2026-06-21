@@ -62,3 +62,23 @@ export function skillStepSlug(seriesId: string, stepId: string): string {
 export function skillSeriesIndexSlug(seriesId: string): string {
 	return `tutoriales/guias/${seriesId}`;
 }
+
+/** Detecta pasos de guia practica desde la URL (p. ej. /tutoriales/guias/puertos/5-tris-direccion/). */
+export function parseSkillTutorialStep(pathname: string): {
+	seriesId: string;
+	stepId: string;
+	locale: 'es' | 'en';
+} | null {
+	const normalized = pathname.replace(/\/$/, '');
+	const match = normalized.match(/^(?:\/en)?\/tutoriales\/guias\/([^/]+)\/([^/]+)$/);
+	if (!match) return null;
+
+	const [, seriesId, stepId] = match;
+	if (!getSkillStep(seriesId, stepId)) return null;
+
+	return {
+		seriesId,
+		stepId,
+		locale: normalized.startsWith('/en/') ? 'en' : 'es',
+	};
+}

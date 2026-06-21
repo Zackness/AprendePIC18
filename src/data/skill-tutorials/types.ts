@@ -10,11 +10,21 @@ export interface SkillTutorialStep {
 	goalEn?: string;
 	bodyEs: string;
 	bodyEn: string;
+	/** Pasos numerados tipo tutorial Astro (“haz esto, luego esto”) */
+	instructionsEs?: string[];
+	instructionsEn?: string[];
+	/** Fragmento o archivo acumulado hasta este paso */
+	cumulativeCode?: string;
 	code?: string;
+	/** Verificar antes de pulsar Siguiente */
+	checklistEs?: string[];
+	checklistEn?: string[];
 	challengeEs?: string;
 	challengeEn?: string;
 	tipEs?: string;
 	tipEn?: string;
+	/** Slug del quiz en pageQuizzes (paso final) */
+	quizSlug?: string;
 }
 
 export interface SkillTutorialSeries {
@@ -24,6 +34,11 @@ export interface SkillTutorialSeries {
 	titleEn: string;
 	descriptionEs: string;
 	descriptionEn: string;
+	/** Meta del programa que construye el alumno */
+	projectGoalEs?: string;
+	projectGoalEn?: string;
+	projectHardwareEs?: string;
+	projectHardwareEn?: string;
 	level: SkillLevel;
 	/** Otras series recomendadas antes */
 	prerequisites?: string[];

@@ -4,6 +4,8 @@ import {
 	skillSeriesHref,
 	skillStepHref,
 } from '../data/skill-tutorials';
+import { getQuizBySlug } from '../data/quizzes';
+import InteractiveQuiz from './InteractiveQuiz.astro';
 
 interface Props {
 	seriesId: string;
@@ -24,97 +26,174 @@ const progressKey = `${seriesId}/${stepId}`;
 const title = isEn ? step.titleEn : step.titleEs;
 const goal = isEn ? step.goalEn : step.goalEs;
 const body = isEn ? step.bodyEn : step.bodyEs;
+const instructions = isEn ? step.instructionsEn : step.instructionsEs;
+const checklist = isEn ? step.checklistEn : step.checklistEs;
 const challenge = isEn ? step.challengeEn : step.challengeEs;
 const tip = isEn ? step.tipEn : step.tipEs;
+const quiz = step.quizSlug ? getQuizBySlug(step.quizSlug) : undefined;
 
 function formatBody(text: string): string {
 	return text
 		.split('\n\n')
-		.map((p) => `<p>${p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')}</p>`)
+		.map((p) => `<p>${p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>').replace(/`([^`]+)`/g, '<code>$1</code>')}</p>`)
 		.join('');
 }
 ---
 
-<article class="skill-step" data-skill-step data-progress-key={progressKey}>
-	<nav class="skill-step__crumb" aria-label="Breadcrumb">
-		<a href={isEn ? '/en/tutoriales/guias/' : '/tutoriales/guias/'}>
-			{isEn ? 'Guides' : 'Guias'}
-		</a>
-		<span aria-hidden="true"> / </span>
-		<a href={skillSeriesHref(seriesId, locale)}>{isEn ? series.titleEn : series.titleEs}</a>
-	</nav>
+<div class="skill-step-layout">
+	<article class="skill-step" data-skill-step data-progress-key={progressKey}>
+		<nav class="skill-step__crumb" aria-label="Breadcrumb">
+			<a href={isEn ? '/en/tutoriales/guias/' : '/tutoriales/guias/'}>
+				{isEn ? 'Guides' : 'Guias'}
+			</a>
+			<span aria-hidden="true"> / </span>
+			<a href={skillSeriesHref(seriesId, locale)}>{isEn ? series.titleEn : series.titleEs}</a>
+		</nav>
 
-	<p class="skill-step__unit">
-		{isEn ? `Step ${index + 1} of ${total}` : `Paso ${index + 1} de ${total}`}
-	</p>
+		<p class="skill-step__unit">
+			{isEn ? `Step ${index + 1} of ${total}` : `Paso ${index + 1} de ${total}`}
+		</p>
 
-	<h1 class="skill-step__title">{title}</h1>
+		<h1 class="skill-step__title">{title}</h1>
 
-	{
-		goal && (
-			<div class="skill-step__goal">
-				<p class="skill-step__goal-label">{isEn ? 'Goal' : 'Objetivo'}</p>
-				<p>{goal}</p>
-			</div>
-		)
-	}
-
-	<div class="skill-step__body" set:html={formatBody(body)} />
-
-	{
-		step.code && (
-			<pre class="skill-step__code">
-				<code>{step.code}</code>
-			</pre>
-		)
-	}
-
-	{
-		challenge && (
-			<aside class="skill-step__challenge">
-				<p class="skill-step__challenge-label">{isEn ? 'Try it' : 'Pruebalo'}</p>
-				<p>{challenge}</p>
-			</aside>
-		)
-	}
-
-	{
-		tip && (
-			<p class="skill-step__tip">
-				<strong>{isEn ? 'Tip:' : 'Consejo:'}</strong> {tip}
-			</p>
-		)
-	}
-
-	<label class="skill-step__done">
-		<input type="checkbox" class="skill-step__done-input" data-progress-key={progressKey} />
-		<span class="skill-step__done-box" aria-hidden="true" />
-		<span>{isEn ? 'I completed this step' : 'Complete este paso'}</span>
-	</label>
-
-	<nav class="skill-step__pager" aria-label={isEn ? 'Tutorial navigation' : 'Navegacion del tutorial'}>
 		{
-			prev ? (
-				<a class="skill-step__prev" href={skillStepHref(seriesId, prev.id, locale)}>
-					← {isEn ? prev.titleEn : prev.titleEs}
-				</a>
-			) : (
-				<span />
+			goal && (
+				<div class="skill-step__goal">
+					<p class="skill-step__goal-label">
+						{isEn
+							? goal.includes('\n\n')
+								? 'Goals for this step'
+								: 'Goal'
+							: goal.includes('\n\n')
+								? 'Objetivos de este paso'
+								: 'Objetivo'}
+					</p>
+					<div class="skill-step__goal-body" set:html={formatBody(goal)} />
+				</div>
 			)
 		}
+
+		<div class="skill-step__body" set:html={formatBody(body)} />
+
 		{
-			next ? (
-				<a class="skill-step__next" href={skillStepHref(seriesId, next.id, locale)}>
-					{isEn ? next.titleEn : next.titleEs} →
-				</a>
-			) : (
-				<a class="skill-step__next skill-step__next--finish" href={skillSeriesHref(seriesId, locale)}>
-					{isEn ? 'Unit complete ✓' : 'Unidad completada ✓'}
-				</a>
+			instructions?.length ? (
+				<section class="skill-step__instructions">
+					<p class="skill-step__section-label">
+						{isEn ? 'Follow these steps' : 'Sigue estos pasos'}
+					</p>
+					<ol class="skill-step__instructions-list">
+						{instructions.map((item) => (
+							<li set:html={formatBody(item).replace(/^<p>|<\/p>$/g, '')} />
+						))}
+					</ol>
+				</section>
+			) : null
+		}
+
+		{
+			step.cumulativeCode && (
+				<section class="skill-step__build">
+					<p class="skill-step__section-label">
+						{isEn ? 'Your file so far' : 'Tu archivo hasta ahora'}
+					</p>
+					<pre class="skill-step__code">
+						<code>{step.cumulativeCode}</code>
+					</pre>
+				</section>
 			)
 		}
-	</nav>
-</article>
+
+		{
+			step.code && !step.cumulativeCode && (
+				<pre class="skill-step__code">
+					<code>{step.code}</code>
+				</pre>
+			)
+		}
+
+		{
+			step.code && step.cumulativeCode && (
+				<section class="skill-step__snippet">
+					<p class="skill-step__section-label">
+						{isEn ? 'What you add in this step' : 'Lo que agregas en este paso'}
+					</p>
+					<pre class="skill-step__code skill-step__code--highlight">
+						<code>{step.code}</code>
+					</pre>
+				</section>
+			)
+		}
+
+		{
+			challenge && (
+				<aside class="skill-step__challenge">
+					<p class="skill-step__challenge-label">{isEn ? 'Try it' : 'Pruebalo'}</p>
+					<p>{challenge}</p>
+				</aside>
+			)
+		}
+
+		{
+			checklist?.length ? (
+				<section class="skill-step__checklist">
+					<p class="skill-step__section-label">
+						{isEn ? 'Checklist before you continue' : 'Lista antes de continuar'}
+					</p>
+					<ul class="skill-step__checklist-list">
+						{checklist.map((item) => (
+							<li>{item}</li>
+						))}
+					</ul>
+				</section>
+			) : null
+		}
+
+		{
+			tip && (
+				<p class="skill-step__tip">
+					<strong>{isEn ? 'Tip:' : 'Consejo:'}</strong> {tip}
+				</p>
+			)
+		}
+
+		{
+			quiz && (
+				<section class="skill-step__quiz">
+					<InteractiveQuiz quiz={quiz} locale={locale} compact />
+				</section>
+			)
+		}
+
+		<label class="skill-step__done">
+			<input type="checkbox" class="skill-step__done-input" data-progress-key={progressKey} />
+			<span class="skill-step__done-box" aria-hidden="true" />
+			<span>{isEn ? 'I completed this step' : 'Complete este paso'}</span>
+		</label>
+
+		<nav class="skill-step__pager" aria-label={isEn ? 'Tutorial navigation' : 'Navegacion del tutorial'}>
+			{
+				prev ? (
+					<a class="skill-step__prev" href={skillStepHref(seriesId, prev.id, locale)}>
+						← {isEn ? prev.titleEn : prev.titleEs}
+					</a>
+				) : (
+					<span />
+				)
+			}
+			{
+				next ? (
+					<a class="skill-step__next" href={skillStepHref(seriesId, next.id, locale)}>
+						{isEn ? next.titleEn : next.titleEs} →
+					</a>
+				) : (
+					<a class="skill-step__next skill-step__next--finish" href={skillSeriesHref(seriesId, locale)}>
+						{isEn ? 'Guide complete ✓' : 'Guia completada ✓'}
+					</a>
+				)
+			}
+		</nav>
+	</article>
+</div>
 
 <script>
 	function initSkillSteps() {

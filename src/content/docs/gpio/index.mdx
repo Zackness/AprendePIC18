@@ -102,7 +102,7 @@ Antes de leer o escribir, declara cada pin como entrada o salida.
 
 En `TRISx`, **1 = entrada** y **0 = salida**. Si `TRISB = 0xFF`, todo PORTB es entrada — pregunta clasica de parcial.
 
-Mas ejercicios en la guia [Configurar direccion con TRIS](/tutoriales/guias/puertos/1-tris-direccion/).
+Mas ejercicios en la guia [Configurar direccion con TRIS](/tutoriales/guias/puertos/5-tris-direccion/).
 
 ## Paso 2 — Escribir salidas con LAT
 
@@ -117,7 +117,7 @@ Para **controlar** un LED, rele o linea digital, escribe en **`LATx`**, no en `P
 
 `BSF`/`BCF` sobre `LATB` solo tocan **un bit** — util cuando mezclas entradas y salidas en el mismo puerto ([Bits y hex — mascaras](/fundamentos/bits-hex/#mascaras-de-bits--modificar-varios-bits-a-la-vez)).
 
-Guia practica: [Escribir salidas con LAT](/tutoriales/guias/puertos/2-lat-salidas/) y [Tutorial Primer LED](/tutoriales/primer-led/).
+Guia practica: [Escribir salidas con LAT](/tutoriales/guias/puertos/7-lat-salidas/) y [Tutorial Primer LED](/tutoriales/primer-led/).
 
 ## Paso 3 — Leer entradas con PORT
 
@@ -136,7 +136,7 @@ fin_lectura:
 
 `BTFSS PORTB, n` / `BTFSC PORTB, n` son la forma mas comun en el curso. Tambien puedes `MOVF PORTB, W` y enmascarar el bit ([Bits y hex](/fundamentos/bits-hex/)).
 
-Guia practica: [Leer entradas con PORT](/tutoriales/guias/puertos/3-port-entradas/).
+Guia practica: [Leer entradas con PORT](/tutoriales/guias/puertos/8-port-entradas/).
 
 ## Paso 4 — PORT vs LAT — diferencia clave
 

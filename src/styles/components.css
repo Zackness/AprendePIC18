@@ -759,6 +759,20 @@
 	text-transform: uppercase;
 }
 
+.skill-step__goal-body p {
+	color: var(--sl-color-gray-2);
+	line-height: 1.65;
+	margin: 0 0 0.5rem;
+}
+
+.skill-step__goal-body p:last-child {
+	margin-bottom: 0;
+}
+
+.skill-step__goal-body a {
+	color: var(--sl-color-text-accent);
+}
+
 .skill-step__body p {
 	color: var(--sl-color-gray-2);
 	line-height: 1.65;
@@ -833,6 +847,240 @@
 
 .skill-step__next--finish {
 	color: var(--ap-cyan-400);
+}
+
+/* Guia practica — contenido a ancho completo; rastreador en sidebar derecho Starlight */
+.skill-step-layout {
+	margin: 0.5rem 0 2rem;
+	max-width: none;
+}
+
+/* Oculta el panel vacio de PageTitle en pasos de guia (titulo va en el articulo) */
+:global(.content-panel:has(+ .content-panel .skill-step-layout):not(:has(h1))) {
+	display: none;
+}
+
+.skill-step__section-label {
+	color: var(--ap-cyan-400);
+	font-size: 0.72rem;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	margin: 1.25rem 0 0.5rem;
+	text-transform: uppercase;
+}
+
+.skill-step__instructions-list,
+.skill-step__checklist-list {
+	color: var(--sl-color-gray-2);
+	line-height: 1.65;
+	margin: 0 0 0.75rem;
+	padding-left: 1.25rem;
+}
+
+.skill-step__instructions-list li,
+.skill-step__checklist-list li {
+	margin-bottom: 0.45rem;
+}
+
+.skill-step__build,
+.skill-step__snippet {
+	margin: 0.5rem 0;
+}
+
+.skill-step__code--highlight {
+	border-color: var(--ap-border-accent);
+	box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.12);
+}
+
+.skill-step__quiz {
+	margin: 1.5rem 0 0;
+}
+
+.skill-tracker {
+	background: var(--ap-surface-1);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-lg);
+	padding: 1rem 1.1rem;
+	position: sticky;
+	top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
+}
+
+.skill-tracker--sidebar {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	margin-bottom: 0.5rem;
+	padding: 0;
+	position: sticky;
+	top: calc(var(--sl-nav-height, 3.5rem) + 1rem);
+}
+
+.skill-tracker__eyebrow {
+	color: var(--ap-cyan-400);
+	font-size: 0.68rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	margin: 0 0 0.25rem;
+	text-transform: uppercase;
+}
+
+.skill-tracker__series {
+	font-size: 0.95rem;
+	font-weight: 800;
+	margin: 0 0 0.75rem;
+}
+
+.skill-tracker__dots {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin-bottom: 0.5rem;
+}
+
+.skill-tracker__dot {
+	background: var(--sl-color-gray-5);
+	border-radius: 999px;
+	height: 8px;
+	width: 8px;
+}
+
+.skill-tracker__dot--past {
+	background: var(--ap-amber-500);
+	opacity: 0.55;
+}
+
+.skill-tracker__dot--current {
+	background: var(--ap-amber-500);
+	box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.35);
+	transform: scale(1.15);
+}
+
+.skill-tracker__step-count {
+	color: var(--sl-color-gray-3);
+	font-size: 0.82rem;
+	margin: 0 0 0.85rem;
+}
+
+.skill-tracker__goal {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border);
+	border-radius: var(--ap-radius-md);
+	margin-bottom: 0.85rem;
+	padding: 0.65rem 0.75rem;
+}
+
+.skill-tracker__goal-label {
+	color: var(--sl-color-gray-3);
+	font-size: 0.68rem;
+	font-weight: 800;
+	margin: 0 0 0.25rem;
+	text-transform: uppercase;
+}
+
+.skill-tracker__goal-text {
+	color: var(--sl-color-gray-2);
+	font-size: 0.84rem;
+	line-height: 1.5;
+	margin: 0;
+}
+
+.skill-tracker__list {
+	list-style: none;
+	margin: 0 0 0.85rem;
+	padding: 0;
+}
+
+.skill-tracker__item {
+	align-items: flex-start;
+	display: flex;
+	gap: 0.45rem;
+	margin: 0.35rem 0;
+}
+
+.skill-tracker__item--current .skill-tracker__item-link {
+	color: var(--sl-color-text-accent);
+	font-weight: 800;
+}
+
+.skill-tracker__item-check {
+	border: 2px solid var(--ap-border);
+	border-radius: 4px;
+	flex-shrink: 0;
+	height: 0.85rem;
+	margin-top: 0.15rem;
+	width: 0.85rem;
+}
+
+.skill-tracker__item-check--done {
+	background: var(--ap-amber-500);
+	border-color: var(--ap-amber-500);
+}
+
+.skill-tracker__item-link {
+	color: var(--sl-color-gray-2);
+	display: flex;
+	font-size: 0.82rem;
+	gap: 0.4rem;
+	line-height: 1.4;
+	text-decoration: none;
+}
+
+.skill-tracker__item-link:hover {
+	color: var(--sl-color-text-accent);
+}
+
+.skill-tracker__item-num {
+	color: var(--sl-color-gray-3);
+	font-weight: 800;
+	min-width: 1rem;
+}
+
+.skill-tracker__bar {
+	background: var(--sl-color-gray-6);
+	border-radius: 999px;
+	height: 4px;
+	overflow: hidden;
+}
+
+.skill-tracker__fill {
+	background: var(--ap-amber-500);
+	height: 100%;
+	transition: width 0.25s ease;
+}
+
+.skill-tracker__progress {
+	color: var(--sl-color-gray-3);
+	font-size: 0.75rem;
+	margin: 0.35rem 0 0;
+}
+
+.skill-series__project {
+	background: var(--ap-surface-2);
+	border: 1px solid var(--ap-border-accent);
+	border-radius: var(--ap-radius-md);
+	margin: 0.75rem 0 1rem;
+	padding: 0.75rem 0.9rem;
+}
+
+.skill-series__project-label {
+	color: var(--ap-cyan-400);
+	font-size: 0.68rem;
+	font-weight: 800;
+	margin: 0 0 0.25rem;
+	text-transform: uppercase;
+}
+
+.skill-series__project-text {
+	color: var(--sl-color-gray-2);
+	font-size: 0.92rem;
+	line-height: 1.55;
+	margin: 0;
+}
+
+@media (max-width: 960px) {
+	.skill-tracker--sidebar {
+		position: static;
+	}
 }
 
 /* Study path — estilo ruta Platzi */
