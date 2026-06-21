@@ -16,7 +16,7 @@
 	border-inline-start: 4px solid var(--ap-amber-500);
 }
 
-.ai-explain strong,
+.ai-explain__title,
 .practice-box__eyebrow {
 	color: var(--sl-color-text-accent);
 	display: block;
@@ -25,6 +25,16 @@
 	letter-spacing: 0.09em;
 	margin-bottom: 0.5rem;
 	text-transform: uppercase;
+}
+
+.ai-explain__body strong {
+	color: var(--sl-color-text-accent);
+	display: inline;
+	font-size: inherit;
+	font-weight: 700;
+	letter-spacing: normal;
+	margin-bottom: 0;
+	text-transform: none;
 }
 
 .ai-explain__body > :first-child,

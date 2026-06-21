@@ -33,34 +33,36 @@ Each assembly line answers a specific question: move data, change a bit, add, co
 
 Later in [MPLAB and Proteus](/en/fundamentos/mplab-proteus/) you will see the full toolchain. [Config bits](/en/fundamentos/config-bits/) go in the same `.ASM` but are stored in a special configuration area, not as normal executable code.
 
-## Anatomy of an MPASM file
+## Anatomy of an MPASM file — “sandwich” layout
+
+In the UNEXPO course your instructor asks for a **sandwich** order in the `.ASM`, similar to `int main()` in C:
+
+| Layer | Contents | C analogy |
+| --- | --- | --- |
+| **Top** | Header, `CONFIG`, variables (`CBLOCK`) | `#include`, defines, global variables |
+| **Middle** | Subroutines (`CALL` / `RETURN`) | Helper functions |
+| **Bottom** | **Main program** | `main()` |
+| **End** | `END` | End of file |
+
+Only at the top goes the **reset vector** (`ORG 0x0000` / **0000H** + `GOTO programa`): the hardware starts at **0000H** and must jump to `main` at the bottom.
 
 ```asm
-; ── 1. Header ───────────────────────────────────────
-        LIST    P=18F4550              ; target processor
-        #include <P18F4550.INC>        ; register names (TRISB, LATB…)
+; ══ TOP — header, config, variables ═══════════════════
+        LIST    P=18F4550
+        #include <P18F4550.INC>
 
-; ── 2. Config bits (fuses) ───────────────────────────
         CONFIG  FOSC = HS
         CONFIG  WDT  = OFF
         CONFIG  LVP  = OFF
 
-; ── 3. Variables (RAM) ──────────────────────────────
-        CBLOCK  0x20                   ; GPR block from address 0x20
-counter     RES     1                  ; reserve 1 byte named 'counter'
+        CBLOCK  0x20
+counter     RES     1
 
-; ── 4. Reset vector ─────────────────────────────────
-        ORG     0x0000                 ; first address in Flash
-        GOTO    start                  ; jump to main code
+; ── Reset vector (jumps to main at the bottom) ───────
+        ORG     0x0000
+        GOTO    programa
 
-; ── 5. Main program ─────────────────────────────────
-start:
-        CALL    setup_ports
-        CALL    turn_on_led
-loop:
-        GOTO    loop                   ; infinite loop (minimal example)
-
-; ── 6. Subroutines ──────────────────────────────────
+; ══ MIDDLE — subroutines ═════════════════════════════
 setup_ports:
         BCF     TRISB, 0               ; RB0 output
         RETURN
@@ -69,8 +71,19 @@ turn_on_led:
         BSF     LATB, 0                ; RB0 high
         RETURN
 
-        END                            ; end of file — required
+; ══ BOTTOM — main program (like main) ════════════════
+programa:
+        CALL    setup_ports
+        CALL    turn_on_led
+loop:
+        GOTO    loop                   ; infinite loop
+
+        END
 ```
+
+<AIExplain title="Course convention">
+In lab reports: **variables on top → subroutines in the middle → `programa:` at the bottom**. Do not put `main` at the top and functions below like some online tutorials — your instructor grades the sandwich layout.
+</AIExplain>
 
 ### Directives you must know
 
@@ -83,30 +96,193 @@ turn_on_led:
 | **`CBLOCK` / `RES`** | Reserves RAM bytes for GPR variables |
 | **`END`** | Marks end of file |
 
-### Labels, comments, and literals
+### Labels and comments
 
-- **Label** (`start:`, `loop:`): name of a Flash location; target of `GOTO` or `CALL`.
-- **Comment** (`; text`): ignored by MPASM — document your code.
-- **Literal** — see [Bits and hexadecimal](/en/fundamentos/bits-hex/):
+- **Label** (`start:`, `loop:`): name of a Flash location; target of `GOTO` or `CALL`. **Not a number** — MPASM turns it into an address when assembling.
+- **Comment** (`; text`): ignored by MPASM — documents your code.
 
-| Notation | Example | Meaning |
+### What is a literal
+
+A **literal** is a **fixed value written in the source line**. It is not a register name (`LATB`, `counter`) or a label (`programa:`): it is the **actual number** you want to use.
+
+Think of it like a **constant** in C: the value you **already chose** and write as-is, not something you read from a RAM variable. If in C you would write `result = 10;`, in assembly you write `MOVLW D'10'` — that **10** is the literal (your constant on that line).
+
+In the MPASM manual it appears as **`k`** when the instruction embeds a value:
+
+| Manual | Your code | Meaning |
 | --- | --- | --- |
-| Decimal | `D'200'` | 200 |
-| Binary | `B'11110000'` | 240 |
-| Hexadecimal | `0xF0` | 240 |
+| `MOVLW k` | `MOVLW D'10'` | Load **literal 10** into `WREG` |
+| `ANDLW k` | `ANDLW 0xF0` | AND between `WREG` and **literal 0xF0** |
+| `ADDLW k` | `ADDLW B'00000001'` | Add **literal 1** to `WREG` |
+
+The assembler **encodes that literal into bytes** inside the Flash instruction. The PIC does not “look up” a literal in RAM: the value travels **inside the opcode**.
+
+<AIExplain title="Literal vs register vs label">
+- **Literal** → fixed number in the instruction (`D'5'`, `0xFF`, `B'10000000'`).
+- **Register (`f`)** → any byte in data RAM (PIC SFR or your own variable). RAM holds many bytes; the name (`LATB`, `counter`, `temp`) tells MPASM which one you want to read or write.
+- **Label** → name of a Flash address (`loop:`, `programa:`).
+
+`MOVLW D'5'` uses a **literal**; `MOVF counter, W` uses a **register**; `GOTO loop` uses a **label**.
+
+**C analogy:** a literal is like writing `5` or `0xF0` directly in an expression — a constant, not a variable. Practical difference: in MPASM that number is embedded in the instruction when you assemble; it does not use an extra RAM byte like a global variable might.
+</AIExplain>
+
+### MPASM notations for literals
+
+MPASM requires **prefixes** to make the number base explicit. The **same value** can be written several ways:
+
+| Notation | Example in `.ASM` | Same value (report) | Base |
+| --- | --- | --- | --- |
+| Decimal | `D'200'` | 200 | 10 |
+| Binary | `B'11110000'` | 240 | 2 |
+| Hex (`0x`) | `0xF0` | **F0H** | 16 |
+| Hex (h suffix) | `0F0h` | **F0H** | 16 in MPASM |
+
+Useful rules when writing literals:
+
+- **Decimal:** always `D'number'` with quotes — `D'10'`, `D'255'`.
+- **Binary:** `B'01010101'` — handy for **masks** (see [Bits and hexadecimal](/en/fundamentos/bits-hex/#bit-masks--changing-several-bits-at-once)).
+- **Hex in `.ASM`:** `0xF0` or `0F0h` (MPASM accepts both; sometimes `0FFh` avoids confusion with a label).
+- **Byte range:** an 8-bit literal goes from **0 to 255** (`0x00` … `0xFF`). Out-of-range values trigger an MPASM error.
+
+Examples in real instructions:
+
+```asm
+MOVLW   D'10'           ; WREG = 10 (decimal)
+MOVLW   0xF0            ; WREG = 240 = F0H
+MOVLW   B'00000001'     ; WREG = mask for bit 0 only
+ANDLW   0x0F            ; WREG = WREG AND 0FH (keep low nibble)
+BSF     LATB, 0         ; the 0 is also a literal: bit number
+```
+
+For **conversion** between decimal, binary, and hex (tables, masks, `0x` vs **FFH**), use [Bits and hexadecimal](/en/fundamentos/bits-hex/). Here the focus is **how to write the value inside the `.ASM`**.
+
+### Literals in directives (addresses)
+
+**Directives** are not executed on the PIC; they tell MPASM **where** or **how much** to reserve. They also use numeric literals:
+
+| Directive | Example | What the literal means |
+| --- | --- | --- |
+| **`ORG`** | `ORG 0x0000` | Flash address (**0000H** = reset vector) |
+| **`CBLOCK`** | `CBLOCK 0x20` | Starting RAM address for variables (**20H**) |
+| **`LIST`** | `LIST P=18F4550` | Here the “literal” is the MCU name (symbol, not a number) |
+
+```asm
+        ORG     0x0000          ; code starts at 0000H
+        CBLOCK  0x20            ; variables from 20H in RAM
+counter     RES     1           ; RES 1 = reserve 1 byte (another kind of literal)
+```
+
+Same notation idea: `0x0000` = **0000H**; `0x20` = **20H**. See equivalents in [Bits and hexadecimal — hex notations](/en/fundamentos/bits-hex/#equivalent-hex-notations).
+
+## The letter `f` in instructions — what it is and how to use it
+
+Before suffixes `,W` and `,F`, you need a **MPASM manual convention** that shows up in almost every instruction.
+
+### Step 1 — How instructions look in the manual
+
+In documentation, instructions do not use concrete names like `LATB` or `counter`. They use the letter **`f`** as a **slot** you fill in:
+
+| Manual instruction | Meaning in plain words |
+| --- | --- |
+| `MOVF f, W` | Copy register **`f`** into **`WREG`** |
+| `MOVWF f` | Copy **`WREG`** into register **`f`** |
+| `INCF f, F` | Add 1 to register **`f`** and store the result in **`f`** |
+| `BSF f, b` | Set bit **`b`** of register **`f`** to 1 |
+| `CLRF f` | Clear register **`f`** to zero |
+
+Manual **`f`** means: *“put here whichever file register you need”*. In English: **file register** — any **byte in data RAM**.
+
+<AIExplain title="Most important">
+**There is no hardware register named `F`.** The letter `f` is **manual syntax only** — a placeholder. In your `.ASM` you **always** replace it with a real name: `LATB`, `TRISB`, `counter`, `temp`…
+</AIExplain>
+
+### Step 2 — Replace `f` with the register you need
+
+When you program, you **substitute `f` with the concrete register** you want to read, write, or modify:
+
+| Manual (generic) | Your code (concrete) | What it does |
+| --- | --- | --- |
+| `MOVF f, W` | `MOVF LATB, W` | Copy **LATB** → **WREG** |
+| `MOVF f, W` | `MOVF counter, W` | Copy **counter** → **WREG** |
+| `MOVWF f` | `MOVWF LATB` | Copy **WREG** → **LATB** |
+| `INCF f, F` | `INCF counter, F` | **counter** = **counter** + 1 |
+
+In the line `MOVF LATB, W`, the manual would write `MOVF f, W`. **In that example, `f` and `LATB` are the same thing**: the only register involved (besides WREG) is **LATB**. There is no hidden register called F.
+
+```asm
+; Manual:     MOVF f, W
+; Your code:  MOVF LATB, W
+;             └─┬──┘
+;               └── this is what the manual calls "f"
+```
+
+Same with your own variable:
+
+```asm
+; Manual:     INCF f, F
+; Your code:  INCF counter, F
+;             └────┬────┘
+;                  └── "f" = counter in this program
+```
+
+### Step 3 — Which registers can be `f`
+
+Any data RAM byte can take the **`f`** slot. Two families (see [Registers](/en/fundamentos/registros/) and [Architecture](/en/fundamentos/arquitectura/)):
+
+| If you replace `f` with… | Type | Example use |
+| --- | --- | --- |
+| `TRISB`, `LATB`, `PORTB`, `INTCON`… | **SFR** | Control PIC hardware |
+| `counter`, `temp` (with `RES`) | **GPR** | Store your program data |
+
+`LATB` and `counter` are **file registers** because **they can be the `f`** in an instruction. SFR vs GPR differs by **purpose**, not by being a “file register”.
+
+### Step 4 — Do not confuse `f` with suffix `,F`
+
+On one line you may see **two different uses** of the letter F:
+
+| Symbol | What it is | Example |
+| --- | --- | --- |
+| **`f`** (lowercase, from manual) | **Which register** you use — replace with `LATB`, `counter`… | `MOVF` **`LATB`**, W |
+| **`,F`** (suffix at end) | **Where the result goes** — back into that same register (not WREG) | `INCF counter,`**`F`** |
+| **`,W`** (suffix) | **Where the result goes** — into **WREG** | `MOVF LATB,`**`W`** |
+
+Full example broken down:
+
+```asm
+MOVF    LATB, W
+;       └─┬─┘  └┬┘
+;         f    destination = WREG (suffix ,W)
+;       in real code, f = LATB
+```
+
+```asm
+INCF    counter, F
+;       └───┬───┘  └┬┘
+;           f     destination = same register (suffix ,F)
+;       in real code, f = counter
+```
+
+The next section details **`,W` vs `,F`** with more instruction examples.
 
 ## Operation destination — `,W` vs `,F`
 
-Many instructions have two forms: the result goes to **`WREG`** (`,W`) or to file register **`f`** (`,F`):
+With the previous section clear: in `MOVF LATB, W`, **manual `f` = `LATB` in your code**; suffix **`,W`** means the result goes to **WREG**.
+
+Many instructions have two destination forms:
 
 ```asm
-MOVF    counter, W     ; copy 'counter' → WREG (counter unchanged)
-MOVF    counter, F     ; copy counter → counter (useless but valid)
-INCF    counter, F     ; counter = counter + 1 (result in counter)
-INCF    counter, W     ; WREG = counter + 1 (counter unchanged)
+; f = counter; destination ,W → result in WREG
+MOVF    counter, W     ; WREG = counter (counter unchanged)
+
+; f = LATB; destination ,W
+MOVF    LATB, W          ; WREG = LATB
+
+; f = counter; destination ,F → result in same register
+INCF    counter, F     ; counter = counter + 1
 ```
 
-Mental rule: **`,F` modifies the register**; **`,W` leaves the register alone** and uses `WREG` as a temp.
+Mental rule: **`,W`** → result in **WREG**; **`,F`** → result in the **same register that replaces `f`** (`LATB`, `counter`…).
 
 ## Basic instructions — data movement
 
@@ -175,8 +351,10 @@ Details and masks in [Bits and hexadecimal](/en/fundamentos/bits-hex/#bit-masks-
 ; Read button on RB3 (input)
 BSF     TRISB, 3        ; RB3 input
 BTFSS   PORTB, 3        ; RB3 = 1?
-GOTO    button_released
-; if no skip → button pressed (depends on wiring)
+GOTO    button_released  ; if RB3 = 1 → jump to destination
+; ... code if button pressed (RB3 = 0) ...
+button_released:
+        ; continues if button is released (RB3 = 1)
 ```
 
 ## Branches, subroutines, and the stack
@@ -189,14 +367,16 @@ GOTO    button_released
 | **`RETFIE`** | Return from interrupt (ISR) |
 
 ```asm
-start:
-        CALL    delay_1s      ; go to delay_1s; save return address
-        BSF     LATB, 0       ; on return, turn LED on
-        GOTO    start
-
+; ── subroutine (middle of sandwich) ──
 delay_1s:
         ; ... timing loop ...
-        RETURN                ; return right after the CALL
+        RETURN
+
+; ── main program (bottom, like main) ──
+programa:
+        CALL    delay_1s      ; go to delay_1s; save return address
+        BSF     LATB, 0       ; on return, turn LED on
+        GOTO    programa
 ```
 
 The **stack** is LIFO: the last `CALL` returns first with `RETURN`. See [Architecture — PC](/en/fundamentos/arquitectura/#pc--program-counter) for more detail.
@@ -210,11 +390,21 @@ PIC18 has **no** `CMP` instruction. You compare by operating and reading **STATU
 MOVLW   D'0'
 XORWF   counter, W      ; if equal → W=0 → Z=1
 BTFSS   STATUS, Z       ; skip if Z=1 (counter was 0)
-GOTO    not_zero
+GOTO    not_zero        ; if not zero → jump to destination
+; counter == 0 ...
+GOTO    zero_done
+not_zero:
+        ; counter != 0 ...
+zero_done:
 
 ; RB0 on?
 BTFSS   LATB, 0         ; skip if LATB bit 0 = 1
-GOTO    led_off
+GOTO    led_off         ; if RB0 = 0 → jump to destination
+; LED on (RB0 = 1) ...
+GOTO    led_done
+led_off:
+        ; LED off (RB0 = 0) ...
+led_done:
 ```
 
 | Instruction | Skips if… |
@@ -233,12 +423,15 @@ Translate “turn on an LED on RB0” into concrete steps using [GPIO registers]
         CONFIG  FOSC = HS, WDT = OFF, LVP = OFF
 
         ORG     0x0000
-        GOTO    start
+        GOTO    programa
 
-start:
+; ── (no subroutines in this minimal example) ──
+
+programa:
         BCF     TRISB, 0        ; 1) RB0 as output
         BSF     LATB, 0         ; 2) RB0 high → LED ON
-        GOTO    start           ; 3) loop (program never exits)
+loop:
+        GOTO    loop            ; 3) loop (program never exits)
 
         END
 ```
@@ -269,17 +462,26 @@ GOTO    $-1
 - **Writing outputs to `PORTx`**: use **`LATx`** for outputs; read inputs with **`PORTx`**.
 - **Mixing up `BTFSS` and `BTFSC`**: one skips if bit is **1**, the other if **0** — check button wiring.
 - **Missing `P18F4550.INC`**: without the include, `TRISB` and `LATB` are undefined symbols.
-- **Label without colon** (`start` instead of `start:`): the assembler will not recognize the jump target.
+- **Label without colon** (`programa` instead of `programa:`): the assembler will not recognize the jump target.
+- **Main program at top, subroutines below**: in UNEXPO it is the opposite — **`programa:` at the bottom**, subroutines in the middle (sandwich / `main` at the end).
 
 ## Exam-style questions
+
+**What does `f` mean in manual MPASM `MOVWF f`?**
+
+It is a **placeholder**: the manual does not know which register you will use. You write `MOVWF LATB` or `MOVWF counter` — **`f` becomes that name**. In `MOVF LATB, W`, **`f` and `LATB` are the same thing**.
+
+**What is a literal in MPASM?**
+
+A **fixed value** written in the line (`D'10'`, `0xF0`, `B'10000000'`) — like a **constant** in C — that the assembler **embeds in the instruction**. It is not a register (`counter`) or a label (`loop:`).
 
 **What does `MOVLW D'5'` followed by `MOVWF counter` do?**
 
 Loads 5 into `WREG` and copies it to GPR variable `counter`.
 
-**What is `ORG 0x0000` for?**
+**What is `ORG 0x0000` (0000H) for?**
 
-It places code at address **0x0000** in program memory (reset vector).
+It places code at address **0000H** in program memory (reset vector).
 
 **What is the difference between `GOTO` and `CALL`?**
 

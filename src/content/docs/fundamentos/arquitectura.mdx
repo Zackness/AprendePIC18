@@ -106,10 +106,13 @@ Las usas para **decidir** con saltos condicionales:
 ```asm
 MOVLW   D'0'          ; referencia: comparar contra 0
 XORWF   contador, W   ; ¿contador == WREG? → si igual, resultado 0, Z=1
-BTFSS   STATUS, Z     ; salta si Z=1 (eran iguales → contador era 0)
-GOTO    sigue
-GOTO    manejar_cero
+BTFSS   STATUS, Z     ; salta si Z=1 (contador era 0)
+GOTO    sigue          ; si Z=0 → salta al destino
+GOTO    manejar_cero   ; si Z=1 → salta al destino
+manejar_cero:
+        ; contador era 0 ...
 sigue:
+        ; contador no era 0 ...
 ```
 
 `BTFSC` salta si la bandera esta en **0**; `BTFSS` salta si esta en **1**.

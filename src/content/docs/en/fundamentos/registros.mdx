@@ -75,7 +75,12 @@ BSF     LATB, 0     ; RB0 high → LED on
 ```asm
 BSF     TRISB, 3    ; RB3 as input (TRISB bit 3 = 1)
 BTFSS   PORTB, 3    ; skip if RB3 is 1 (button released, depends on wiring)
-GOTO    button_pressed
+GOTO    button_pressed   ; if RB3 = 0 → jump to destination
+; button released (RB3 = 1) ...
+GOTO    done_button
+button_pressed:
+        ; button pressed (RB3 = 0) ...
+done_button:
 ```
 
 <AIExplain title="PORT vs LAT — exam favorite">
@@ -142,7 +147,7 @@ INCF    counter, F
 MOVF    counter, W
 ```
 
-The **name** is your variable; an **SFR** has a fixed factory name. That difference is covered in [Architecture — GPR vs SFR](/en/fundamentos/arquitectura/#gpr--general-purpose-registers).
+The **name** is your variable; an **SFR** has a fixed factory name.
 
 ## Exam-style questions
 

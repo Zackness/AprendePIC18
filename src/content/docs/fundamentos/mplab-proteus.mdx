@@ -3,58 +3,230 @@ title: MPLAB v8, MPLAB X, Proteus y placa
 description: Herramientas usadas para escribir, simular y probar codigo del PIC18F4550.
 ---
 
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
 import LessonProgress from '../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../components/TopicQuiz.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
-import AIExplain from '../../../components/AIExplain.astro';
 
 <LessonProgress slug="fundamentos/mplab-proteus" />
 
 
 
-En el curso trabajaremos principalmente con **MPLAB v8** porque suele ser mas compatible con flujos clasicos de MPASM y proyectos academicos. Tambien se explicara **MPLAB X** para que puedas entender el entorno moderno.
+
+Hasta aqui aprendiste **que escribir** en ensamblador ([MPASM](/fundamentos/ensamblador/)) y **como configurar el hardware al encender** ([config bits](/fundamentos/config-bits/)). Esta pagina explica **con que herramientas** lo compilas, simulas y pruebas en el curso UNEXPO.
+
+En el flujo academico trabajamos principalmente con **MPLAB v8 + MPASM + Proteus**. Tambien veras **MPLAB X** para que reconozcas el entorno moderno si lo usas en otro equipo.
 
 <AIExplain title="Flujo real de trabajo">
-Escribes ensamblador en MPLAB, compilas un archivo `.hex`, lo cargas en Proteus para simular y finalmente lo grabas en una placa fisica si tienes el hardware.
+Escribes `.ASM` en MPLAB → MPASM genera `.HEX` → cargas el `.HEX` en Proteus (simulacion) o en un programador (placa fisica) → comparas el comportamiento con lo esperado.
 </AIExplain>
+
+## Cadena completa — del texto al PIC
+
+```
+  Editor MPLAB (.ASM)
+       ↓  Build / ensamblar
+  MPASM → archivo .HEX (+ .cod opcional)
+       ↓
+  ┌────────────────┴────────────────┐
+  ↓                                 ↓
+Proteus (simulacion)          PICkit / programador
+  ↓                                 ↓
+LED virtual, pines logicos    Placa fisica UNEXPO
+```
+
+| Etapa | Herramienta | Entrada | Salida |
+| --- | --- | --- | --- |
+| Escribir | MPLAB v8 / X | Tu codigo fuente | `.ASM` |
+| Ensamblar | **MPASM** | `.ASM` | **`.HEX`** (programa + config bits) |
+| Simular | **Proteus ISIS** | `.HEX` + esquematico | Comportamiento virtual |
+| Grabar | PICkit 2/3, etc. | `.HEX` | Flash del PIC18F4550 |
+
+El `.HEX` es el **puente** entre software y hardware: contiene las instrucciones y la palabra de configuracion que definiste con `CONFIG`.
+
+## MPASM — que hace al compilar
+
+MPASM lee tu [archivo ensamblador](/fundamentos/ensamblador/#anatomia-de-un-archivo-mpasm) y:
+
+1. **Traduce** mnemonicos (`MOVLW`, `BSF`…) a codigo maquina.
+2. **Resuelve** etiquetas, simbolos del `#include` y directivas `CONFIG`.
+3. **Genera** el `.HEX` para el programador o Proteus.
+4. **Reporta errores** si falta `END`, hay etiqueta duplicada o simbolo indefinido.
+
+### Archivos que veras tras compilar
+
+| Archivo | Para que sirve |
+| --- | --- |
+| **`.HEX`** | Lo que cargas en Proteus o programador — **el importante** |
+| **`.COD`** | Listado con direcciones y codigo maquina (depuracion) |
+| **`.LST`** | Listado con codigo fuente mezclado (si lo activas) |
+| **`.ERR`** | Errores de ensamblado (si falla el build) |
+
+Si el build falla, **no habra `.HEX` util** — corrige errores en la ventana de salida antes de simular.
 
 <AIExplain title="Siguiente paso en la ruta">
-Despues de esta pagina, la [ruta de estudio](/ruta-de-estudio/) te lleva a la guia practica de puertos y al [tutorial Primer LED](/tutoriales/primer-led/), donde creas el proyecto en MPLAB y simulas en Proteus paso a paso (instalacion, CONFIG, TRIS y LAT).
+Despues de esta pagina, la [ruta de estudio](/ruta-de-estudio/) te lleva a la guia practica de puertos y al [tutorial Primer LED](/tutoriales/primer-led/), donde creas el proyecto en MPLAB y simulas en Proteus paso a paso.
 </AIExplain>
 
+## MPLAB v8 — entorno principal del curso
+
+MPLAB v8 es el IDE clasico de Microchip. En laboratorio UNEXPO suele usarse porque encaja bien con **MPASM** y proyectos `.ASM` puros.
+
 <Tabs>
-	<TabItem label="MPLAB v8">
-		1. Crear proyecto con el asistente.
-		2. Seleccionar `PIC18F4550`.
-		3. Usar MPASM como herramienta de ensamblador.
-		4. Agregar archivo `.asm`.
-		5. Compilar y generar `.hex`.
+	<TabItem label="MPLAB v8 — paso a paso">
+		### Crear proyecto
+
+		1. **Project → Project Wizard**
+		2. Selecciona **PIC18F4550**
+		3. Herramienta: **MPASM** (no XC8 si solo usas ensamblador)
+		4. Nombre del proyecto y carpeta
+		5. Agrega tu archivo **`.asm`** al proyecto
+
+		### Compilar
+
+		1. **Project → Build All** (o el icono de martillo)
+		2. Revisa la ventana **Output** — debe decir *Build succeeded*
+		3. Busca el **`.hex`** en la carpeta del proyecto (ej. `Debug/` o raiz)
+
+		### Config bits en MPLAB v8
+
+		Puedes editarlos con **Configure → Configuration Bits**, pero en el curso es mejor declararlos en el `.ASM` ([config bits](/fundamentos/config-bits/#plantilla-del-curso-20-mhz)) para que informe y `.HEX` coincidan.
+
+		### Errores tipicos al compilar
+
+		| Mensaje | Causa frecuente |
+		| --- | --- |
+		| `Symbol not defined` | Falta `#include <P18F4550.INC>` o typo en `TRISB` |
+		| `Label required` | Etiqueta sin `:` (`inicio` vs `inicio:`) |
+		| `END directive required` | Falta `END` al final del archivo |
+		| `Bank select error` | Acceso a variable en otro banco sin `BSR` correcto |
 	</TabItem>
 	<TabItem label="MPLAB X">
-		1. Crear proyecto standalone.
-		2. Seleccionar familia y dispositivo `PIC18F4550`.
-		3. Configurar toolchain compatible.
-		4. Agregar codigo ensamblador.
-		5. Compilar y revisar errores en la salida.
+		### Cuando usarlo
+
+		MPLAB X es el IDE moderno (basado en NetBeans). Microchip lo promueve para proyectos nuevos en **XC8**, pero tambien puede ensamblar `.ASM` con el toolchain adecuado.
+
+		### Pasos resumidos
+
+		1. **File → New Project** → Standalone Project
+		2. Device: **PIC18F4550**
+		3. Selecciona toolchain compatible con ensamblador
+		4. Agrega tu `.asm` al proyecto
+		5. **Production → Build Main Project**
+		6. Revisa **Output** y localiza el `.hex`
+
+		En el curso UNEXPO, si tu profesor pide MPLAB v8, **no mezcles** proyectos v8 y X en la misma carpeta — las rutas y configuraciones difieren.
 	</TabItem>
 	<TabItem label="Proteus">
-		1. Colocar el PIC18F4550.
-		2. Conectar cristal, alimentacion y componentes.
-		3. Cargar el `.hex` en las propiedades del PIC.
-		4. Ajustar frecuencia de reloj.
-		5. Ejecutar simulacion y observar pines.
+		### Montar el circuito
+
+		1. Coloca **PIC18F4550** en el esquematico
+		2. Conecta [sistema minimo](/fundamentos/config-bits/#sistema-minimo--hardware-que-acompania-los-config-bits): cristal **20 MHz**, condensadores, MCLR con pull-up, VDD/VSS, desacople
+		3. Agrega LED + resistencia en **RB0** (o el pin de tu practica)
+		4. Verifica tierras comunes y polaridad del LED
+
+		### Cargar el .HEX
+
+		1. Doble clic en el PIC → pestaña **Program File**
+		2. Selecciona el **`.hex`** generado por MPASM
+		3. En **Clock Frequency** pon **20 MHz** (coherente con `FOSC = HS` y cristal)
+		4. Acepta y guarda el esquematico
+
+		### Simular
+
+		1. Boton **Play** (Run simulation)
+		2. Observa el LED virtual y los niveles en **RB0**
+		3. Usa **Debug** para ver registros si tu version lo permite
+		4. Si no arranca: revisa `.HEX` cargado, frecuencia de reloj y [config bits](/fundamentos/config-bits/)
+
+		Proteus **no compila** ensamblador — solo ejecuta el `.HEX` que tu generaste en MPLAB.
 	</TabItem>
 	<TabItem label="Placa fisica">
-		1. Verificar alimentacion.
-		2. Revisar oscilador, MCLR y conexiones.
-		3. Grabar el microcontrolador.
-		4. Medir salidas con multimetro o LED.
-		5. Comparar comportamiento real contra Proteus.
+		### Antes de grabar
+
+		1. **Alimentacion 5 V** estable y condensador de desacople
+		2. Cristal 20 MHz + caps + MCLR con 10 kΩ ([sistema minimo](/fundamentos/config-bits/))
+		3. Revisa cableado del LED (resistencia 220–330 Ω)
+		4. Comprueba que no haya cortos en protoboard
+
+		### Grabar el micro
+
+		1. Conecta **PICkit 2/3** (o programador del laboratorio) a ICSP
+		2. En MPLAB: **Programmer → Select Programmer**
+		3. **Program** con el mismo `.HEX` que usaste en Proteus
+		4. Verifica mensaje *Programming/Verify complete*
+
+		### Validar
+
+		1. LED encendido o apagado segun tu codigo
+		2. Multimetro en pines de salida si algo falla
+		3. Compara con la simulacion — si Proteus OK y placa no, sospecha **hardware** (cableado, alimentacion, config bits distintos)
 	</TabItem>
 </Tabs>
 
-## Sobre imagenes con AI
+## MPLAB vs Proteus vs placa — quien hace que
 
-La web dejara espacio para diagramas generados con AI cuando sean utiles: arquitectura visual, conexion de LED, flujo de interrupcion o mapa de memoria. Cada imagen debe revisarse tecnicamente antes de usarla, porque una imagen bonita pero incorrecta puede confundir mas que ayudar.
+| Tarea | MPLAB + MPASM | Proteus | Placa fisica |
+| --- | --- | --- | --- |
+| Escribir codigo | ✅ | ❌ | ❌ |
+| Compilar `.HEX` | ✅ | ❌ | ❌ |
+| Simular sin hardware | ❌ | ✅ | ❌ |
+| Medir tiempos reales de cristal | ❌ | Aproximado | ✅ |
+| Probar ruido, contactos, rebotes | ❌ | Limitado | ✅ |
+| Grabar Flash del PIC | Con programador | Solo simula | ✅ |
+
+Regla del curso: **primero compila sin errores**, **luego simula en Proteus**, **después monta en protoboard**.
+
+## Coherencia entre herramientas — checklist
+
+Antes de decir “no funciona”, verifica que **todo coincida**:
+
+- [ ] Dispositivo: **PIC18F4550** en MPLAB, Proteus y placa
+- [ ] `CONFIG FOSC = HS` y cristal **20 MHz** en esquematico y Proteus
+- [ ] Mismo **`.HEX`** en Proteus y programador (recompila tras cada cambio)
+- [ ] `PBADEN = OFF`, `LVP = OFF`, `WDT = OFF` (plantilla del curso)
+- [ ] Pin del LED coincide con codigo (`RB0` → `BCF TRISB,0` y `BSF LATB,0`)
+- [ ] Recompilaste despues de editar el `.ASM`
+
+<Exercise title="Ordena el flujo">
+Orden correcto para la Practica del Primer LED:
+
+1. Escribir `.ASM` con `LIST`, `#include`, `CONFIG`, `ORG`, codigo GPIO
+2. **Build** en MPLAB → obtener `.HEX`
+3. Montar esquematico en Proteus con cristal 20 MHz
+4. Cargar `.HEX` en el PIC de Proteus
+5. Simular y verificar LED
+6. Montar protoboard y grabar con PICkit
+
+**Error tipico:** cargar un `.HEX` viejo en Proteus despues de cambiar el codigo sin recompilar — la simulacion no refleja tus ultimos cambios.
+</Exercise>
+
+## Errores comunes
+
+- **Proteus sin `.HEX` cargado**: el PIC simula con memoria vacia o programa anterior.
+- **Reloj en Proteus distinto de 20 MHz**: tiempos y algunos perifericos no coinciden con la placa.
+- **Compilar en MPLAB X y abrir proyecto v8** (o al reves): rutas y toolchains mezclados.
+- **Simulacion OK, placa no**: revisa alimentacion, MCLR, cristal, orientacion del PIC, LVP/PBADEN.
+- **Placa OK, simulacion no**: `.HEX` desactualizado o frecuencia mal puesta en Proteus.
+- **Confundir Proteus con compilador**: Proteus **no reemplaza** MPASM — solo ejecuta el `.HEX`.
+
+## Preguntas tipo parcial
+
+**¿Que archivo entrega MPASM al compilar correctamente?**
+
+Un archivo **`.HEX`** con el programa y los config bits para grabar o simular.
+
+**¿Para que se usa Proteus en el curso?**
+
+Para **simular** el circuito y el programa **antes** de la placa fisica, cargando el `.HEX` generado en MPLAB.
+
+**¿MPLAB compila ensamblador directamente o usa otra herramienta?**
+
+MPLAB invoca **MPASM** (en proyectos de ensamblador puro del curso).
+
+**¿Por que debe coincidir la frecuencia de reloj en Proteus con el cristal?**
+
+Porque el tiempo de ejecucion y perifericos dependen de **Fosc**; con `FOSC = HS` y cristal 20 MHz, Proteus debe usar **20 MHz**.
 
 <TopicQuiz slug="fundamentos/mplab-proteus" />

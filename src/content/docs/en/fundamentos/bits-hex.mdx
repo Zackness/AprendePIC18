@@ -20,7 +20,7 @@ This page complements [Basic architecture](/en/fundamentos/arquitectura/) and [M
 Mastering binary, hexadecimal, and masks is essential for the exam and lab work (especially **Practice 1**, which requires logic routines with the ALU).
 
 <AIExplain title="Practical rule">
-One byte = 8 bits. In MPASM you write `B'10101010'` (binary), `D'170'` (decimal), or `0xAA` (hex). To turn on a specific bit: `BSF`; to clear it: `BCF`. To change several bits at once without touching the rest: **masks** with AND, OR, or XOR.
+One byte = 8 bits. In MPASM you write `B'10101010'` (binary), `D'170'` (decimal), or `0xAA` (hex). In notes and reports you will see the same hex with **suffix H**: `AAH`, `00H`, `FFH`. To turn on a specific bit: `BSF`; to clear it: `BCF`. To change several bits at once without touching the rest: **masks** with AND, OR, or XOR.
 </AIExplain>
 
 ## What is a bit and what is a byte
@@ -60,14 +60,14 @@ Writing `B'11000011'` is long; in hex one byte is **only 2 digits** (`0xC3`). Ea
 
 ### Quick conversion table (useful bytes)
 
-| Decimal | Binary | Hex | Typical use |
-| --- | --- | --- | --- |
-| 0 | 00000000 | 0x00 | All off |
-| 1 | 00000001 | 0x01 | Bit 0 only |
-| 15 | 00001111 | 0x0F | Full low nibble |
-| 240 | 11110000 | 0xF0 | Full high nibble |
-| 170 | 10101010 | 0xAA | Alternating pattern |
-| 255 | 11111111 | 0xFF | All bits set |
+| Decimal | Binary | Hex (`0x`) | Hex (H suffix) | Typical use |
+| --- | --- | --- | --- | --- |
+| 0 | 00000000 | 0x00 | 00H | All off |
+| 1 | 00000001 | 0x01 | 01H | Bit 0 only |
+| 15 | 00001111 | 0x0F | 0FH | Full low nibble |
+| 240 | 11110000 | 0xF0 | F0H | Full high nibble |
+| 170 | 10101010 | 0xAA | AAH | Alternating pattern |
+| 255 | 11111111 | 0xFF | FFH | All bits set |
 
 ### Step-by-step conversion
 
@@ -77,10 +77,22 @@ Writing `B'11000011'` is long; in hex one byte is **only 2 digits** (`0xC3`). Ea
 
 **Binary → hex:** group in 4 bits from the right. `11000011` → `1100` + `0011` → `0xC3`.
 
-**Decimal → hex:** divide by 16. Example: 195 ÷ 16 = 12 remainder 3 → `0xC3`.
+**Decimal → hex:** divide by 16. Example: 195 ÷ 16 = 12 remainder 3 → `0xC3` or **C3H**.
 
-<AIExplain title="In MPASM">
-`MOVLW 0xC3`, `MOVLW B'11000011'`, and `MOVLW D'195'` load **the same value** into `WREG`. Lab reports usually ask for hex or binary — do not mix notations without stating it.
+### Equivalent hex notations
+
+The **same byte** can be written in several ways. All mean the same value:
+
+| Style | Example | Typical use |
+| --- | --- | --- |
+| `0x` prefix | `0x00`, `0xFF`, `0xC3` | MPASM code, many tools |
+| **H** suffix | `00H`, `FFH`, `C3H` | Notes, reports, exercise sheets |
+| MPASM **h** suffix | `00h`, `0FFh`, `0C3h` | Valid alternative in `.ASM` |
+
+**H** suffix rule: digits are hex; **H** at the end means base 16. `00H` = zero; `0FH` = 15; `F0H` = 240. Do not confuse `0FH` (15) with `F0H` (240).
+
+<AIExplain title="In MPASM and in reports">
+`MOVLW 0xC3`, `MOVLW 0C3h`, and `MOVLW B'11000011'` load **the same value** into `WREG`. In written text you can write **C3H** instead of `0xC3`. Reports may ask for hex with H suffix — do not mix notations without stating it.
 </AIExplain>
 
 ## A single bit — set, clear, toggle
@@ -151,7 +163,12 @@ In MPASM the instruction is **`IORWF`** / **`IORLW`**.
 MOVLW   D'5'
 XORWF   counter, W      ; if counter == 5 → W = 0 → Z = 1
 BTFSS   STATUS, Z
-GOTO    not_five
+GOTO    not_five          ; if counter != 5 → jump to destination
+; counter == 5 ...
+GOTO    cmp_done
+not_five:
+        ; counter != 5 ...
+cmp_done:
 ```
 
 ### Complement (NOT)
@@ -264,7 +281,7 @@ Why use `BCF` instead of writing all of `PORTB`? You avoid accidentally changing
 
 ## Common mistakes
 
-- **Mixing notation:** `0x0F` (hex) is not the same as `D'15'` (decimal) — both equal 15, but `0xF0` is 240, not 15.
+- **Mixing notation:** `0x0F` = **0FH** = 15, but `0xF0` = **F0H** = 240 — nibble order matters.
 - **Bit vs pin:** **bit 3** of `LATB` is pin **RB3**; numbering starts at **0**.
 - **AND vs OR:** AND **clears** bits where the mask is 0; OR **sets** bits where the mask is 1.
 - **Inverted mask on TRIS:** in `TRISx`, **1 = input** and **0 = output** — when designing masks, remember what each bit means.

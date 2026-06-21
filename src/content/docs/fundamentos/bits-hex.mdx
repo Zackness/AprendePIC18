@@ -20,7 +20,7 @@ Esta pagina complementa [Arquitectura basica](/fundamentos/arquitectura/) y [Reg
 Dominar binario, hexadecimal y mascaras es indispensable para el parcial y para las practicas de laboratorio (especialmente la **Practica 1**, que exige rutinas logicas con la ALU).
 
 <AIExplain title="Regla practica">
-Un byte = 8 bits. En MPASM escribes valores con `B'10101010'` (binario), `D'170'` (decimal) o `0xAA` (hexadecimal). Para encender un bit concreto: `BSF`; para apagarlo: `BCF`. Para modificar varios bits a la vez sin tocar el resto: **mascaras** con AND, OR o XOR.
+Un byte = 8 bits. En MPASM escribes valores con `B'10101010'` (binario), `D'170'` (decimal) o `0xAA` (hexadecimal). En apuntes e informes veras el mismo hex con **sufijo H**: `AAH`, `00H`, `FFH`. Para encender un bit concreto: `BSF`; para apagarlo: `BCF`. Para modificar varios bits a la vez sin tocar el resto: **mascaras** con AND, OR o XOR.
 </AIExplain>
 
 ## Que es un bit y que es un byte
@@ -60,14 +60,14 @@ Escribir `B'11000011'` es largo; en hex un byte son **solo 2 digitos** (`0xC3`).
 
 ### Tabla de conversion rapida (bytes utiles)
 
-| Decimal | Binario | Hex | Uso tipico |
-| --- | --- | --- | --- |
-| 0 | 00000000 | 0x00 | Todo apagado |
-| 1 | 00000001 | 0x01 | Solo bit 0 |
-| 15 | 00001111 | 0x0F | Nibble bajo completo |
-| 240 | 11110000 | 0xF0 | Nibble alto completo |
-| 170 | 10101010 | 0xAA | Patron alternado |
-| 255 | 11111111 | 0xFF | Todos los bits en 1 |
+| Decimal | Binario | Hex (`0x`) | Hex (sufijo H) | Uso tipico |
+| --- | --- | --- | --- | --- |
+| 0 | 00000000 | 0x00 | 00H | Todo apagado |
+| 1 | 00000001 | 0x01 | 01H | Solo bit 0 |
+| 15 | 00001111 | 0x0F | 0FH | Nibble bajo completo |
+| 240 | 11110000 | 0xF0 | F0H | Nibble alto completo |
+| 170 | 10101010 | 0xAA | AAH | Patron alternado |
+| 255 | 11111111 | 0xFF | FFH | Todos los bits en 1 |
 
 ### Como convertir paso a paso
 
@@ -77,10 +77,22 @@ Escribir `B'11000011'` es largo; en hex un byte son **solo 2 digitos** (`0xC3`).
 
 **Binario → hex:** agrupa de a 4 bits desde la derecha. `11000011` → `1100` + `0011` → `0xC3`.
 
-**Decimal → hex:** divide entre 16. Ejemplo: 195 ÷ 16 = 12 resto 3 → `0xC3`.
+**Decimal → hex:** divide entre 16. Ejemplo: 195 ÷ 16 = 12 resto 3 → `0xC3` o **C3H**.
 
-<AIExplain title="En MPASM">
-`MOVLW 0xC3` y `MOVLW B'11000011'` y `MOVLW D'195'` cargan **el mismo valor** en `WREG`. El informe de laboratorio suele pedir hex o binario — no mezcles notaciones sin indicarlo.
+### Notaciones hex equivalentes
+
+El **mismo byte** puede escribirse de varias formas. Todas valen lo mismo:
+
+| Estilo | Ejemplo | Uso tipico |
+| --- | --- | --- |
+| Prefijo `0x` | `0x00`, `0xFF`, `0xC3` | Codigo MPASM, muchas herramientas |
+| Sufijo **H** | `00H`, `FFH`, `C3H` | Apuntes, informes, hojas de ejercicio |
+| MPASM con **h** | `00h`, `0FFh`, `0C3h` | Alternativa valida en el `.ASM` |
+
+Regla del sufijo **H**: los digitos son hex; la **H** al final indica base 16. `00H` = cero; `0FH` = 15; `F0H` = 240. No confundas `0FH` (15) con `F0H` (240).
+
+<AIExplain title="En MPASM y en el informe">
+`MOVLW 0xC3`, `MOVLW 0C3h` y `MOVLW B'11000011'` cargan **el mismo valor** en `WREG`. En texto escrito puedes anotar **C3H** en lugar de `0xC3`. El informe puede pedir hex con sufijo H — no mezcles notaciones sin indicarlo.
 </AIExplain>
 
 ## Un bit concreto — encender, apagar, invertir
@@ -151,7 +163,12 @@ En MPASM la instruccion se escribe **`IORWF`** / **`IORLW`**.
 MOVLW   D'5'
 XORWF   contador, W     ; si contador == 5 → W = 0 → Z = 1
 BTFSS   STATUS, Z
-GOTO    no_es_cinco
+GOTO    no_es_cinco       ; si contador != 5 → salta al destino
+; contador == 5 ...
+GOTO    fin_cmp
+no_es_cinco:
+        ; contador != 5 ...
+fin_cmp:
 ```
 
 ### Complemento (NOT)
@@ -265,7 +282,7 @@ Si `PORTB` valia `0xC3` y ejecutas `BCF PORTB, 6`:
 
 ## Errores comunes
 
-- **Confundir notacion:** `0x0F` (hex) no es lo mismo que `D'15'` (decimal) — ambos valen 15, pero `0xF0` es 240, no 15.
+- **Confundir notacion:** `0x0F` = **0FH** = 15, pero `0xF0` = **F0H** = 240 — el orden de los nibbles importa.
 - **Bit vs pin:** el **bit 3** de `LATB` es el pin **RB3**; la numeracion empieza en **0**.
 - **AND vs OR:** AND **apaga** bits donde la mascara es 0; OR **enciende** bits donde la mascara es 1.
 - **Mascara invertida en TRIS:** en `TRISx`, **1 = entrada** y **0 = salida** — al disenar mascaras, piensa en que significa cada bit.

@@ -106,10 +106,13 @@ You use flags to **make decisions** with conditional branches:
 ```asm
 MOVLW   D'0'          ; reference: compare against 0
 XORWF   counter, W    ; counter == WREG? → if equal, result 0, Z=1
-BTFSS   STATUS, Z    ; skip if Z=1 (they matched → counter was 0)
-GOTO    continue
-GOTO    handle_zero
+BTFSS   STATUS, Z    ; skip if Z=1 (counter was 0)
+GOTO    continue      ; if Z=0 → jump to destination
+GOTO    handle_zero   ; if Z=1 → jump to destination
+handle_zero:
+        ; counter was 0 ...
 continue:
+        ; counter was not 0 ...
 ```
 
 `BTFSC` skips when the flag is **0**; `BTFSS` skips when it is **1**.

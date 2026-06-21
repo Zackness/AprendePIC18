@@ -78,6 +78,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 											name={`q-${quiz.slug}-${q.id}`}
 											value={oi}
 											data-option-index={oi}
+											data-original-index={oi}
 										/>
 										<span class="interactive-quiz__option-box" aria-hidden="true" />
 										<span class="interactive-quiz__option-text">{opt}</span>
@@ -178,6 +179,34 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 	import { initCaletaAuth, saveQuizResult, getQuizResult, isLoggedIn } from '../scripts/caleta-auth';
 	import { fetchDownloadAccess, subscriptionPlansUrl } from '../scripts/caleta-downloads';
 
+	function shuffleQuizOptions(fieldset: Element) {
+		const container = fieldset.querySelector('.interactive-quiz__options');
+		if (!container) return;
+
+		const labels = Array.from(
+			container.querySelectorAll('label.interactive-quiz__option'),
+		);
+		for (let i = labels.length - 1; i > 0; i -= 1) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[labels[i], labels[j]] = [labels[j], labels[i]];
+		}
+		labels.forEach((label, displayIndex) => {
+			container.appendChild(label);
+			const input = label.querySelector('input[type="radio"]');
+			if (input instanceof HTMLInputElement) {
+				input.dataset.optionIndex = String(displayIndex);
+			}
+		});
+	}
+
+	function getSelectedOriginalIndex(fieldset: Element): number {
+		const selected = fieldset.querySelector(
+			'input[type="radio"]:checked',
+		) as HTMLInputElement | null;
+		if (!selected) return -1;
+		return Number(selected.dataset.originalIndex ?? selected.dataset.optionIndex ?? -1);
+	}
+
 	async function setQuizAuthState(root: Element) {
 		const authMode = root.getAttribute('data-auth-mode') || 'none';
 		const gate = root.querySelector('[data-quiz-auth-gate]');
@@ -268,6 +297,8 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 			const fieldsets = root.querySelectorAll('[data-question-index]');
 			const total = fieldsets.length;
 
+			fieldsets.forEach((fs) => shuffleQuizOptions(fs));
+
 			setQuizAuthState(root);
 			window.addEventListener('aprende-auth-change', () => {
 				setQuizAuthState(root);
@@ -296,7 +327,7 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 						if (!q || chosen < 0) return;
 
 						const input = fs.querySelector(
-							`input[data-option-index="${chosen}"]`,
+							`input[data-original-index="${chosen}"]`,
 						) as HTMLInputElement | null;
 						if (input) input.checked = true;
 
@@ -396,20 +427,19 @@ const quizJson = JSON.stringify({ slug: quiz.slug, questions });
 
 				fieldsets.forEach((fs, qi) => {
 					const q = quizData.questions[qi];
-					const selected = fs.querySelector('input[type="radio"]:checked');
 					const feedback = fs.querySelector('[data-feedback]');
 					fs.classList.remove(
 						'interactive-quiz__question--correct',
 						'interactive-quiz__question--wrong',
 					);
 
-					if (!selected || !q) {
+					const chosen = getSelectedOriginalIndex(fs);
+					if (chosen < 0 || !q) {
 						allAnswered = false;
 						answers.push(-1);
 						return;
 					}
 
-					const chosen = Number(selected.getAttribute('data-option-index'));
 					answers.push(chosen);
 					const isCorrect = chosen === q.correctIndex;
 					if (isCorrect) correct += 1;

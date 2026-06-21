@@ -17,32 +17,98 @@ import TopicQuiz from '../../../../components/TopicQuiz.astro';
 
 The **configuration word** (also called **config bits** or **fuses**) sets hardware options the PIC applies **at power-on**, before running your program: oscillator source, watchdog, MCLR behavior, whether ports start digital, and more.
 
-This page complements [MPASM assembly](/en/fundamentos/ensamblador/): there you saw `CONFIG` at the top of the `.ASM`; here you learn **what each bit means** and how it ties to the UNEXPO lab **minimum system**.
+This page completes the Foundations block with [MPASM assembly](/en/fundamentos/ensamblador/): there you saw `CONFIG` at the top of the `.ASM` and the sandwich layout; here you learn **what the configuration word is**, **what each bit means**, and how it ties to the UNEXPO lab **minimum system**.
 
 <AIExplain title="In MPASM">
-`CONFIG` directives **do not generate executable code**. The assembler turns them into bits the programmer writes to the PIC's **configuration memory** (separate from the Flash where your `GOTO start` lives).
+`CONFIG` directives **do not generate executable code**. The assembler turns them into bits the programmer writes to the PIC's **configuration memory** (separate from the Flash where your `GOTO programa` lives).
 </AIExplain>
 
-## What config bits are
+## What is the configuration word
+
+In the course you will hear **configuration word**, **config bits**, and **fuses** — the **same idea** with different names: a **fixed block of bits** that tells the PIC **how to start** before your `programa:` runs.
+
+### Step 1 — A group of bits, not a program
+
+The configuration word **is not instructions** the CPU runs with `MOVLW`, `GOTO`, or `CALL`. It is a **hardware switch pack** stored in a special chip area:
+
+| | Configuration word | Your Flash program |
+| --- | --- | --- |
+| **What it is** | Startup bits (oscillator, WDT, MCLR…) | Instructions the CPU executes |
+| **When it acts** | At power-on or after reset | Line by line while running |
+| **You define it with** | `CONFIG` directives in `.ASM` | Code under `ORG` / labels |
+| **Changes at runtime** | No (unless reprogramming) | Yes — your code modifies SFRs |
+
+Think of it as **factory setup for the stage**: crystal, reset, and watchdog are chosen **before** `main`; then your [assembly](/en/fundamentos/ensamblador/) works on [registers](/en/fundamentos/registros/) (`TRISB`, `LATB`…).
+
+### Step 2 — You write it with `CONFIG` in the `.ASM`
+
+Each `CONFIG` line sets **one part** of the word. MPASM maps the name (`FOSC`, `WDT`…) and value (`HS`, `OFF`…) to the actual PIC18F4550 bit:
+
+```asm
+        CONFIG  FOSC = HS     ; part of the word: high-speed oscillator
+        CONFIG  WDT  = OFF    ; part of the word: watchdog off
+        CONFIG  LVP  = OFF    ; part of the word: RB5 free
+```
+
+This is not a **literal** inside an instruction (like `MOVLW D'10'`). It is a **directive**: it talks to the **assembler**, not to the CPU at run time.
+
+### Step 3 — MPASM packs it into the `.HEX`
+
+When you build, the `.HEX` carries **two things**:
+
+```
+  .HEX file
+  ├── Program code (executable Flash)
+  └── Configuration word (startup bits)
+```
+
+That is why in [MPLAB and Proteus](/en/fundamentos/mplab-proteus/) you load **one `.HEX`**: Proteus and the programmer store program **and** configuration word together. Without a `CONFIG` block, the chip may use **defaults** different from the lab.
+
+### Step 4 — The PIC applies it at power-on
+
+Sequence when you apply 5 V:
+
+```
+  Power applied (POR)
+       ↓  PWRT (if CONFIG PWRT = ON)
+  PIC reads configuration word
+       ↓  FOSC, WDT, PBADEN, MCLRE… are fixed
+  PC = 0000H → runs ORG 0x0000
+       ↓
+  GOTO    programa          ; jump to main
+; ...
+programa:                     ; destination — your code starts here
+```
+
+If the program “does not start”, check **word + hardware** before debugging `LATB`: supply → crystal/`FOSC` → MCLR/`MCLRE` → `LVP`/`PBADEN` → only then code.
+
+<AIExplain title="Configuration word vs SFR register">
+- **Configuration word** → hardware at **power-on** (`FOSC = HS`).  
+- **SFR register** → hardware **while running** (`BCF TRISB, 0`).  
+
+`CONFIG WDT = OFF` does not replace `CLRWDT` in a program that later enables WDT another way — different layers.
+</AIExplain>
+
+## Key concepts — equivalent names
 
 | Concept | Explanation |
 | --- | --- |
-| **Config bits / fuses** | Non-volatile bits that define fixed chip behavior |
-| **Configuration word** | Those bits grouped in configuration registers |
-| **`CONFIG` directive** | MPASM syntax to set them in the `.ASM` file |
-| **Configuration memory** | Programmed with the `.HEX`, but not CPU-executable code |
+| **Configuration word** | The **full block** of startup bits |
+| **Config bits / fuses** | Each **bit** (or group) inside that word |
+| **`CONFIG` directive** | How you **write** those bits in `.ASM` |
+| **Configuration memory** | Where they are **stored** on chip (not executable Flash) |
 
 Think of config bits as **factory switches** you choose once when building/programming. If `WDT = ON` and your program never runs `CLRWDT`, the PIC will reset on its own even when your logic looks fine.
 
-## Where they go in the .ASM file
+## Where it goes in the sandwich `.ASM`
 
-Place them **after** `LIST` and `#include`, **before** `ORG` and your code:
+It belongs in the **top layer**, after `LIST` and `#include`, **before** the reset vector and code — same as [Assembly — anatomy](/en/fundamentos/ensamblador/#anatomy-of-an-mpasm-file--sandwich-layout):
 
 ```asm
+; ══ TOP — header + configuration word ════════════════
         LIST    P=18F4550
         #include <P18F4550.INC>
 
-; ── Config bits (required in course projects) ──
         CONFIG  FOSC = HS
         CONFIG  WDT  = OFF
         CONFIG  LVP  = OFF
@@ -51,12 +117,24 @@ Place them **after** `LIST` and `#include`, **before** `ORG` and your code:
         CONFIG  BOR  = OFF
         CONFIG  PWRT = ON
 
+; ── Reset vector ──────────────────────────────────────
         ORG     0x0000
-        GOTO    start
-; ... rest of program ...
+        GOTO    programa         ; jump to main (at bottom)
+
+; ══ MIDDLE — subroutines (if any) ═════════════════════
+; ...
+
+; ══ BOTTOM — main program ════════════════════════════
+programa:
+        BCF     TRISB, 0
+        BSF     LATB, 0
+loop:
+        GOTO    loop               ; jump → destination loop: (line above)
+
+        END
 ```
 
-In MPLAB v8 you can also edit them via **Configure → Configuration Bits**, but in the UNEXPO course you usually declare them in the `.ASM` so the report and `.HEX` match.
+In MPLAB v8 you can also edit them via **Configure → Configuration Bits**, but in the UNEXPO course you usually declare them in `.ASM` so the report and `.HEX` match.
 
 ## Each config bit in detail
 
@@ -72,6 +150,16 @@ Selects **where the execution clock comes from**.
 | `EC` / `ECM` | External clock on a pin | Special cases |
 
 With **`FOSC = HS`** you must wire the **crystal + capacitors** of the minimum system. Without a crystal (or bad wiring), the PIC **does not run** at the expected speed — or does not start at all.
+
+With a **20 MHz** crystal in HS (UNEXPO course):
+
+| Quantity | Typical value | Formula / note |
+| --- | --- | --- |
+| **Fosc** | 20 MHz | Oscillator frequency (crystal) |
+| **Tcy** (instruction cycle) | **200 ns** | Tcy = 4 / Fosc = 4 / 20 MHz |
+| **MIPS** (order of magnitude) | ~5 | 1 / Tcy in million instructions/s |
+
+That **Fosc** is set by the configuration word (`FOSC = HS`) **and** the physical crystal — they must match. In Proteus and on the board, the PIC clock must reflect **20 MHz** if you use this template.
 
 ### `WDT` — Watchdog Timer
 
@@ -128,6 +216,8 @@ Many course builds use **`BOR = OFF`**. With `ON`, 5 V supply variations can cau
 **`PWRT = ON`** is good practice with HS crystal and decoupling caps.
 
 ### Summary — course template (20 MHz)
+
+Block ready to copy in the **top layer** of all your `.ASM` files:
 
 ```asm
         CONFIG  FOSC = HS        ; External high-speed crystal

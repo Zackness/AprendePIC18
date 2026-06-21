@@ -75,7 +75,12 @@ BSF     LATB, 0     ; RB0 en alto → enciende LED
 ```asm
 BSF     TRISB, 3    ; RB3 como entrada (bit 3 de TRISB = 1)
 BTFSS   PORTB, 3    ; salta si RB3 esta en 1 (boton suelto, segun cableado)
-GOTO    boton_presionado
+GOTO    boton_presionado   ; si RB3 = 0 → salta al destino
+; boton suelto (RB3 = 1) ...
+GOTO    fin_boton
+boton_presionado:
+        ; boton presionado (RB3 = 0) ...
+fin_boton:
 ```
 
 <AIExplain title="PORT vs LAT — pregunta de parcial">
@@ -142,7 +147,7 @@ INCF    contador, F
 MOVF    contador, W
 ```
 
-El **nombre** es tu variable; el **SFR** tiene nombre fijo del fabricante. Esa diferencia ya la viste en [Arquitectura — GPR vs SFR](/fundamentos/arquitectura/#gpr--registros-de-proposito-general).
+El **nombre** es tu variable; el **SFR** tiene nombre fijo del fabricante.
 
 ## Preguntas tipo parcial
 

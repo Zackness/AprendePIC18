@@ -3,58 +3,230 @@ title: MPLAB v8, MPLAB X, Proteus, and board
 description: Tools used to write, simulate, and test PIC18F4550 code.
 ---
 
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
 import LessonProgress from '../../../../components/LessonProgress.astro';
 import TopicQuiz from '../../../../components/TopicQuiz.astro';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
-import AIExplain from '../../../../components/AIExplain.astro';
 
 <LessonProgress slug="fundamentos/mplab-proteus" locale="en" />
 
 
 
-This course focuses mainly on **MPLAB v8** because it is often more compatible with classic MPASM and academic project workflows. **MPLAB X** will also be explained so you understand the modern environment.
+
+So far you learned **what to write** in assembly ([MPASM](/en/fundamentos/ensamblador/)) and **how to configure hardware at power-on** ([config bits](/en/fundamentos/config-bits/)). This page explains **which tools** you use to build, simulate, and test in the UNEXPO course.
+
+The academic workflow focuses on **MPLAB v8 + MPASM + Proteus**. You will also see **MPLAB X** so you recognize the modern IDE if you use it on another machine.
 
 <AIExplain title="Real workflow">
-You write assembly in MPLAB, compile a `.hex` file, load it into Proteus for simulation, and finally burn it into a physical board if you have the hardware.
+Write `.ASM` in MPLAB → MPASM produces `.HEX` → load `.HEX` in Proteus (simulation) or a programmer (physical board) → compare behavior with what you expect.
 </AIExplain>
+
+## Full chain — from text to the PIC
+
+```
+  MPLAB editor (.ASM)
+       ↓  Build / assemble
+  MPASM → .HEX file (+ optional .cod)
+       ↓
+  ┌────────────────┴────────────────┐
+  ↓                                 ↓
+Proteus (simulation)          PICkit / programmer
+  ↓                                 ↓
+Virtual LED, logic pins       UNEXPO physical board
+```
+
+| Stage | Tool | Input | Output |
+| --- | --- | --- | --- |
+| Write | MPLAB v8 / X | Your source code | `.ASM` |
+| Assemble | **MPASM** | `.ASM` | **`.HEX`** (program + config bits) |
+| Simulate | **Proteus ISIS** | `.HEX` + schematic | Virtual behavior |
+| Program | PICkit 2/3, etc. | `.HEX` | PIC18F4550 Flash |
+
+The `.HEX` is the **bridge** between software and hardware: it holds instructions and the configuration word from your `CONFIG` directives.
+
+## MPASM — what happens when you build
+
+MPASM reads your [assembly file](/en/fundamentos/ensamblador/#anatomy-of-an-mpasm-file) and:
+
+1. **Translates** mnemonics (`MOVLW`, `BSF`…) into machine code.
+2. **Resolves** labels, `#include` symbols, and `CONFIG` directives.
+3. **Generates** the `.HEX` for programmer or Proteus.
+4. **Reports errors** if `END` is missing, labels duplicate, or symbols are undefined.
+
+### Files you see after a build
+
+| File | Purpose |
+| --- | --- |
+| **`.HEX`** | Load into Proteus or programmer — **the important one** |
+| **`.COD`** | Listing with addresses and machine code (debug) |
+| **`.LST`** | Source mixed with listing (if enabled) |
+| **`.ERR`** | Assembly errors (if build fails) |
+
+If the build fails, **there is no useful `.HEX`** — fix errors in the output window before simulating.
 
 <AIExplain title="Next step on the path">
-After this page, the [study path](/en/ruta-de-estudio/) takes you to the ports practical guide and the [First LED tutorial](/en/tutoriales/primer-led/), where you create the MPLAB project and simulate in Proteus step by step (setup, CONFIG, TRIS, and LAT).
+After this page, the [study path](/en/ruta-de-estudio/) takes you to the ports practical guide and the [First LED tutorial](/en/tutoriales/primer-led/), where you create the MPLAB project and simulate in Proteus step by step.
 </AIExplain>
 
+## MPLAB v8 — main course IDE
+
+MPLAB v8 is Microchip's classic IDE. UNEXPO labs often use it because it fits **MPASM** and pure `.ASM` projects well.
+
 <Tabs>
-	<TabItem label="MPLAB v8">
-		1. Create a project with the wizard.
-		2. Select `PIC18F4550`.
-		3. Use MPASM as the assembler tool.
-		4. Add the `.asm` file.
-		5. Build and generate the `.hex` file.
+	<TabItem label="MPLAB v8 — step by step">
+		### Create a project
+
+		1. **Project → Project Wizard**
+		2. Select **PIC18F4550**
+		3. Tool: **MPASM** (not XC8 if you only use assembly)
+		4. Project name and folder
+		5. Add your **`.asm`** file to the project
+
+		### Build
+
+		1. **Project → Build All** (or hammer icon)
+		2. Check **Output** — should say *Build succeeded*
+		3. Find the **`.hex`** in the project folder (e.g. `Debug/` or root)
+
+		### Config bits in MPLAB v8
+
+		You can edit them via **Configure → Configuration Bits**, but in the course it is better to declare them in `.ASM` ([config bits](/en/fundamentos/config-bits/#summary--course-template-20-mhz)) so report and `.HEX` match.
+
+		### Typical build errors
+
+		| Message | Common cause |
+		| --- | --- |
+		| `Symbol not defined` | Missing `#include <P18F4550.INC>` or typo in `TRISB` |
+		| `Label required` | Label without `:` (`start` vs `start:`) |
+		| `END directive required` | Missing `END` at file end |
+		| `Bank select error` | Variable in another bank without correct `BSR` |
 	</TabItem>
 	<TabItem label="MPLAB X">
-		1. Create a standalone project.
-		2. Select the device family and `PIC18F4550`.
-		3. Configure a compatible toolchain.
-		4. Add assembly code.
-		5. Build and review errors in the output panel.
+		### When to use it
+
+		MPLAB X is the modern IDE (NetBeans-based). Microchip promotes it for new **XC8** projects, but it can assemble `.ASM` with the right toolchain.
+
+		### Summary steps
+
+		1. **File → New Project** → Standalone Project
+		2. Device: **PIC18F4550**
+		3. Pick a toolchain compatible with assembly
+		4. Add your `.asm` to the project
+		5. **Production → Build Main Project**
+		6. Check **Output** and locate the `.hex`
+
+		If your instructor requires MPLAB v8, **do not mix** v8 and X projects in the same folder — paths and settings differ.
 	</TabItem>
 	<TabItem label="Proteus">
-		1. Place the PIC18F4550.
-		2. Connect crystal, power, and components.
-		3. Load the `.hex` file in the PIC properties.
-		4. Set the clock frequency.
-		5. Run the simulation and observe the pins.
+		### Build the circuit
+
+		1. Place **PIC18F4550** on the schematic
+		2. Wire [minimum system](/en/fundamentos/config-bits/#minimum-system--hardware-that-goes-with-config-bits): **20 MHz** crystal, capacitors, MCLR pull-up, VDD/VSS, decoupling
+		3. Add LED + resistor on **RB0** (or your lab pin)
+		4. Check common ground and LED polarity
+
+		### Load the .HEX
+
+		1. Double-click the PIC → **Program File** tab
+		2. Select the **`.hex`** from MPASM
+		3. Set **Clock Frequency** to **20 MHz** (matches `FOSC = HS` and crystal)
+		4. OK and save schematic
+
+		### Run simulation
+
+		1. **Play** (Run simulation)
+		2. Watch virtual LED and **RB0** levels
+		3. Use **Debug** to inspect registers if your version allows
+		4. If it does not start: check loaded `.HEX`, clock frequency, and [config bits](/en/fundamentos/config-bits/)
+
+		Proteus **does not assemble** — it only runs the `.HEX` you built in MPLAB.
 	</TabItem>
 	<TabItem label="Physical board">
-		1. Check power supply.
-		2. Verify oscillator, MCLR, and connections.
-		3. Program the microcontroller.
-		4. Measure outputs with a multimeter or LED.
-		5. Compare real behavior against Proteus.
+		### Before programming
+
+		1. Stable **5 V** supply and decoupling cap
+		2. 20 MHz crystal + caps + MCLR 10 kΩ ([minimum system](/en/fundamentos/config-bits/))
+		3. Check LED wiring (220–330 Ω resistor)
+		4. No shorts on the breadboard
+
+		### Program the MCU
+
+		1. Connect **PICkit 2/3** (or lab programmer) to ICSP
+		2. In MPLAB: **Programmer → Select Programmer**
+		3. **Program** with the same `.HEX` used in Proteus
+		4. Confirm *Programming/Verify complete*
+
+		### Validate
+
+		1. LED on/off per your code
+		2. Multimeter on output pins if something fails
+		3. Compare with simulation — Proteus OK but board not → suspect **hardware** (wiring, supply, wrong config bits)
 	</TabItem>
 </Tabs>
 
-## About AI-generated images
+## MPLAB vs Proteus vs board — who does what
 
-The site will leave room for AI-generated diagrams when useful: architecture visuals, LED wiring, interrupt flow, or memory maps. Each image must be technically reviewed before use, because a beautiful but incorrect image can confuse more than it helps.
+| Task | MPLAB + MPASM | Proteus | Physical board |
+| --- | --- | --- | --- |
+| Write code | ✅ | ❌ | ❌ |
+| Build `.HEX` | ✅ | ❌ | ❌ |
+| Simulate without hardware | ❌ | ✅ | ❌ |
+| Real crystal timing | ❌ | Approximate | ✅ |
+| Noise, contacts, bounce | ❌ | Limited | ✅ |
+| Program PIC Flash | With programmer | Simulates only | ✅ |
+
+Course rule: **build without errors first**, **then simulate in Proteus**, **then breadboard**.
+
+## Cross-tool consistency — checklist
+
+Before saying “it does not work”, verify **everything matches**:
+
+- [ ] Device: **PIC18F4550** in MPLAB, Proteus, and board
+- [ ] `CONFIG FOSC = HS` and **20 MHz** crystal in schematic and Proteus
+- [ ] Same **`.HEX`** in Proteus and programmer (rebuild after every change)
+- [ ] `PBADEN = OFF`, `LVP = OFF`, `WDT = OFF` (course template)
+- [ ] LED pin matches code (`RB0` → `BCF TRISB,0` and `BSF LATB,0`)
+- [ ] Rebuilt after editing `.ASM`
+
+<Exercise title="Order the workflow">
+Correct order for the First LED practice:
+
+1. Write `.ASM` with `LIST`, `#include`, `CONFIG`, `ORG`, GPIO code
+2. **Build** in MPLAB → get `.HEX`
+3. Build schematic in Proteus with 20 MHz crystal
+4. Load `.HEX` into Proteus PIC
+5. Simulate and verify LED
+6. Breadboard and program with PICkit
+
+**Typical mistake:** loading an old `.HEX` in Proteus after changing code without rebuilding — simulation does not reflect your latest changes.
+</Exercise>
+
+## Common mistakes
+
+- **Proteus without loaded `.HEX`**: PIC simulates empty memory or old program.
+- **Proteus clock not 20 MHz**: timing and some peripherals won't match the board.
+- **Mixing MPLAB X and v8 projects**: conflicting paths and toolchains.
+- **Simulation OK, board not**: check supply, MCLR, crystal, PIC orientation, LVP/PBADEN.
+- **Board OK, simulation not**: outdated `.HEX` or wrong Proteus frequency.
+- **Treating Proteus as compiler**: Proteus **does not replace** MPASM — it only runs `.HEX`.
+
+## Exam-style questions
+
+**What file does MPASM produce on a successful build?**
+
+A **`.HEX`** file with program and config bits for programming or simulation.
+
+**What is Proteus used for in the course?**
+
+To **simulate** circuit and program **before** the physical board, loading the `.HEX` from MPLAB.
+
+**Does MPLAB assemble directly or use another tool?**
+
+MPLAB invokes **MPASM** (for pure assembly projects in the course).
+
+**Why must Proteus clock frequency match the crystal?**
+
+Execution time and peripherals depend on **Fosc**; with `FOSC = HS` and 20 MHz crystal, Proteus should use **20 MHz**.
 
 <TopicQuiz slug="fundamentos/mplab-proteus" locale="en" />
