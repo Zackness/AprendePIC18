@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { buildStudyPathSidebar } from './src/data/study-path-navigation.ts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -36,6 +37,7 @@ export default defineConfig({
 				},
 			},
 			customCss: ['./src/styles/custom.css'],
+			routeMiddleware: ['./src/starlightRouteData.ts'],
 			components: {
 				Head: './src/components/Head.astro',
 				Header: './src/components/Header.astro',
@@ -51,138 +53,7 @@ export default defineConfig({
 				{ icon: 'external', label: 'StartupVen', href: 'https://startupven.com' },
 				{ icon: 'external', label: 'CALETAS', href: 'https://caleta.top' },
 			],
-			sidebar: [
-				{
-					label: 'Comienza aqui',
-					translations: { en: 'Start here' },
-					items: [
-						{ slug: 'ruta-de-estudio' },
-						{ slug: 'sobre/ecosistema' },
-						{ slug: 'introduccion/conceptos-basicos' },
-						{ slug: 'introduccion/pic18f4550' },
-						{ slug: 'introduccion/comparaciones' },
-					],
-				},
-				{
-					label: 'Fundamentos',
-					translations: { en: 'Foundations' },
-					items: [
-						{ slug: 'fundamentos/arquitectura' },
-						{ slug: 'fundamentos/registros' },
-						{ slug: 'fundamentos/bits-hex' },
-						{ slug: 'fundamentos/ensamblador' },
-						{ slug: 'fundamentos/config-bits' },
-						{ slug: 'fundamentos/mplab-proteus' },
-					],
-				},
-				{
-					label: 'GPIO',
-					translations: { en: 'GPIO' },
-					items: [
-						{ slug: 'gpio' },
-						{ slug: 'gpio/botones' },
-					],
-				},
-				{
-					label: 'Timers',
-					translations: { en: 'Timers' },
-					items: [
-						{ slug: 'timers/timer0' },
-						{ slug: 'timers/timer1-timer2' },
-					],
-				},
-				{
-					label: 'Interrupciones',
-					translations: { en: 'Interrupts' },
-					items: [{ slug: 'interrupciones' }],
-				},
-				{
-					label: 'ADC',
-					translations: { en: 'ADC' },
-					items: [{ slug: 'adc' }],
-				},
-				{
-					label: 'PWM / CCP',
-					translations: { en: 'PWM / CCP' },
-					items: [{ slug: 'pwm' }],
-				},
-				{
-					label: 'Comunicacion',
-					translations: { en: 'Communication' },
-					items: [
-						{ slug: 'comunicacion/uart' },
-						{ slug: 'comunicacion/spi-i2c' },
-						{ slug: 'comunicacion/usb' },
-						{ slug: 'comunicacion/lcd-teclado' },
-					],
-				},
-				{
-					label: 'Proyectos',
-					translations: { en: 'Projects' },
-					items: [
-						{ slug: 'proyectos/semaforo' },
-						{ slug: 'proyectos/control-nivel' },
-					],
-				},
-				{
-					label: 'Preparacion parcial',
-					translations: { en: 'Exam prep' },
-					items: [
-						{ slug: 'parcial/parcial-1' },
-						{ slug: 'parcial/parcial-2' },
-						{ slug: 'parcial/parcial-3' },
-						{ slug: 'parcial/parcial-4' },
-						{ slug: 'parcial/guia-teorica' },
-						{ slug: 'parcial/ejercicios' },
-						{ slug: 'parcial/proyecto-final' },
-					],
-				},
-				{
-					label: 'Referencia',
-					translations: { en: 'Reference' },
-					items: [
-						{ slug: 'referencia/guia-registros' },
-						{ slug: 'referencia/glosario' },
-					],
-				},
-				{
-					label: 'Catalogo de tutoriales',
-					translations: { en: 'Tutorial catalog' },
-					collapsed: true,
-					items: [
-						{ slug: 'tutoriales' },
-						{ slug: 'tutoriales/ejercicios' },
-						{
-							label: 'Guias practicas',
-							translations: { en: 'Practical guides' },
-							collapsed: true,
-							items: [
-								{ slug: 'tutoriales/guias' },
-								{ slug: 'tutoriales/guias/puertos' },
-								{ slug: 'tutoriales/guias/alu' },
-								{ slug: 'tutoriales/guias/interrupciones' },
-							],
-						},
-						{
-							label: 'Laboratorios UNEXPO',
-							translations: { en: 'UNEXPO labs' },
-							collapsed: true,
-							items: [
-								{ slug: 'tutoriales/primer-led' },
-								{ slug: 'tutoriales/practica-1' },
-								{ slug: 'tutoriales/practica-2' },
-								{ slug: 'tutoriales/practica-3' },
-								{ slug: 'tutoriales/practica-4' },
-								{ slug: 'tutoriales/practica-5' },
-								{ slug: 'tutoriales/practica-6' },
-								{ slug: 'tutoriales/practica-7' },
-								{ slug: 'tutoriales/practica-8' },
-								{ slug: 'tutoriales/practica-9' },
-							],
-						},
-					],
-				},
-			],
+			sidebar: buildStudyPathSidebar(),
 		}),
 	],
 });
