@@ -1,0 +1,106 @@
+---
+title: Banderas C y Z en comparaciones
+description: STATUS, comportamiento en resta, SUBWF y que bandera mirar en cada comparacion.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/banderas-c-z" />
+
+Cuando comparas registros con **`SUBWF`**, el PIC actualiza automaticamente **`C`** y **`Z`** en `STATUS`. El Segundo Parcial pide **explicar** esos bits en la parte teorica y **predecir** sus valores en la parte de desarrollo.
+
+## Registro STATUS (repaso)
+
+| Bit | Nombre | En comparaciones (resta unsigned) |
+| --- | --- | --- |
+| 0 | **C** | Acarreo / **bit de prestamo** en resta |
+| 2 | **Z** | Resultado **cero** |
+
+El PDF del curso dice: **C actua como el bit 9** del resultado en operaciones sin signo. En **resta A − B**:
+
+| Situacion | **C** | Significado |
+| --- | --- | --- |
+| **No hubo prestamo** (A ≥ B en unsigned) | **1** | Resultado valido sin borrow |
+| **Hubo prestamo** (A &lt; B en unsigned) | **0** | A era menor que B |
+
+| Situacion | **Z** |
+| --- | --- |
+| Resultado de la operacion = **0** | **1** |
+| Resultado ≠ **0** | **0** |
+
+<AIExplain title="Respuesta teorica del parcial (C y Z)">
+**Z:** se pone en 1 si el resultado es cero. **C:** en resta, 1 si no hay prestamo (resultado positivo o cero en unsigned); 0 si hay prestamo (A menor que B).
+</AIExplain>
+
+## SUBWF — la instruccion central
+
+`SUBWF f,d` calcula:
+
+```
+(f) − WREG  →  destino d
+```
+
+Pasos para comparar **A** con **B** haciendo **A − B**:
+
+```asm
+MOVF    B,W               ; W = B
+SUBWF   A,W               ; W = A - B  (actualiza C y Z)
+```
+
+- Destino **W** (`d=0`): resultado en WREG, **A** en memoria no cambia.
+- Destino **f** (`d=1`): resultado se guarda en **A** (cuidado: destruyes A si no te conviene).
+
+En comparaciones del curso casi siempre usas **`SUBWF A,W`** para no modificar A.
+
+## BTFSS y BTFSC — probar banderas
+
+| Instruccion | Salta si... |
+| --- | --- |
+| `BTFSS STATUS,Z` | **Z = 1** |
+| `BTFSC STATUS,Z` | **Z = 0** |
+| `BTFSS STATUS,C` | **C = 1** |
+| `BTFSC STATUS,C` | **C = 0** |
+
+`SS` = **Skip if Set** (salta si el bit esta en 1).  
+`SC` = **Skip if Clear** (salta si el bit esta en 0).
+
+La eleccion entre `BTFSS` y `BTFSC` depende de **a que etiqueta** quieres ir cuando la condicion es verdadera o falsa.
+
+## Que bandera mirar segun la relacion
+
+Tras **A − B** con `MOVF B,W` + `SUBWF A,W`:
+
+| Relacion | Condicion | Bandera principal |
+| --- | --- | --- |
+| A = B | Resultado 0 | **Z = 1** |
+| A &gt; B | Sin prestamo y no cero | **C = 1** y **Z = 0** |
+| A &lt; B | Con prestamo | **C = 0** |
+| A ≥ B | Sin prestamo | **C = 1** (Z puede ser 0 o 1) |
+| A ≤ B | Cero o prestamo | **C = 0** o **Z = 1** |
+
+## A − B no es igual a B − A
+
+```asm
+; A - B
+MOVF    B,W
+SUBWF   A,W
+
+; B - A  (¡distinto resultado en STATUS!)
+MOVF    A,W
+SUBWF   B,W
+```
+
+En el parcial, si comparas `REG1` con `REG2`, define explicitamente: ¿estas calculando **REG1 − REG2** o **REG2 − REG1**?
+
+<Exercise title="Prediccion rapida">
+A=8, B=8: ¿C? ¿Z?  
+A=12, B=5: ¿C? ¿Z?  
+A=1, B=10: ¿C? ¿Z?
+</Exercise>
+
+**Siguiente:** [Igual a cero](/comparaciones/igual-cero/) — caso especial que el examen pregunta aparte con `MOVF`.
+
+<TopicQuiz slug="comparaciones/banderas-c-z" locale="es" />

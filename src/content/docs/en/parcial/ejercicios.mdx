@@ -1,13 +1,13 @@
 ---
 title: Exam-style exercise bank
-description: Exercises aligned with UNEXPO Partial II — Topics 4 and 5 (delays, comparisons) and GPIO problems.
+description: Exercises aligned with UNEXPO Partial II — delays, comparisons, and GPIO problems.
 ---
 
 import Exercise from '../../../../components/Exercise.astro';
 
-## Partial II — Topics 4 and 5 (Jun 2026 model)
+## Partial II — delays and comparisons (Jun 2026 model)
 
-Study [Delays](/en/fundamentos/retardos/) and [Comparisons](/en/fundamentos/comparaciones-registros/) first.
+Study [Delays](/en/retardos/) and [Comparisons](/en/comparaciones/) first.
 
 <Exercise title="Theory: MOVF vs zero compare">
 Explain why `MOVF REGISTRO,F` uses flag **Z** (not C) to test zero. Write `BTFSS`/`BTFSC` to branch when the register is **not** zero.
@@ -37,7 +37,7 @@ RB0/RB1: sensors. RD0/RD1: motors. Structure: read sensors → `CALL CASO_1` …
 
 ## Additional class guide (GPIO application)
 
-The PDF `Ejercicios II parcial 20252.pdf` has tank-level control exercises — useful for flowcharts, not core Topics 4–5 theory.
+The PDF `Ejercicios II parcial 20252.pdf` has tank-level control exercises — useful for flowcharts, not core delay/comparison theory.
 
 <Exercise title="Tank level control">
 Pump + valve with simulated sensors. See [Level control project](/en/proyectos/control-nivel/).

@@ -1,13 +1,13 @@
 ---
 title: Banco de ejercicios tipo parcial
-description: Ejercicios alineados al Segundo Parcial UNEXPO — Temas 4 y 5 (retardos, comparaciones) y problemas GPIO.
+description: Ejercicios alineados al Segundo Parcial UNEXPO — retardos, comparaciones y problemas GPIO.
 ---
 
 import Exercise from '../../../components/Exercise.astro';
 
 ## Parcial II — Temas 4 y 5 (modelo jun 2026)
 
-Estos ejercicios reflejan la exigencia del examen real. Estudia primero [Retardos](/fundamentos/retardos/) y [Comparaciones](/fundamentos/comparaciones-registros/).
+Estos ejercicios reflejan la exigencia del examen real. Estudia primero [Retardos](/retardos/) y [Comparaciones](/comparaciones/).
 
 <Exercise title="Teoria: MOVF vs comparacion con cero">
 Explica por que `MOVF REGISTRO,F` usa la bandera **Z** (y no C) para saber si el registro es cero. Escribe el par de instrucciones `BTFSS`/`BTFSC` para saltar si **no** es cero.
@@ -41,14 +41,14 @@ RB0/RB1: sensores. RD0/RD1: motores. Estructura: leer sensores → `CALL CASO_1`
 
 ## Guia de clase adicional (aplicacion GPIO)
 
-El PDF `Ejercicios II parcial 20252.pdf` trae problemas de **control de nivel** (bomba/válvula) y display — utiles como practica de diagrama y pseudocodigo, aunque no son el nucleo teorico de Temas 4–5:
+El PDF `Ejercicios II parcial 20252.pdf` trae problemas de **control de nivel** (bomba/válvula) y display — utiles como practica de diagrama y pseudocodigo:
 
 <Exercise title="Control de nivel (guia 20252)">
 Sistema bomba + valvula con sensores simulados. Ver tambien [Proyecto control de nivel](/proyectos/control-nivel/).
 </Exercise>
 
 <Exercise title="Conteo descendente en display 7 segmentos">
-Programa que cuenta de 0FH a 00H en display BCD catodo comun. Dos pulsadores: uno incrementa cuenta inicial, otro inicia decremento de 1 s por digito (retardo Tema 4).
+Programa que cuenta de 0FH a 00H en display BCD catodo comun. Dos pulsadores: uno incrementa cuenta inicial, otro inicia decremento de 1 s por digito (usa [retardos](/retardos/)).
 </Exercise>
 
 ## Temas frecuentes en evaluacion
@@ -57,5 +57,5 @@ Programa que cuenta de 0FH a 00H en display BCD catodo comun. Dos pulsadores: un
 - Diagrama de flujo con decisiones
 - Codigo ensamblador modular (`CALL` / `RETURN`)
 - Calculo de retardos con CM × Σ CI
-- Comparaciones con tabla C/Z del Tema 5
+- Comparaciones con tabla C/Z de la seccion [Comparaciones](/comparaciones/)
 - Simulacion en Proteus y explicacion oral

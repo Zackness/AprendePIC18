@@ -343,37 +343,91 @@ export const studyPathCourses: StudyCourse[] = [
 		id: 'c05',
 		order: 5,
 		phase: 'curso',
-		titleEs: 'Tema 4 — Retardos por software',
-		titleEn: 'Topic 4 — Software delays',
+		titleEs: 'Retardos por software',
+		titleEn: 'Software delays',
 		descriptionEs:
-			'Ciclos de maquina, calculo de retardos con bucles anidados, NOP, BRA vs GOTO y GPIO aplicado.',
+			'Ciclos de maquina, bucles anidados, calculo CM × Σ CI, NOP y BRA vs GOTO.',
 		descriptionEn:
-			'Machine cycles, nested-loop delay math, NOP, BRA vs GOTO, and applied GPIO.',
+			'Machine cycles, nested loops, CM × Σ CI math, NOP, and BRA vs GOTO.',
 		level: 'beginner',
 		sourceDocs: ['Clase Tema 4 y 5.pdf'],
 		outcomesEs: [
 			'Calcular CM y retardo con CM × Σ CI',
 			'Implementar retardos de 1, 2 y 3 bucles',
-			'Explicar pipeline y ciclos de instruccion',
+			'Resolver el retardo de 3 ms @ 20 MHz del parcial',
 		],
 		outcomesEn: [
 			'Calculate CM and delay with CM × Σ CI',
 			'Implement 1-, 2-, and 3-loop delays',
-			'Explain pipeline and instruction cycles',
+			'Solve the partial exam 3 ms delay @ 20 MHz',
 		],
 		lessons: [
 			{
-				id: 'c05-l0',
-				titleEs: 'Retardos: CM, bucles y calculo',
-				titleEn: 'Delays: CM, loops, and calculation',
-				hrefEs: '/fundamentos/retardos/',
-				hrefEn: '/en/fundamentos/retardos/',
-				minutes: 50,
+				id: 'c05-l1',
+				titleEs: 'Introduccion a retardos',
+				titleEn: 'Introduction to delays',
+				hrefEs: '/retardos/',
+				hrefEn: '/en/retardos/',
+				minutes: 35,
 				type: 'theory',
 				sourceDoc: 'Clase Tema 4 y 5.pdf',
 			},
 			{
-				id: 'c05-l1',
+				id: 'c05-l2',
+				titleEs: 'Ciclos de maquina e instruccion',
+				titleEn: 'Machine and instruction cycles',
+				hrefEs: '/retardos/ciclos-maquina/',
+				hrefEn: '/en/retardos/ciclos-maquina/',
+				minutes: 40,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+			{
+				id: 'c05-l3',
+				titleEs: 'Bucles de retardo',
+				titleEn: 'Delay loops',
+				hrefEs: '/retardos/bucles/',
+				hrefEn: '/en/retardos/bucles/',
+				minutes: 45,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+			{
+				id: 'c05-l4',
+				titleEs: 'Calculo y aplicaciones',
+				titleEn: 'Calculation and applications',
+				hrefEs: '/retardos/calculo-y-aplicaciones/',
+				hrefEn: '/en/retardos/calculo-y-aplicaciones/',
+				minutes: 55,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+		],
+	},
+	{
+		id: 'c06',
+		order: 6,
+		phase: 'curso',
+		titleEs: 'GPIO — TRIS, PORT y LAT',
+		titleEn: 'GPIO — TRIS, PORT, and LAT',
+		descriptionEs:
+			'Puertos digitales, entradas, salidas, botones y antirrebote para problemas del parcial.',
+		descriptionEn:
+			'Digital ports, inputs, outputs, buttons, and debounce for partial exam problems.',
+		level: 'beginner',
+		outcomesEs: [
+			'Explicar diferencia entre PORT y LAT',
+			'Configurar entradas con pull-up interno',
+			'Implementar antirrebote basico',
+		],
+		outcomesEn: [
+			'Explain PORT vs LAT difference',
+			'Configure inputs with internal pull-up',
+			'Implement basic debounce',
+		],
+		lessons: [
+			{
+				id: 'c06-l1',
 				titleEs: 'GPIO: TRIS, PORT y LAT',
 				titleEn: 'GPIO: TRIS, PORT, and LAT',
 				hrefEs: '/gpio/',
@@ -383,7 +437,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 2 y 3 (1).pdf',
 			},
 			{
-				id: 'c05-l2',
+				id: 'c06-l2',
 				titleEs: 'Botones, pull-up y antirrebote',
 				titleEn: 'Buttons, pull-up, and debounce',
 				hrefEs: '/gpio/botones/',
@@ -394,40 +448,95 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c06',
-		order: 6,
+		id: 'c07',
+		order: 7,
 		phase: 'curso',
-		titleEs: 'Tema 5 — Comparacion de registros',
-		titleEn: 'Topic 5 — Register comparisons',
+		titleEs: 'Comparacion de registros',
+		titleEn: 'Register comparisons',
 		descriptionEs:
-			'MOVF vs SUBWF, banderas C y Z, subrutinas de comparacion y Practica 1 de operaciones ALU.',
+			'MOVF vs SUBWF, banderas C y Z, igual a cero, mayor/menor y subrutinas tipo parcial.',
 		descriptionEn:
-			'MOVF vs SUBWF, C and Z flags, comparison subroutines, and Practice 1 ALU lab.',
+			'MOVF vs SUBWF, C and Z flags, zero compare, greater/less, and partial-style subroutines.',
 		level: 'applied',
-		sourceDocs: ['Clase Tema 4 y 5.pdf', 'Practica 1  Operacion matematia.pdf'],
+		sourceDocs: ['Clase Tema 4 y 5.pdf'],
 		outcomesEs: [
 			'Comparar registro con cero usando Z',
 			'Implementar igual, menor y mayor con SUBWF',
-			'Resolver ejercicios tipo parcial (REG1 > REG2)',
+			'Resolver ejercicios REG1 > REG2 y tabla C/Z',
 		],
 		outcomesEn: [
 			'Compare register to zero using Z',
 			'Implement equal, less, and greater with SUBWF',
-			'Solve partial-style exercises (REG1 > REG2)',
+			'Solve REG1 > REG2 and C/Z table exercises',
 		],
 		lessons: [
 			{
-				id: 'c06-l1',
-				titleEs: 'Comparacion de registros (C y Z)',
-				titleEn: 'Register comparisons (C and Z)',
-				hrefEs: '/fundamentos/comparaciones-registros/',
-				hrefEn: '/en/fundamentos/comparaciones-registros/',
-				minutes: 45,
+				id: 'c07-l1',
+				titleEs: 'Introduccion a comparaciones',
+				titleEn: 'Introduction to comparisons',
+				hrefEs: '/comparaciones/',
+				hrefEn: '/en/comparaciones/',
+				minutes: 20,
 				type: 'theory',
 				sourceDoc: 'Clase Tema 4 y 5.pdf',
 			},
 			{
-				id: 'c06-l0g',
+				id: 'c07-l2',
+				titleEs: 'Banderas C y Z',
+				titleEn: 'C and Z flags',
+				hrefEs: '/comparaciones/banderas-c-z/',
+				hrefEn: '/en/comparaciones/banderas-c-z/',
+				minutes: 35,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+			{
+				id: 'c07-l3',
+				titleEs: 'Comparar con cero',
+				titleEn: 'Compare to zero',
+				hrefEs: '/comparaciones/igual-cero/',
+				hrefEn: '/en/comparaciones/igual-cero/',
+				minutes: 25,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+			{
+				id: 'c07-l4',
+				titleEs: 'Comparar dos registros',
+				titleEn: 'Compare two registers',
+				hrefEs: '/comparaciones/entre-registros/',
+				hrefEn: '/en/comparaciones/entre-registros/',
+				minutes: 50,
+				type: 'theory',
+				sourceDoc: 'Clase Tema 4 y 5.pdf',
+			},
+		],
+	},
+	{
+		id: 'c08',
+		order: 8,
+		phase: 'curso',
+		titleEs: 'Practica 1 — Operaciones matematicas',
+		titleEn: 'Practice 1 — Math operations',
+		descriptionEs:
+			'Laboratorio oficial de operaciones ALU en ensamblador segun Practica 1 del curso.',
+		descriptionEn:
+			'Official lab for ALU operations in assembly per course Practice 1.',
+		level: 'applied',
+		sourceDocs: ['Practica 1  Operacion matematia.pdf'],
+		outcomesEs: [
+			'Implementar suma, resta y operaciones logicas en .ASM',
+			'Montar diagrama en Proteus y placa',
+			'Explicar oralmente el codigo del laboratorio',
+		],
+		outcomesEn: [
+			'Implement add, subtract, and logic ops in .ASM',
+			'Build schematic in Proteus and hardware',
+			'Orally explain the lab code',
+		],
+		lessons: [
+			{
+				id: 'c08-l0g',
 				titleEs: 'Guia practica — Operaciones ALU',
 				titleEn: 'Practical guide — ALU operations',
 				hrefEs: '/tutoriales/guias/alu/',
@@ -437,7 +546,7 @@ export const studyPathCourses: StudyCourse[] = [
 				autoSkillSeries: 'alu',
 			},
 			{
-				id: 'c06-l2',
+				id: 'c08-l1',
 				titleEs: 'Tutorial — Práctica 1: operaciones matemáticas',
 				titleEn: 'Tutorial — Practice 1: math operations',
 				hrefEs: '/tutoriales/practica-1/',
@@ -450,11 +559,11 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c07',
-		order: 7,
+		id: 'c09',
+		order: 9,
 		phase: 'parcial',
-		titleEs: 'Preparacion Parcial II (Temas 4 y 5)',
-		titleEn: 'Partial II preparation (Topics 4 and 5)',
+		titleEs: 'Preparacion Parcial II',
+		titleEn: 'Partial II preparation',
 		descriptionEs:
 			'Repasa retardos, comparaciones, GPIO y Practica 1. Presenta el examen interactivo al nivel del parcial real.',
 		descriptionEn:
@@ -477,7 +586,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c07-l1',
+				id: 'c09-l1',
 				titleEs: 'Guia de repaso Parcial II',
 				titleEn: 'Partial II review guide',
 				hrefEs: '/parcial/parcial-2/',
@@ -486,7 +595,7 @@ export const studyPathCourses: StudyCourse[] = [
 				type: 'exam',
 			},
 			{
-				id: 'c07-l2',
+				id: 'c09-l2',
 				titleEs: 'Banco de ejercicios Parcial II',
 				titleEn: 'Partial II exercise bank',
 				hrefEs: '/parcial/ejercicios/',
@@ -499,8 +608,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c08',
-		order: 8,
+		id: 'c10',
+		order: 10,
 		phase: 'curso',
 		titleEs: 'Tema 6 — Interrupciones',
 		titleEn: 'Topic 6 — Interrupts',
@@ -522,7 +631,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c08-l1',
+				id: 'c10-l1',
 				titleEs: 'Interrupciones: concepto y registros',
 				titleEn: 'Interrupts: concept and registers',
 				hrefEs: '/interrupciones/',
@@ -532,7 +641,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 6. Interrupciones.pdf',
 			},
 			{
-				id: 'c08-l1g',
+				id: 'c10-l1g',
 				titleEs: 'Guia practica — Interrupciones',
 				titleEn: 'Practical guide — Interrupts',
 				hrefEs: '/tutoriales/guias/interrupciones/',
@@ -542,7 +651,7 @@ export const studyPathCourses: StudyCourse[] = [
 				autoSkillSeries: 'interrupciones',
 			},
 			{
-				id: 'c08-l2',
+				id: 'c10-l2',
 				titleEs: 'Tutorial: Timers e interrupciones (practica 5)',
 				titleEn: 'Tutorial: Timers and interrupts (practice 5)',
 				hrefEs: '/tutoriales/practica-5/',
@@ -555,8 +664,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c09',
-		order: 9,
+		id: 'c11',
+		order: 11,
 		phase: 'curso',
 		titleEs: 'Tema 7 — LCD y teclado matricial',
 		titleEn: 'Topic 7 — LCD and matrix keyboard',
@@ -581,7 +690,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c09-l1',
+				id: 'c11-l1',
 				titleEs: 'LCD HD44780 y teclado matricial',
 				titleEn: 'HD44780 LCD and matrix keyboard',
 				hrefEs: '/comunicacion/lcd-teclado/',
@@ -591,7 +700,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 7.1 Modulo LCD y 7.2 Teclado.pdf',
 			},
 			{
-				id: 'c09-l2',
+				id: 'c11-l2',
 				titleEs: 'Tutorial — Práctica 2: teclado y LCD',
 				titleEn: 'Tutorial — Practice 2: keyboard and LCD',
 				hrefEs: '/tutoriales/practica-2/',
@@ -604,8 +713,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c10',
-		order: 10,
+		id: 'c12',
+		order: 12,
 		phase: 'curso',
 		titleEs: 'Tema 8 — Timers',
 		titleEn: 'Topic 8 — Timers',
@@ -630,7 +739,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c10-l1',
+				id: 'c12-l1',
 				titleEs: 'Timer 0: retardo y contador',
 				titleEn: 'Timer 0: delay and counter',
 				hrefEs: '/timers/timer0/',
@@ -640,7 +749,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 8. Timer.pdf',
 			},
 			{
-				id: 'c10-l2',
+				id: 'c12-l2',
 				titleEs: 'Timer 1 y Timer 2',
 				titleEn: 'Timer 1 and Timer 2',
 				hrefEs: '/timers/timer1-timer2/',
@@ -650,7 +759,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 8. Timer.pdf',
 			},
 			{
-				id: 'c10-l3',
+				id: 'c12-l3',
 				titleEs: 'Tutorial — Práctica 3: frecuencímetro',
 				titleEn: 'Tutorial — Practice 3: frequency meter',
 				hrefEs: '/tutoriales/practica-3/',
@@ -663,8 +772,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c11',
-		order: 11,
+		id: 'c13',
+		order: 13,
 		phase: 'curso',
 		titleEs: 'Tema 9 — PWM y modulo CCP',
 		titleEn: 'Topic 9 — PWM and CCP module',
@@ -689,7 +798,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c11-l1',
+				id: 'c13-l1',
 				titleEs: 'PWM / CCP: teoria y registros',
 				titleEn: 'PWM / CCP: theory and registers',
 				hrefEs: '/pwm/',
@@ -699,7 +808,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Clase Tema 9. Modulo CCP (PWM).pdf',
 			},
 			{
-				id: 'c11-l2',
+				id: 'c13-l2',
 				titleEs: 'Tutorial: PWM (practica 4)',
 				titleEn: 'Tutorial: PWM (practice 4)',
 				hrefEs: '/tutoriales/practica-4/',
@@ -709,7 +818,7 @@ export const studyPathCourses: StudyCourse[] = [
 				autoPracticeSlug: 'practica-4',
 			},
 			{
-				id: 'c11-l3',
+				id: 'c13-l3',
 				titleEs: 'Tutorial — Práctica 6: motor paso a paso',
 				titleEn: 'Tutorial — Practice 6: stepper motor',
 				hrefEs: '/tutoriales/practica-6/',
@@ -722,8 +831,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c12',
-		order: 12,
+		id: 'c14',
+		order: 14,
 		phase: 'parcial',
 		titleEs: 'Preparacion Parcial III (Temas 6, 7, 8 y 9 PWM)',
 		titleEn: 'Partial III preparation (Topics 6, 7, 8, and 9 PWM)',
@@ -746,7 +855,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c12-l1',
+				id: 'c14-l1',
 				titleEs: 'Guia de repaso Parcial III',
 				titleEn: 'Partial III review guide',
 				hrefEs: '/parcial/parcial-3/',
@@ -755,7 +864,7 @@ export const studyPathCourses: StudyCourse[] = [
 				type: 'exam',
 			},
 			{
-				id: 'c12-l2',
+				id: 'c14-l2',
 				titleEs: 'Banco de ejercicios II parcial',
 				titleEn: 'Midterm II exercise bank',
 				hrefEs: '/parcial/ejercicios/',
@@ -767,8 +876,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c13',
-		order: 13,
+		id: 'c15',
+		order: 15,
 		phase: 'curso',
 		titleEs: 'Tema 9 — Convertidor A/D (ADC)',
 		titleEn: 'Topic 9 — A/D converter (ADC)',
@@ -790,7 +899,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c13-l1',
+				id: 'c15-l1',
 				titleEs: 'ADC de 10 bits en PIC18F4550',
 				titleEn: '10-bit ADC on PIC18F4550',
 				hrefEs: '/adc/',
@@ -800,7 +909,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Tema 9. CAD.pdf',
 			},
 			{
-				id: 'c13-l2',
+				id: 'c15-l2',
 				titleEs: 'Tutorial — Práctica 7: convertidor A/D',
 				titleEn: 'Tutorial — Practice 7: A/D converter',
 				hrefEs: '/tutoriales/practica-7/',
@@ -813,8 +922,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c14',
-		order: 14,
+		id: 'c16',
+		order: 16,
 		phase: 'curso',
 		titleEs: 'Tema 10 — Comunicacion serial',
 		titleEn: 'Topic 10 — Serial communication',
@@ -839,7 +948,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c14-l1',
+				id: 'c16-l1',
 				titleEs: 'UART / EUSART',
 				titleEn: 'UART / EUSART',
 				hrefEs: '/comunicacion/uart/',
@@ -849,7 +958,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'Tema 10. Comunicación serial.pdf',
 			},
 			{
-				id: 'c14-l2',
+				id: 'c16-l2',
 				titleEs: 'SPI e I2C (MSSP)',
 				titleEn: 'SPI and I2C (MSSP)',
 				hrefEs: '/comunicacion/spi-i2c/',
@@ -859,7 +968,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'PIC18LF4455-I-PT.PDF',
 			},
 			{
-				id: 'c14-l3',
+				id: 'c16-l3',
 				titleEs: 'USB del PIC18F4550',
 				titleEn: 'PIC18F4550 USB',
 				hrefEs: '/comunicacion/usb/',
@@ -869,7 +978,7 @@ export const studyPathCourses: StudyCourse[] = [
 				optional: true,
 			},
 			{
-				id: 'c14-l4',
+				id: 'c16-l4',
 				titleEs: 'Tutorial — Práctica 8: comunicación serial',
 				titleEn: 'Tutorial — Practice 8: serial communication',
 				hrefEs: '/tutoriales/practica-8/',
@@ -882,8 +991,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c15',
-		order: 15,
+		id: 'c17',
+		order: 17,
 		phase: 'parcial',
 		titleEs: 'Preparacion Parcial IV (ADC, serial y cierre)',
 		titleEn: 'Partial IV preparation (ADC, serial, and wrap-up)',
@@ -907,7 +1016,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c15-l1',
+				id: 'c17-l1',
 				titleEs: 'Guia de repaso Parcial IV',
 				titleEn: 'Partial IV review guide',
 				hrefEs: '/parcial/parcial-4/',
@@ -916,7 +1025,7 @@ export const studyPathCourses: StudyCourse[] = [
 				type: 'exam',
 			},
 			{
-				id: 'c15-l2',
+				id: 'c17-l2',
 				titleEs: 'Proyecto final tipo parcial',
 				titleEn: 'Final partial-style project',
 				hrefEs: '/parcial/proyecto-final/',
@@ -925,7 +1034,7 @@ export const studyPathCourses: StudyCourse[] = [
 				type: 'exam',
 			},
 			{
-				id: 'c15-l3',
+				id: 'c17-l3',
 				titleEs: 'Tutorial proyecto integrador (practica 9)',
 				titleEn: 'Integrator project tutorial (practice 9)',
 				hrefEs: '/tutoriales/practica-9/',
@@ -937,8 +1046,8 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 	},
 	{
-		id: 'c16',
-		order: 16,
+		id: 'c18',
+		order: 18,
 		phase: 'referencia',
 		titleEs: 'Referencia y repaso general',
 		titleEn: 'Reference and general review',
@@ -957,7 +1066,7 @@ export const studyPathCourses: StudyCourse[] = [
 		],
 		lessons: [
 			{
-				id: 'c16-l1',
+				id: 'c18-l1',
 				titleEs: 'Glosario y guia rapida de registros',
 				titleEn: 'Glossary and quick register guide',
 				hrefEs: '/referencia/glosario/',
@@ -967,7 +1076,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'PIC18LF4455-I-PT.PDF',
 			},
 			{
-				id: 'c16-l2',
+				id: 'c18-l2',
 				titleEs: 'Guia de registros (referencia)',
 				titleEn: 'Register guide (reference)',
 				hrefEs: '/referencia/guia-registros/',
@@ -977,7 +1086,7 @@ export const studyPathCourses: StudyCourse[] = [
 				sourceDoc: 'PIC18LF4455-I-PT.PDF',
 			},
 			{
-				id: 'c16-l3',
+				id: 'c18-l3',
 				titleEs: 'Ejercicios interactivos con checklist',
 				titleEn: 'Interactive exercises with checklist',
 				hrefEs: '/tutoriales/ejercicios/',

@@ -1,0 +1,36 @@
+---
+title: Register comparisons
+description: Introduction to MOVF, SUBWF, and STATUS flags — Partial II preparation.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones" locale="en" />
+
+Almost every decision in PIC assembly uses **comparisons**. The PIC18 has no `CMP` instruction — you **subtract** (or `MOVF` for zero) and read **`STATUS`**.
+
+<AIExplain title="Golden rule">
+**Zero:** `MOVF reg,F` + **Z**. **Two registers:** `MOVF` + `SUBWF` + **C** / **Z**.
+</AIExplain>
+
+## Three cases
+
+| Case | Method |
+| --- | --- |
+| Equal to zero | `MOVF A,F` → test **Z** |
+| Equal registers | `MOVF B,W` / `SUBWF A,W` → **Z** |
+| Less / greater | Same subtract → **C** (and **Z**) |
+
+## Partial exam mapping
+
+| Page | Exam topic |
+| --- | --- |
+| [C and Z flags](/en/comparaciones/banderas-c-z/) | Theory: explain C and Z |
+| [Equal to zero](/en/comparaciones/igual-cero/) | Theory: why MOVF,F |
+| [Between registers](/en/comparaciones/entre-registros/) | REG1>REG2, C/Z table |
+
+**Next:** [C and Z flags](/en/comparaciones/banderas-c-z/).
+
+<TopicQuiz slug="comparaciones" locale="en" />

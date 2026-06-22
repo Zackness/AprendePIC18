@@ -86,6 +86,11 @@ const SOURCES = {
 		pages: [8, 19, 20],
 		credit: 'Clase Tema 2 y 3 — Arquitectura del PIC (UNEXPO · Prof. Ing. Yoel Pire)',
 	},
+	'tema-4-5': {
+		file: 'Clase Tema 4 y 5.pdf',
+		pages: [6, 7, 8, 9, 10, 11],
+		credit: 'Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)',
+	},
 };
 
 function hasPdfimages() {

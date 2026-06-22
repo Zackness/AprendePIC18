@@ -1,0 +1,182 @@
+---
+title: Bucles de retardo
+description: Retardo de un bucle, dos y tres bucles anidados, conteo de ciclos paso a paso y duracion maxima @ 20 MHz.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/bucles" />
+
+Un retardo por software es un **bucle** que decrementa contadores hasta cero. Para tiempos de milisegundos o segundos necesitas **anidar** bucles (uno dentro de otro).
+
+## Retardo de un solo bucle
+
+### Codigo completo (subrutina)
+
+```asm
+RETARDO
+    MOVLW   .N
+    MOVWF   CONTADOR
+BUCLE
+    DECFSZ  CONTADOR,F
+    BRA     BUCLE
+    RETURN
+```
+
+Si se llama con `CALL RETARDO`, el `CALL` suma **2 ciclos** antes de entrar.
+
+### Conteo de ciclos (como en el PDF)
+
+| Linea | Instruccion | Ciclos × veces | Subtotal |
+| --- | --- | --- | --- |
+| (CALL) | `CALL RETARDO` | 2 × 1 | 2 |
+| 1 | `MOVLW .N` | 1 × 1 | 1 |
+| 2 | `MOVWF CONTADOR` | 1 × 1 | 1 |
+| 3 | `DECFSZ CONTADOR,F` | 1×(N−1) + 2×1 | N + 1 |
+| 4 | `BRA BUCLE` | 2 × (N−1) | 2N − 2 |
+| 5 | `RETURN` | 2 × 1 | 2 |
+
+**Σ CI (con CALL)** = 2 + 1 + 1 + (N+1) + (2N−2) + 2 = **3N + 4**
+
+Sin `CALL` (solo cuerpo de subrutina): **Σ CI ≈ 3N + 2**
+
+### Ejemplo del PDF: N = 200, cristal 20 MHz
+
+| Paso | Valor |
+| --- | --- |
+| CM | 4/20 MHz = **0,2 µs** |
+| Σ CI | 2+1+1+201+398+2 = **605** |
+| Retardo | 0,2 × 605 = **121 µs** |
+
+Desglose `DECFSZ`: 199 veces × 1 ciclo + 1 vez × 2 ciclos = **201**.  
+Desglose `BRA`: 199 veces × 2 = **398**.
+
+<AIExplain title="Error comun">
+No cuentes `DECFSZ` como N×1 solamente. La ultima iteracion (cuando el contador pasa a 0) consume **2 ciclos**, no 1.
+</AIExplain>
+
+## Retardo de dos bucles anidados
+
+Estructura del PDF (recarga **N** en cada vuelta del bucle externo):
+
+<Figure
+	src="/images/pdf/tema-4-5/page-8.png"
+	alt="Diapositiva del PDF: retardo de dos y tres bucles anidados con conteo de ciclos y formulas"
+	caption="Diapositiva 8 del PDF: codigo, conteo linea por linea y formulas Σ CI = 3NM + 4M + 5 (dos bucles) y 3NMP + 4MP + 4P + 5 (tres bucles)."
+	credit="Clase Tema 4 y 5 — Retardos · UNEXPO · Prof. Ing. Yoel Pire"
+/>
+
+```asm
+RETARDO
+    MOVLW   .M
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .N
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    RETURN
+```
+
+**Formula del curso (sin CALL):**
+
+```
+Σ CI = 3NM + 4M + 5
+```
+
+Donde **N** = contador interno, **M** = contador externo.
+
+### De donde sale la formula
+
+Cada vuelta del bucle externo paga:
+
+- `MOVLW .N` + `MOVWF CONTADOR_1` → 2 ciclos
+- Bucle interno completo → ≈ 3N ciclos
+- `DECFSZ CONTADOR_2` + `BRA BUCLE_2` → ≈ 4 ciclos por vuelta externa (promediado)
+
+El PDF resume todo en **3NM + 4M + 5**; usala para estimar y luego verifica linea por linea en el examen.
+
+## Retardo de tres bucles anidados
+
+```asm
+RETARDO
+    MOVLW   .P
+    MOVWF   CONTADOR_3
+BUCLE_3
+    MOVLW   .M
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .N
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    DECFSZ  CONTADOR_3,F
+    BRA     BUCLE_3
+    RETURN
+```
+
+**Formula del curso:**
+
+```
+Σ CI = 3NMP + 4MP + 4P + 5
+```
+
+## Tabla de duracion maxima @ 20 MHz
+
+Este cuadro **no es del examen parcial**: es el **ejercicio de clase** del PDF (*«Realice un cuadro comparativo con la duracion maxima de retardos de 1, 2 y 3 bucles con un cristal de 20 MHz»*). La fila de **2 bucles** (Σ CI = **196 100**, retardo **39,22 ms**) sale de ahi.
+
+<Figure
+	src="/images/pdf/tema-4-5/page-9.png"
+	alt="Ejercicio del PDF: tabla comparativa de retardos maximos con 1, 2 y 3 bucles a 20 MHz"
+	caption="Diapositiva 9 del PDF — ejercicio de clase: N=M=P=255 y tabla con 770 / 196 100 / 50 005 250 ciclos."
+	credit="Clase Tema 4 y 5 — Retardos · UNEXPO · Prof. Ing. Yoel Pire"
+/>
+
+Con contadores al maximo (**N = M = P = 255**):
+
+| Bucles | Σ CI | Retardo |
+| --- | --- | --- |
+| 1 | 770 | **0,154 ms** |
+| 2 | 196 100 | **39,22 ms** |
+| 3 | 50 005 250 | **~10 s** |
+
+**Conclusion practica:** con software puro y 20 MHz, para **segundos** necesitas **3 bucles** o repetir subrutinas (p. ej. llamar `RETARDO_50MS` muchas veces). El problema de la **bomba** del parcial (10 s por digito) encaja con retardos largos o bucles de 3 niveles.
+
+<Exercise title="Cuadro comparativo (ejercicio del PDF)">
+Verifica la fila de 1 bucle: N=255, Σ CI=770, Retardo = 770 × 0,2 µs = 154 µs = 0,154 ms.
+</Exercise>
+
+<Exercise title="¿Cuanto con 2 bucles? (misma diapositiva)">
+Con N=M=255, Σ CI = 3×255×255 + 4×255 + 5 = 196 100. Retardo = 196 100 × 0,2 µs = 39,22 ms.
+</Exercise>
+
+<AIExplain title="PDF de clase vs examen parcial">
+Lo de esta pagina (formulas, tabla 1/2/3 bucles) viene del PDF **Clase Tema 4 y 5**. El **retardo de 3 ms** con N=29 y variable **A** es del **Segundo Parcial** (no esta en esas diapositivas) — ver [Calculo y aplicaciones](/retardos/calculo-y-aplicaciones/).
+</AIExplain>
+
+## Variables en RAM
+
+Declara contadores en GPR (estilo sandwich del curso):
+
+```asm
+CONTADOR    RES 1
+CONTADOR_1  RES 1
+CONTADOR_2  RES 1
+CONTADOR_3  RES 1
+```
+
+Cada `RES 1` reserva **1 byte** (0–255). Por eso el maximo de un contador en un bucle simple es **255** (`.255` o valor menor).
+
+**Siguiente:** [Calculo y aplicaciones](/retardos/calculo-y-aplicaciones/) — retardo **3 ms** del examen, señal 10 Hz, `NOP` y `BRA` vs `GOTO`.
+
+<TopicQuiz slug="retardos/bucles" locale="es" />

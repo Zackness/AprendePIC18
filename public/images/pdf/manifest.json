@@ -386,82 +386,82 @@
   {
     "key": "pwm",
     "page": 1,
-    "src": "/images/pdf/pwm/page-1-img-1.png",
+    "src": "/images/pdf/pwm/page-1.png",
     "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
-    "bytes": 4289,
-    "mode": "embedded"
+    "bytes": 70882,
+    "mode": "page"
   },
   {
     "key": "pwm",
     "page": 2,
-    "src": "/images/pdf/pwm/page-2-img-2.png",
+    "src": "/images/pdf/pwm/page-2.png",
     "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
-    "bytes": 1415,
-    "mode": "embedded"
+    "bytes": 367900,
+    "mode": "page"
   },
   {
     "key": "pwm",
     "page": 3,
-    "src": "/images/pdf/pwm/page-3-img-3.png",
+    "src": "/images/pdf/pwm/page-3.png",
     "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
-    "bytes": 5690,
-    "mode": "embedded"
+    "bytes": 164569,
+    "mode": "page"
   },
   {
     "key": "pwm",
     "page": 4,
-    "src": "/images/pdf/pwm/page-4-img-4.png",
+    "src": "/images/pdf/pwm/page-4.png",
     "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
-    "bytes": 1512,
-    "mode": "embedded"
+    "bytes": 251691,
+    "mode": "page"
   },
   {
     "key": "pwm",
     "page": 5,
-    "src": "/images/pdf/pwm/page-5-img-5.png",
+    "src": "/images/pdf/pwm/page-5.png",
     "credit": "Tema 9 — Modulo CCP / PWM (UNEXPO)",
-    "bytes": 3450,
-    "mode": "embedded"
+    "bytes": 176644,
+    "mode": "page"
   },
   {
     "key": "adc",
     "page": 1,
-    "src": "/images/pdf/adc/page-1-img-1.png",
+    "src": "/images/pdf/adc/page-1.png",
     "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
-    "bytes": 13604,
-    "mode": "embedded"
+    "bytes": 143220,
+    "mode": "page"
   },
   {
     "key": "adc",
     "page": 2,
-    "src": "/images/pdf/adc/page-2-img-2.png",
+    "src": "/images/pdf/adc/page-2.png",
     "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
-    "bytes": 1167,
-    "mode": "embedded"
+    "bytes": 672914,
+    "mode": "page"
   },
   {
     "key": "adc",
     "page": 3,
-    "src": "/images/pdf/adc/page-3-img-3.png",
+    "src": "/images/pdf/adc/page-3.png",
     "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
-    "bytes": 164728,
-    "mode": "embedded"
+    "bytes": 562471,
+    "mode": "page"
   },
   {
     "key": "adc",
     "page": 4,
-    "src": "/images/pdf/adc/page-4-img-4.png",
+    "src": "/images/pdf/adc/page-4.png",
     "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
-    "bytes": 6553,
-    "mode": "embedded"
+    "bytes": 434443,
+    "mode": "page"
   },
   {
     "key": "adc",
     "page": 5,
-    "src": "/images/pdf/adc/page-5-img-5.png",
+    "src": "/images/pdf/adc/page-5.png",
     "credit": "Tema 9 — Convertidor A/D (UNEXPO)",
-    "bytes": 71947,
-    "mode": "embedded"
+    "bytes": 318483,
+    "mode": "page"
   },
   {
     "key": "tema-2-3",
@@ -485,6 +485,54 @@
     "src": "/images/pdf/tema-2-3/page-20.png",
     "credit": "Clase Tema 2 y 3 — Arquitectura del PIC (UNEXPO · Prof. Ing. Yoel Pire)",
     "bytes": 258985,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 6,
+    "src": "/images/pdf/tema-4-5/page-6.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 171162,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 7,
+    "src": "/images/pdf/tema-4-5/page-7.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 101267,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 8,
+    "src": "/images/pdf/tema-4-5/page-8.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 204296,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 9,
+    "src": "/images/pdf/tema-4-5/page-9.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 92400,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 10,
+    "src": "/images/pdf/tema-4-5/page-10.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 133884,
+    "mode": "page"
+  },
+  {
+    "key": "tema-4-5",
+    "page": 11,
+    "src": "/images/pdf/tema-4-5/page-11.png",
+    "credit": "Clase Tema 4 y 5 — Retardos y comparaciones (UNEXPO · Prof. Ing. Yoel Pire)",
+    "bytes": 196370,
     "mode": "page"
   }
 ]

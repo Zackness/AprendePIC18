@@ -1,0 +1,151 @@
+---
+title: Comparar dos registros
+description: Igual, menor, mayor, mayor o igual, menor o igual, tabla C/Z y ejercicios del parcial.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/entre-registros" />
+
+Todas las comparaciones entre **dos registros** A y B pasan por calcular **A − B** con `MOVF B,W` y `SUBWF A,W`, luego leer **C** y **Z**.
+
+## Igual (A = B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,Z          ; Z=1 → iguales
+GOTO    A_NO_IGUAL_B
+GOTO    A_IGUAL_B
+```
+
+| Si A=B | A−B | Z | C |
+| --- | --- | --- | --- |
+| Si | 0 | **1** | **1** |
+
+## Menor que (A &lt; B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSC   STATUS,C          ; C=0 → A < B
+GOTO    A_ES_MENOR_B
+GOTO    A_NO_ES_MENOR_B
+```
+
+Cuando **A &lt; B** (unsigned), hay **prestamo** → **C = 0**.
+
+## Mayor que (A &gt; B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,C          ; ¿C=1?
+GOTO    A_NO_ES_MAYOR_B
+BTFSS   STATUS,Z          ; ¿Z=0? (no iguales)
+GOTO    A_ES_MAYOR_B
+GOTO    A_NO_ES_MAYOR_B
+```
+
+**A &gt; B** requiere **C = 1** y **Z = 0** (sin prestamo y resultado no cero).
+
+## Mayor o igual (A ≥ B)
+
+Solo necesitas **C = 1** (incluye el caso A = B donde Z = 1):
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,C
+GOTO    A_MENOR_B
+; aqui A >= B
+```
+
+## Menor o igual (A ≤ B)
+
+**C = 0** o **Z = 1**:
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,Z          ; A = B
+GOTO    A_IGUAL_B
+BTFSC   STATUS,C          ; A < B si C=0
+GOTO    A_MENOR_B
+; ...
+```
+
+## Tabla resumen del PDF (operacion A − B)
+
+| Operacion A−B | C | Z | Comprobar (nota del PDF) |
+| --- | --- | --- | --- |
+| A = B | 1 | 1 | **Z** |
+| A &gt; B | 1 | 0 | **C** y **Z** |
+| A &lt; B | 0 | 0 | **C** |
+| A ≥ B | 1 | 0 o 1 | **C** |
+| A ≤ B | 0 o 1 | 1 | **C** o **Z** |
+
+## Inciso del parcial: valores de C y Z
+
+Tras `MOVF B,W` y `SUBWF A,W`:
+
+| Caso | A | B | A−B | **C** | **Z** |
+| --- | --- | --- | --- | --- | --- |
+| a) | 10 | 10 | 0 | **1** | **1** |
+| b) | 5 | 3 | 2 | **1** | **0** |
+| c) | 2 | 7 | prestamo | **0** | **0** |
+
+<Exercise title="Completar tabla">
+A=15, B=8 → ¿C? ¿Z?  
+A=0, B=1 → ¿C? ¿Z?
+</Exercise>
+
+**Solucion:** A=15,B=8 → C=1,Z=0. A=0,B=1 → C=0,Z=0.
+
+## Subrutina del parcial: REG1 &gt; REG2
+
+Enunciado: *Si REG1 es mayor que REG2, saltar a la etiqueta **MAYOR**.*
+
+```asm
+COMPARAR
+    MOVF    REG2,W
+    SUBWF   REG1,W          ; REG1 - REG2
+    BTFSS   STATUS,C        ; C=0 → no es mayor (REG1 < REG2)
+    GOTO    FIN_COMP
+    BTFSS   STATUS,Z        ; Z=1 → son iguales
+    GOTO    MAYOR           ; C=1 y Z=0 → REG1 > REG2
+FIN_COMP
+    RETURN
+MAYOR
+    ; codigo cuando REG1 > REG2
+    RETURN
+```
+
+Variante con una sola rama a `MAYOR` y `RETURN` en otro lado segun pida el enunciado.
+
+<AIExplain title="Robot seguidor (parcial problema 5)">
+Lee sensores RB0/RB1, enmascara bits, compara patron (linea negra = alto o bajo segun enunciado) y `CALL CASO_1` … `CASO_4`. Cada caso es una **combinacion** de entradas — aplica la misma logica de comparacion/mascara.
+</AIExplain>
+
+## Comparar B − A (orden inverso)
+
+Si el enunciado dice "¿REG2 mayor que REG1?", calcula **REG2 − REG1**:
+
+```asm
+MOVF    REG1,W
+SUBWF   REG2,W            ; REG2 - REG1
+; luego mismas pruebas de C y Z
+```
+
+## Checklist antes del parcial (comparaciones)
+
+- [ ] MOVF,F + Z para cero (teoria)
+- [ ] Explicar C y Z en resta (teoria)
+- [ ] Tabla A=10,B=10 / 5,3 / 2,7
+- [ ] Subrutina REG1 &gt; REG2
+- [ ] Saber cuando usar solo C, solo Z, o ambos
+
+<TopicQuiz slug="comparaciones/entre-registros" locale="es" />

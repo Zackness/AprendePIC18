@@ -1,0 +1,55 @@
+---
+title: C and Z flags in comparisons
+description: STATUS after SUBWF, borrow bit C, zero flag Z, and which flag to test.
+---
+
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/banderas-c-z" locale="en" />
+
+## After subtraction A − B
+
+| Flag | Meaning (unsigned subtract) |
+| --- | --- |
+| **Z** | 1 if result is **zero** |
+| **C** | 1 if **no borrow** (A ≥ B); 0 if borrow (A &lt; B) |
+
+**C** acts as bit 9 of the unsigned result (course PDF).
+
+## SUBWF pattern
+
+```asm
+MOVF    B,W
+SUBWF   A,W               ; A - B, updates C and Z
+```
+
+**A − B ≠ B − A** in flags.
+
+## Which flag to check
+
+| Relation | Flags |
+| --- | --- |
+| A = B | **Z = 1** |
+| A &gt; B | **C = 1**, **Z = 0** |
+| A &lt; B | **C = 0** |
+| A ≥ B | **C = 1** |
+| A ≤ B | **C = 0** or **Z = 1** |
+
+## Test instructions
+
+| Instruction | Skips if |
+| --- | --- |
+| `BTFSS STATUS,Z` | Z = 1 |
+| `BTFSC STATUS,Z` | Z = 0 |
+| `BTFSS STATUS,C` | C = 1 |
+| `BTFSC STATUS,C` | C = 0 |
+
+<Exercise title="Predict">
+A=8,B=8 → C=1,Z=1. A=12,B=5 → C=1,Z=0. A=1,B=10 → C=0,Z=0.
+</Exercise>
+
+**Next:** [Equal to zero](/en/comparaciones/igual-cero/).
+
+<TopicQuiz slug="comparaciones/banderas-c-z" locale="en" />

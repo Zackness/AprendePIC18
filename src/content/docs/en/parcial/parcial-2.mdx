@@ -1,6 +1,6 @@
 ---
 title: Partial II preparation
-description: Review and interactive exam for Partial II — Topic 4 (delays) and Topic 5 (comparisons) UNEXPO.
+description: Review and interactive exam for Partial II — delays, comparisons, and GPIO UNEXPO.
 ---
 
 import Figure from '../../../../components/Figure.astro';
@@ -13,28 +13,26 @@ import { getParcialById } from '../../../../data/parciales';
 
 ## When to take this partial
 
-After **courses 5, 6, and 7** on the [study path](/en/ruta-de-estudio/#c07): **delays (Topic 4)**, **register comparisons (Topic 5)**, GPIO, buttons, and **Practice 1**.
+After **courses 5 through 9** on the [study path](/en/ruta-de-estudio/#c09): [Delays](/en/retardos/), [GPIO](/en/gpio/), [Comparisons](/en/comparaciones/), and **Practice 1**.
 
 ## Real exam difficulty
 
-Partial II is not GPIO-only. The professor's model (Jun 2026) includes:
-
 | Part | Typical content |
 | --- | --- |
-| **I — Theory** | `MOVF REGISTRO,F` vs zero compare (**Z** flag); **C** and **Z**; **pipeline** overlap; **machine cycle** |
-| **II — Development** | Subroutine if `REG1 > REG2`; C/Z after `SUBWF`; **3 ms delay @ 20 MHz**; BRA vs GOTO; pump + BCD display |
-| **III — Problems** | Pump countdown; line-following robot (`CALL CASO_n`) |
+| **I — Theory** | `MOVF REGISTRO,F` vs zero (**Z**); **C** and **Z**; pipeline; machine cycle |
+| **II — Development** | `REG1 > REG2` subroutine; C/Z after `SUBWF`; **3 ms delay @ 20 MHz** |
+| **III — Problems** | Pump countdown; line-following robot |
 
 <Figure
 	src="/images/parcial/examen-ii-unexpo.png"
-	alt="Sample UNEXPO Microcontrollers Partial II exam"
-	caption="Reference: Second Partial — PIC18F4550 Microcontrollers (Topics 4 and 5 model)."
+	alt="Sample UNEXPO Partial II exam"
+	caption="Reference: Second Partial — PIC18F4550 Microcontrollers."
 />
 
-### Required lessons before the exam
+### Required before the exam
 
-1. [Software delays](/en/fundamentos/retardos/) — Topic 4 from `Clase Tema 4 y 5.pdf`
-2. [Register comparisons](/en/fundamentos/comparaciones-registros/) — Topic 5
+1. [Delays](/en/retardos/)
+2. [Comparisons](/en/comparaciones/)
 3. [GPIO](/en/gpio/) and [buttons](/en/gpio/botones/)
 4. [Practice 1](/en/tutoriales/practica-1/)
 

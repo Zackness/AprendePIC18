@@ -1,0 +1,104 @@
+---
+title: Comparar con cero
+description: MOVF registro,F, bandera Z, BTFSS vs BTFSC — respuesta a la pregunta teorica del parcial.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/igual-cero" />
+
+El examen pregunta en la **Parte I**:
+
+> *¿Por que se usa `MOVF REGISTRO,F` para comparar con cero?*
+
+Esta pagina te da la respuesta completa que el profesor espera.
+
+## Respuesta corta (memorizar)
+
+1. `MOVF REGISTRO,F` **mueve el registro sobre si mismo** (destino `F` = el mismo registro).
+2. Esa operacion actualiza la bandera **Z** del `STATUS`.
+3. Si `REGISTRO = 0` → **Z = 1**. Si no → **Z = 0**.
+4. La bandera relevante es **Z**, **no C**.
+
+## Por que no basta con mirar C
+
+`MOVF` **no es una resta**. No genera prestamo ni acarreo de la misma forma que `SUBWF`. Para **igual a cero**, el curso ensena **`MOVF` + Z**, no probar **C**.
+
+Si en el examen marcas que usas **C** para comparar con cero tras `MOVF`, la respuesta es **incorrecta**.
+
+## Codigo: igual a cero
+
+### Variante con `BTFSS` (salta si Z=1 → era cero)
+
+```asm
+MOVF    REGISTRO,F
+BTFSS   STATUS,Z         ; ¿Z=1?
+GOTO    NO_ES_CERO       ; no salta si Z=1 → no era cero
+GOTO    ES_CERO           ; Z=1 → era cero
+```
+
+| REGISTRO | Z despues de MOVF | ¿Salta BTFSS? | Flujo |
+| --- | --- | --- | --- |
+| 0 | 1 | Si | Va a `ES_CERO` |
+| ≠ 0 | 0 | No | Va a `NO_ES_CERO` |
+
+### Variante con `BTFSC` (logica invertida)
+
+```asm
+MOVF    REGISTRO,F
+BTFSC   STATUS,Z         ; salta si Z=0 (no es cero)
+GOTO    ES_CERO
+GOTO    NO_ES_CERO
+```
+
+Ambas son correctas; elige la que haga mas legible tu flujo hacia `ES_CERO` o `NO_ES_CERO`.
+
+## Codigo: distinto de cero
+
+```asm
+MOVF    REGISTRO,F
+BTFSC   STATUS,Z         ; salta si Z=0 → no es cero
+GOTO    ES_DISTINTO_CERO
+GOTO    ES_CERO
+```
+
+## ¿Se puede usar SUBWF para comparar con cero?
+
+Si:
+
+```asm
+MOVLW   .0
+SUBWF   A,W              ; A - 0
+BTFSS   STATUS,Z
+```
+
+Funciona, pero el **metodo oficial del curso** para cero es **`MOVF A,F`**. En la pregunta teorica del parcial responde con **MOVF y Z**.
+
+<AIExplain title="Enlace con arquitectura">
+Es el mismo criterio que en [Arquitectura](/fundamentos/arquitectura/): comparar con cero leyendo **Z** tras operar sobre el registro.
+</AIExplain>
+
+## Comparar con un literal distinto de cero
+
+Para ¿A = 5?:
+
+```asm
+MOVLW   .5
+SUBWF   A,W
+BTFSS   STATUS,Z
+GOTO    A_NO_ES_5
+GOTO    A_ES_5
+```
+
+Aqui **si** usas resta porque comparas con un **valor distinto de cero**.
+
+<Exercise title="Pregunta teorica (escrita)">
+Redacta en 3-4 lineas: ¿Por que `MOVF REGISTRO,F` compara con cero usando Z y no C?
+</Exercise>
+
+**Siguiente:** [Entre registros](/comparaciones/entre-registros/) — igual, menor, mayor y tabla del parcial.
+
+<TopicQuiz slug="comparaciones/igual-cero" locale="es" />

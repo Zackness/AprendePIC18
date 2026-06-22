@@ -1,0 +1,96 @@
+---
+title: Delay loops
+description: Single loop, nested 2- and 3-loop delays, cycle counting, max duration @ 20 MHz.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import Figure from '../../../../components/Figure.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/bucles" locale="en" />
+
+## Single loop
+
+```asm
+RETARDO
+    MOVLW   .N
+    MOVWF   CONTADOR
+BUCLE
+    DECFSZ  CONTADOR,F
+    BRA     BUCLE
+    RETURN
+```
+
+With `CALL`: **Σ CI ≈ 3N + 4**. Body only: **≈ 3N + 2**.
+
+### PDF example: N=200 @ 20 MHz
+
+Σ CI = 605 → delay = **121 µs**.
+
+<AIExplain title="Common mistake">
+Do not count `DECFSZ` as N×1 only. The final iteration when counter hits 0 costs **2 cycles**.
+</AIExplain>
+
+## Two nested loops (PDF structure)
+
+<Figure
+	src="/images/pdf/tema-4-5/page-8.png"
+	alt="Course PDF slide: two- and three-loop nested delays with cycle counts and formulas"
+	caption="PDF slide 8: line-by-line cycle count and Σ CI = 3NM + 4M + 5 (two loops) / 3NMP + 4MP + 4P + 5 (three loops)."
+	credit="Clase Tema 4 y 5 — Delays · UNEXPO · Prof. Ing. Yoel Pire"
+/>
+
+```asm
+    MOVLW   .M
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .N
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    RETURN
+```
+
+**Σ CI ≈ 3NM + 4M + 5** (no CALL).
+
+## Three nested loops
+
+**Σ CI ≈ 3NMP + 4MP + 4P + 5**
+
+## Maximum @ 20 MHz (N=M=P=255)
+
+This table is the **class exercise** from the PDF (*«Create a comparative table of maximum delay for 1, 2, and 3 loops @ 20 MHz»*). The **2-loop** row (Σ CI = **196,100**, **39.22 ms**) comes from that slide — not from the partial exam.
+
+<Figure
+	src="/images/pdf/tema-4-5/page-9.png"
+	alt="PDF exercise: comparative table of max delays for 1, 2, and 3 loops at 20 MHz"
+	caption="PDF slide 9 — class exercise: N=M=P=255 and table with 770 / 196,100 / 50,005,250 cycles."
+	credit="Clase Tema 4 y 5 — Delays · UNEXPO · Prof. Ing. Yoel Pire"
+/>
+
+| Loops | Σ CI | Max delay |
+| --- | --- | --- |
+| 1 | 770 | 0.154 ms |
+| 2 | 196,100 | 39.22 ms |
+| 3 | 50,005,250 | ~10 s |
+
+<Exercise title="Comparative table (PDF exercise)">
+Verify row 1: N=255, Σ CI=770, delay = 770 × 0.2 µs = 0.154 ms.
+</Exercise>
+
+<Exercise title="How much with 2 loops? (same slide)">
+N=M=255 → Σ CI = 3×255×255 + 4×255 + 5 = 196,100 → 39.22 ms.
+</Exercise>
+
+<AIExplain title="Class PDF vs partial exam">
+Formulas and the 1/2/3-loop table on this page come from **Clase Tema 4 y 5.pdf**. The **3 ms delay** with N=29 and variable **A** is from the **partial exam** — see [Calculation and applications](/en/retardos/calculo-y-aplicaciones/).
+</AIExplain>
+
+**Next:** [Calculation and applications](/en/retardos/calculo-y-aplicaciones/).
+
+<TopicQuiz slug="retardos/bucles" locale="en" />

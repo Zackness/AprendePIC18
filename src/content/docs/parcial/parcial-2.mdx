@@ -1,6 +1,6 @@
 ---
 title: Preparacion Parcial II
-description: Repaso y examen interactivo para el Parcial II — Temas 4 (retardos) y 5 (comparaciones) del curso UNEXPO.
+description: Repaso y examen interactivo para el Parcial II — retardos, comparaciones y GPIO del curso UNEXPO.
 ---
 
 import Figure from '../../../components/Figure.astro';
@@ -13,7 +13,7 @@ import { getParcialById } from '../../../data/parciales';
 
 ## Cuando presentar este parcial
 
-Despues de los cursos **5, 6 y 7** de la [ruta de estudio](/ruta-de-estudio/#c07): **retardos (Tema 4)**, **comparacion de registros (Tema 5)**, GPIO, botones y **Practica 1**.
+Despues de los cursos **5 al 9** de la [ruta de estudio](/ruta-de-estudio/#c09): seccion [Retardos](/retardos/), [GPIO](/gpio/), [Comparaciones](/comparaciones/) y **Practica 1**.
 
 ## Nivel de exigencia del parcial real
 
@@ -22,21 +22,21 @@ El Parcial II no es solo GPIO. El modelo del profesor (jun 2026) incluye:
 | Parte | Contenido tipico |
 | --- | --- |
 | **I — Teoria** | `MOVF REGISTRO,F` vs comparacion con cero (bandera **Z**); bits **C** y **Z**; **solapamiento** (pipeline); **ciclo de maquina** |
-| **II — Desarrollo** | Subrutina si `REG1 > REG2`; valores de C/Z tras `SUBWF`; **retardo 3 ms @ 20 MHz** (calcular variable, `NOP`, `BRA` vs `GOTO`); diagrama bomba + display BCD |
+| **II — Desarrollo** | Subrutina si `REG1 > REG2`; valores de C/Z tras `SUBWF`; **retardo 3 ms @ 20 MHz**; diagrama bomba + display BCD |
 | **III — Problemas** | Bomba con cuenta regresiva; robot seguidor de linea (`CALL CASO_n`) |
 
 <Figure
 	src="/images/parcial/examen-ii-unexpo.png"
 	alt="Ejemplo de examen Segundo Parcial Microcontroladores UNEXPO"
-	caption="Referencia: Segundo Parcial — Microcontroladores PIC18F4550 (modelo con Temas 4 y 5)."
+	caption="Referencia: Segundo Parcial — Microcontroladores PIC18F4550."
 />
 
 ### Clases obligatorias antes del examen
 
-1. [Retardos por software](/fundamentos/retardos/) — Tema 4 del PDF `Clase Tema 4 y 5.pdf`
-2. [Comparacion de registros](/fundamentos/comparaciones-registros/) — Tema 5 del mismo PDF
-3. [GPIO](/gpio/) y [botones](/gpio/botones/) — para la parte de diagramas y problemas
-4. [Practica 1](/tutoriales/practica-1/) — operaciones ALU en laboratorio
+1. [Retardos](/retardos/) — ciclos de maquina, bucles y calculo
+2. [Comparaciones](/comparaciones/) — C/Z, igual a cero, mayor/menor
+3. [GPIO](/gpio/) y [botones](/gpio/botones/) — diagramas y problemas
+4. [Practica 1](/tutoriales/practica-1/) — laboratorio ALU
 
 <ParcialPrep parcial={getParcialById('p2')} locale="es" />
 

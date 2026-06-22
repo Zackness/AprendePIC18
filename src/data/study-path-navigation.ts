@@ -179,7 +179,9 @@ type SidebarSectionKey =
 	| 'fundamentos'
 	| 'primer-programa'
 	| 'parcial-1'
+	| 'retardos'
 	| 'gpio'
+	| 'comparaciones'
 	| 'practica-1'
 	| 'parcial-2'
 	| 'interrupciones'
@@ -201,7 +203,9 @@ const SIDEBAR_SECTIONS: Array<{
 	{ key: 'fundamentos', labelEs: 'Fundamentos', labelEn: 'Foundations' },
 	{ key: 'primer-programa', labelEs: 'Primer programa', labelEn: 'First program' },
 	{ key: 'parcial-1', labelEs: 'Preparacion parcial I', labelEn: 'Partial I prep' },
+	{ key: 'retardos', labelEs: 'Retardos', labelEn: 'Delays' },
 	{ key: 'gpio', labelEs: 'GPIO', labelEn: 'GPIO' },
+	{ key: 'comparaciones', labelEs: 'Comparaciones', labelEn: 'Comparisons' },
 	{ key: 'practica-1', labelEs: 'Practica 1 — ALU', labelEn: 'Practice 1 — ALU' },
 	{ key: 'parcial-2', labelEs: 'Preparacion parcial II', labelEn: 'Partial II prep' },
 	{ key: 'interrupciones', labelEs: 'Interrupciones', labelEn: 'Interrupts' },
@@ -225,17 +229,19 @@ function getSidebarSectionKey(courseId: string, lesson: StudyLesson): SidebarSec
 		return 'fundamentos';
 	}
 	if (courseId === 'c04') return 'parcial-1';
-	if (courseId === 'c05') return 'gpio';
-	if (courseId === 'c06') return 'practica-1';
-	if (courseId === 'c07') return 'parcial-2';
-	if (courseId === 'c08') return 'interrupciones';
-	if (courseId === 'c09') return 'lcd';
-	if (courseId === 'c10') return 'timers';
-	if (courseId === 'c11') return 'pwm';
-	if (courseId === 'c12') return 'parcial-3';
-	if (courseId === 'c13') return 'adc';
-	if (courseId === 'c14') return 'comunicacion';
-	if (courseId === 'c15') return 'parcial-4';
+	if (courseId === 'c05') return 'retardos';
+	if (courseId === 'c06') return 'gpio';
+	if (courseId === 'c07') return 'comparaciones';
+	if (courseId === 'c08') return 'practica-1';
+	if (courseId === 'c09') return 'parcial-2';
+	if (courseId === 'c10') return 'interrupciones';
+	if (courseId === 'c11') return 'lcd';
+	if (courseId === 'c12') return 'timers';
+	if (courseId === 'c13') return 'pwm';
+	if (courseId === 'c14') return 'parcial-3';
+	if (courseId === 'c15') return 'adc';
+	if (courseId === 'c16') return 'comunicacion';
+	if (courseId === 'c17') return 'parcial-4';
 	return 'referencia';
 }
 

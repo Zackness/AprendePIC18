@@ -1,0 +1,116 @@
+---
+title: Ciclos de maquina e instruccion
+description: CM = 4/f_osc, Tabla 4.1, pipeline y formula Retardo = CM x suma de CI — base del Parcial II.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/ciclos-maquina" />
+
+Todo retardo por software se reduce a una pregunta: **¿cuantos ciclos de instruccion ejecuta el PIC y cuanto dura cada ciclo de maquina?** Eso es exactamente lo que evalua el Segundo Parcial en la parte teorica y en el calculo del retardo de 3 ms.
+
+## Ciclo de maquina (CM)
+
+El **ciclo de maquina** es el tiempo base del PIC18. Con la frecuencia del cristal **f_osc**:
+
+```
+CM = 4 / f_osc
+```
+
+El factor **4** viene de la arquitectura interna del PIC18 (cuatro fases de reloj por ciclo de instruccion en el modelo del curso).
+
+| Cristal (f_osc) | Calculo | CM |
+| --- | --- | --- |
+| 4 MHz | 4 / 4 000 000 | **1 µs** |
+| 8 MHz | 4 / 8 000 000 | 0,5 µs |
+| 20 MHz | 4 / 20 000 000 | **0,2 µs** (200 ns) |
+
+**Ejemplo del PDF:** con 4 MHz, una instruccion de **1 ciclo** tarda **1 µs**.
+
+<AIExplain title="Pregunta tipica del parcial">
+"¿Cual es el tiempo que tarda en ejecutarse una instruccion?" → **Ciclo de maquina** (multiplicado por los ciclos de esa instruccion). Con 20 MHz, CM = 0,2 µs.
+</AIExplain>
+
+### Cristal 20 MHz en el parcial
+
+Casi todos los ejercicios del examen usan **20 MHz**. Memoriza:
+
+- **CM = 0,2 µs**
+- **1 ms = 1000 µs** → para 3 ms necesitas **3000 µs** de retardo
+- Si Retardo = CM × Σ CI, entonces **Σ CI = Retardo / CM = 3000 / 0,2 = 15 000 ciclos**
+
+## Ciclos de instruccion (CI)
+
+No todas las instrucciones tardan lo mismo. El PDF dice: **casi todas toman 1 ciclo de maquina**, excepto los **saltos** (2 o mas) y `DECFSZ` (caso especial).
+
+### Tabla 4.1 — aprendetela de memoria
+
+| Instruccion | Ciclos (CI) |
+| --- | --- |
+| `MOVLW` | 1 |
+| `MOVWF` | 1 |
+| `NOP` | 1 |
+| `GOTO` | 2 |
+| `BRA` | 2 |
+| `CALL` | 2 |
+| `RETURN` | 2 |
+| `DECFSZ` | **1** si no salta; **2 o 3** si salta |
+
+### DECFSZ en detalle
+
+`DECFSZ f,F` hace tres cosas:
+
+1. Resta 1 al registro `f`.
+2. Si el resultado **no es cero**, sigue a la siguiente instruccion → **1 ciclo**.
+3. Si el resultado **es cero**, **salta** la siguiente instruccion (normalmente el `BRA` que le sigue) → **2 o 3 ciclos** (el curso usa **2** en el conteo del PDF cuando sale del bucle).
+
+Por eso en un bucle de N iteraciones:
+
+- `DECFSZ` se ejecuta **N veces**: (N−1) veces con 1 ciclo + **1 vez** con 2 ciclos al salir → **N + 1** ciclos en total para `DECFSZ`.
+- `BRA` se ejecuta **(N−1) veces** (solo cuando no salio del bucle) → **2 × (N−1)** ciclos.
+
+## Solapamiento (pipeline)
+
+El PIC18 usa **pipeline**: mientras una instruccion se **ejecuta**, la siguiente puede estar en etapa de **busqueda** (fetch). Eso se llama **solapamiento** de instrucciones.
+
+En el parcial (opcion multiple) la respuesta correcta suele ser **solapamiento** o **pipeline**, no "retardo" ni "comparacion".
+
+Para **calcular retardos** en el curso **no restas** ciclos por pipeline: usas la **Tabla 4.1** tal como esta y sumas Σ CI. El profesor quiere que sepas el concepto en teoria y la tabla en la practica.
+
+## Formula del retardo
+
+```
+Retardo = CM × Σ CI
+```
+
+- **CM** = duracion de un ciclo de maquina (en segundos o µs).
+- **Σ CI** = suma de ciclos de **cada instruccion**, multiplicada por **cuantas veces se repite** en el bucle.
+
+### Pasos para cualquier ejercicio
+
+1. Escribe el codigo del retardo linea por linea.
+2. Asigna ciclos segun Tabla 4.1.
+3. Cuenta repeticiones (N, M, P en bucles anidados).
+4. Suma Σ CI.
+5. Multiplica por CM.
+6. Compara con el tiempo pedido; ajusta con `NOP` si falta o sobra.
+
+<Exercise title="CM con distintos cristales">
+Calcula CM para 4 MHz, 10 MHz y 20 MHz. ¿Cuantos µs dura un `MOVLW` en cada caso? (Respuesta: 1 × CM en cada caso.)
+</Exercise>
+
+<Exercise title="Sigma CI minimo">
+Un programa tiene solo `MOVLW` + `MOVWF` + `RETURN` (sin bucle). Con 20 MHz, ¿cuanto dura? Σ CI = 1+1+2 = 4 → 4 × 0,2 µs = **0,8 µs**.
+</Exercise>
+
+## Relacion con otras paginas
+
+- [Bucles de retardo](/retardos/bucles/) — como contar Σ CI en bucles de 1, 2 y 3 niveles.
+- [Calculo y aplicaciones](/retardos/calculo-y-aplicaciones/) — retardo de **3 ms** del examen con N=29 y variable **A**.
+
+**Siguiente:** [Bucles de retardo](/retardos/bucles/).
+
+<TopicQuiz slug="retardos/ciclos-maquina" locale="es" />

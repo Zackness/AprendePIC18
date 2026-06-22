@@ -1,0 +1,189 @@
+---
+title: Calculo y aplicaciones de retardos
+description: Retardo 3 ms del parcial, señal 10 Hz, NOP, BRA vs GOTO y retardo interrumpible por pulsador.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import Figure from '../../../components/Figure.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/calculo-y-aplicaciones" />
+
+Esta pagina conecta la teoria con lo que aparece en el **Segundo Parcial**: calcular la constante **A**, justificar `NOP` y `BRA`, y armar retardos para LED y bomba.
+
+## BRA vs GOTO (pregunta del examen)
+
+| | `BRA` | `GOTO` |
+| --- | --- | --- |
+| Tipo de salto | **Relativo** (desplazamiento corto) | **Absoluto** (cualquier etiqueta) |
+| Ciclos | 2 | 2 |
+| Uso en retardos | Bucles locales (`BRA BUCLE`) | Saltos lejanos entre paginas |
+
+**¿Que pasaria si usas `GOTO` en lugar de `BRA` en el bucle?**
+
+- En **tiempo**: igual cantidad de ciclos (ambos valen 2).
+- En **practica del curso**: `BRA` es la convencion para bucles **cercanos**; `GOTO` puede cruzar paginas de memoria de programa y en codigo grande es menos eficiente en organizacion.
+- En el **examen**: el profesor espera que digas que **`BRA` es salto relativo** al bucle inmediato y que es el patron correcto en subrutinas de retardo locales.
+
+## NOP — ¿para que sirven los dos NOP del parcial?
+
+Cada **`NOP`** consume **exactamente 1 ciclo** de instruccion.
+
+Despues de calcular N, M o A con la formula, el tiempo real a veces queda **unos ciclos corto**. Los `NOP` al final de la subrutina **ajustan** Σ CI sin cambiar la logica del bucle.
+
+**Ejemplo:** si necesitas Σ CI = 15 000 y tu formula da 14 998, agregas **2 NOP** → +2 ciclos → 15 000.
+
+En el parcial te piden **explicar** por que hay dos `NOP`: respuesta = **afinar el retardo a 3 ms exactos** (o lo mas cercano posible) con cristal 20 MHz.
+
+## Retardo de 3 ms @ 20 MHz (pregunta del examen)
+
+Este problema **no esta en el PDF de clase** (`Clase Tema 4 y 5.pdf`): sale del **Segundo Parcial** (modelo en [Preparacion Parcial II](/parcial/parcial-2/)). Usa la formula de **dos bucles** que si esta en el PDF (diapositiva 8).
+
+### Datos del problema
+
+- Cristal **20 MHz** → CM = **0,2 µs**
+- Objetivo **3 ms** = **3000 µs**
+- **Σ CI necesario** = 3000 / 0,2 = **15 000 ciclos**
+
+### Codigo tipo examen (dos bucles, N = 29 fijo)
+
+El parcial entrega una rutina con **CONTADOR_1 = 29** y pide calcular **A** para **CONTADOR_2**:
+
+```asm
+RETARDO_3MS
+    MOVLW   .29
+    MOVWF   CONTADOR_1
+    MOVLW   .A              ; <-- calcular A
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .29              ; recarga interna cada vuelta externa
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    NOP
+    NOP
+    RETURN
+```
+
+### Calculo con formula de 2 bucles
+
+Usa **N = 29**, **M = A**, sin `CALL` dentro de la subrutina:
+
+```
+Σ CI = 3NM + 4M + 5 + 2(NOP) = 3×29×A + 4A + 5 + 2
+     = 87A + 4A + 7
+     = 91A + 7
+```
+
+Iguala a 15 000:
+
+```
+91A + 7 = 15 000
+91A = 14 993
+A ≈ 164,76  →  A = 165  (valor entero mas cercano)
+```
+
+**Comprobacion:** Σ CI = 91×165 + 7 = 15 022 → Retardo = 15 022 × 0,2 µs = **3004,4 µs ≈ 3,00 ms**
+
+Si el profesor exige mas precision, prueba **A = 164** o ajusta un `NOP`.
+
+<AIExplain title="Metodo en el examen">
+1. CM y Σ CI objetivo. 2. Formula o tabla linea por linea. 3. Despeja A. 4. Comprueba. 5. Explica NOP y BRA por escrito.
+</AIExplain>
+
+<Exercise title="Practica 3 ms">
+Repite el calculo con N=29 y verifica Σ CI a mano para A=165. Si Σ CI = 15 022, ¿cuantos µs de mas respecto a 3000 µs?
+</Exercise>
+
+## Señal cuadrada de 10 Hz
+
+Frecuencia **10 Hz** → periodo **T = 100 ms**. Cada mitad (LED encendido u apagado) = **50 ms**.
+
+```asm
+SEÑAL_10HZ
+    BSF     SALIDA
+    CALL    RETARDO_50MS
+    BCF     SALIDA
+    CALL    RETARDO_50MS
+    BRA     SEÑAL_10HZ
+```
+
+### RETARDO_50MS (valores del PDF @ 20 MHz)
+
+Diapositiva 10 del PDF — ejercicio de señal cuadrada 10 Hz:
+
+<Figure
+	src="/images/pdf/tema-4-5/page-10.png"
+	alt="Ejercicio del PDF: subrutina RETARDO_50MS con tres bucles para señal de 10 Hz"
+	caption="PDF diapositiva 10: 10 Hz → 50 ms por semiciclo; contadores .2, .252, .164 y 3 NOP."
+	credit="Clase Tema 4 y 5 — Retardos · UNEXPO · Prof. Ing. Yoel Pire"
+/>
+
+Tres bucles + **3 NOP** al final:
+
+```asm
+RETARDO_50MS
+    MOVLW   .2
+    MOVWF   CONTADOR_3
+BUCLE_3_RETARDO_50MS
+    MOVLW   .252
+    MOVWF   CONTADOR_2
+BUCLE_2_RETARDO_50MS
+    MOVLW   .164
+    MOVWF   CONTADOR_1
+BUCLE_1_RETARDO_50MS
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1_RETARDO_50MS
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2_RETARDO_50MS
+    DECFSZ  CONTADOR_3,F
+    BRA     BUCLE_3_RETARDO_50MS
+    NOP
+    NOP
+    NOP
+    RETURN
+```
+
+Los valores **2, 252, 164** y los tres `NOP` se obtienen calculando Σ CI para 50 ms (o tomando la solucion del PDF). En un examen similar puedes recibir otros tiempos: el procedimiento es el mismo.
+
+## Retardo interrumpible (pulsador)
+
+El PDF muestra un `RETARDO_50MS` que **sale antes** si se suelta el pulsador (`BTFSS P1` → `BRA SALIR_RETARDO_50MS`). Eso enlaza retardos con [GPIO/botones](/gpio/botones/) y con el problema de la bomba (parar si se pulsa de nuevo).
+
+Patron:
+
+```asm
+BUCLE_1_RETARDO_50MS
+    BTFSS   P1                  ; ¿soltaron el boton?
+    BRA     SALIR_RETARDO_50MS
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1_RETARDO_50MS
+    ; ... resto de bucles ...
+```
+
+## Bomba y display (parcial — 10 s por digito)
+
+El examen pide **~10 s** por cada digito de la cuenta regresiva. Opciones:
+
+1. **Subrutina de ~10 s** con 3 bucles (maximo teorico ~10 s con N=M=P=255 @ 20 MHz).
+2. **Llamar varias veces** una subrutina de 1 s o 50 ms (p. ej. 200 × 50 ms = 10 s).
+3. Combinar `CALL RETARDO_1S` diez veces en un bucle con contador.
+
+En todos los casos necesitas lo de esta seccion: **CM × Σ CI**.
+
+## Checklist antes del parcial (retardos)
+
+- [ ] CM con 4 MHz y 20 MHz
+- [ ] Tabla 4.1 de memoria
+- [ ] Contar `DECFSZ` como N+1 ciclos, no N
+- [ ] Formulas 3NM+4M+5 y 3NMP+4MP+4P+5
+- [ ] Despejar A para 3 ms
+- [ ] Explicar NOP y BRA vs GOTO
+- [ ] Tabla maxima 1/2/3 bucles
+
+<TopicQuiz slug="retardos/calculo-y-aplicaciones" locale="es" />

@@ -1,0 +1,61 @@
+---
+title: Machine and instruction cycles
+description: CM = 4/f_osc, Table 4.1, pipeline, and Delay = CM × Σ CI.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/ciclos-maquina" locale="en" />
+
+## Machine cycle (CM)
+
+```
+CM = 4 / f_osc
+```
+
+| Crystal | CM |
+| --- | --- |
+| 4 MHz | 1 µs |
+| 20 MHz | **0.2 µs** |
+
+For **3 ms @ 20 MHz**: target **Σ CI = 15,000** (3000 µs / 0.2 µs).
+
+## Table 4.1 — memorize
+
+| Instruction | Cycles |
+| --- | --- |
+| `MOVLW`, `MOVWF`, `NOP` | 1 |
+| `GOTO`, `BRA`, `CALL`, `RETURN` | 2 |
+| `DECFSZ` | 1 if no skip; **2** when skipping at zero |
+
+### DECFSZ counting
+
+For N iterations: **N+1** cycles total for `DECFSZ` (last pass uses 2 cycles).  
+`BRA` runs **(N−1)** times → **2(N−1)** cycles.
+
+## Pipeline overlap
+
+PIC18 **pipeline** = instruction overlap (exam multiple choice). For delay math, use Table 4.1 as given and sum **Σ CI**.
+
+## Delay formula
+
+```
+Delay = CM × Σ CI
+```
+
+1. List each instruction and cycles.  
+2. Count repetitions.  
+3. Sum Σ CI.  
+4. Multiply by CM.  
+5. Tune with `NOP` if needed.
+
+<Exercise title="Quick check">
+20 MHz, Σ CI = 605 → delay = 605 × 0.2 µs = **121 µs** (PDF example, N=200).
+</Exercise>
+
+**Next:** [Delay loops](/en/retardos/bucles/).
+
+<TopicQuiz slug="retardos/ciclos-maquina" locale="en" />

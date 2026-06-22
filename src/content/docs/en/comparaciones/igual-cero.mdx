@@ -1,0 +1,43 @@
+---
+title: Compare to zero
+description: MOVF register,F and flag Z — partial exam theory answer.
+---
+
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/igual-cero" locale="en" />
+
+## Exam answer (memorize)
+
+1. `MOVF REGISTRO,F` moves the register onto itself.
+2. That updates flag **Z** in `STATUS`.
+3. If register = 0 → **Z = 1**; else **Z = 0**.
+4. Use **Z**, **not C**.
+
+## Code
+
+```asm
+MOVF    REGISTRO,F
+BTFSS   STATUS,Z
+GOTO    NO_ES_CERO
+GOTO    ES_CERO
+```
+
+## Why not C?
+
+`MOVF` is not subtraction. For zero compare the course uses **MOVF + Z**, not carry.
+
+## Non-zero literal
+
+For A = 5 use subtract:
+
+```asm
+MOVLW   .5
+SUBWF   A,W
+BTFSS   STATUS,Z
+```
+
+**Next:** [Between registers](/en/comparaciones/entre-registros/).
+
+<TopicQuiz slug="comparaciones/igual-cero" locale="en" />

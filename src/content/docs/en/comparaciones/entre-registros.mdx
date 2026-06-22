@@ -1,0 +1,58 @@
+---
+title: Compare two registers
+description: Equal, less, greater, summary table, REG1>REG2, and partial C/Z cases.
+---
+
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones/entre-registros" locale="en" />
+
+## Greater than (A &gt; B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,C
+GOTO    A_NO_ES_MAYOR_B
+BTFSS   STATUS,Z
+GOTO    A_ES_MAYOR_B
+```
+
+## Summary table A − B
+
+| Case | C | Z |
+| --- | --- | --- |
+| A = B | 1 | 1 |
+| A &gt; B | 1 | 0 |
+| A &lt; B | 0 | 0 |
+
+## Partial exam C/Z cases
+
+| A | B | C | Z |
+| --- | --- | --- | --- |
+| 10 | 10 | 1 | 1 |
+| 5 | 3 | 1 | 0 |
+| 2 | 7 | 0 | 0 |
+
+## REG1 &gt; REG2 subroutine
+
+```asm
+    MOVF    REG2,W
+    SUBWF   REG1,W
+    BTFSS   STATUS,C
+    GOTO    FIN_COMP
+    BTFSS   STATUS,Z
+    GOTO    MAYOR
+FIN_COMP
+    RETURN
+MAYOR
+    RETURN
+```
+
+<Exercise title="Extra cases">
+A=15,B=8 → C=1,Z=0. A=0,B=1 → C=0,Z=0.
+</Exercise>
+
+<TopicQuiz slug="comparaciones/entre-registros" locale="en" />

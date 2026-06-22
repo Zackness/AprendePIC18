@@ -1,0 +1,58 @@
+---
+title: Comparacion de registros
+description: Introduccion a comparar datos con MOVF, SUBWF y banderas STATUS — preparacion Parcial II.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="comparaciones" />
+
+En ensamblador casi **toda decision** pasa por comparar: ¿llego la temperatura al umbral?, ¿la tecla es la opcion 3?, ¿`REG1` es mayor que `REG2`? El PIC18 **no tiene** una instruccion `CMP` como otros procesadores; comparas haciendo una **operacion** (casi siempre **resta**) y leyendo **`STATUS`**.
+
+<AIExplain title="Dos herramientas distintas">
+**Comparar con cero** → `MOVF registro,F` + bandera **Z**. **Comparar dos registros** → `MOVF` + `SUBWF` + banderas **C** y/o **Z**.
+</AIExplain>
+
+## Tres situaciones del curso
+
+| Caso | Metodo tipico |
+| --- | --- |
+| Registro **igual a cero** | `MOVF A,F` → probar **Z** |
+| Registro **igual a otro** | `MOVF B,W` / `SUBWF A,W` → probar **Z** |
+| Registro **menor o mayor** | Misma resta → probar **C** (y **Z** si hace falta) |
+
+Tambien puedes comparar **dato literal con registro** (`MOVLW` + `SUBWF`) o **dato con dato** (cargando uno en W). El procedimiento es el mismo.
+
+## Ejemplos del mundo real (PDF)
+
+1. **Temperatura** vs valor deseado (tras ADC) → igual o mayor/menor.
+2. **UART** — ¿el caracter recibido es el esperado? → igual.
+3. **Menu de teclado** — ¿que tecla coincide con la lista? → varias comparaciones.
+4. **Control en rango** — ¿variable por debajo o encima del limite? → menor / mayor.
+
+En el **parcial** aparecen en forma directa (tabla C/Z, `REG1 > REG2`) y en problemas (robot: ¿que sensor ve linea negra?).
+
+## Que aprenderas en esta seccion
+
+| Pagina | Contenido | Pregunta del parcial |
+| --- | --- | --- |
+| [Banderas C y Z](/comparaciones/banderas-c-z/) | STATUS, resta, bit 9 | Parte I: explicar C y Z |
+| [Igual a cero](/comparaciones/igual-cero/) | `MOVF REGISTRO,F` | Parte I: ¿por que MOVF y no C? |
+| [Entre registros](/comparaciones/entre-registros/) | Igual, &lt;, &gt;, ≥, ≤ | Parte II: subrutina y tabla A,B |
+
+## Relacion con Fundamentos
+
+Si necesitas repaso del registro `STATUS`, ver [Arquitectura — STATUS](/fundamentos/arquitectura/#status--banderas-del-resultado). Esta seccion aplica eso a **comparaciones** paso a paso.
+
+<Exercise title="Antes de seguir">
+Sin mirar solucion: si A=5 y B=3, ¿A−B es cero? ¿positivo? ¿que esperas de Z y C? Comprueba en [Entre registros](/comparaciones/entre-registros/).
+</Exercise>
+
+## Siguiente paso
+
+Lee [Banderas C y Z](/comparaciones/banderas-c-z/) — sin eso no puedes resolver la tabla del inciso 2 del examen.
+
+<TopicQuiz slug="comparaciones" locale="es" />

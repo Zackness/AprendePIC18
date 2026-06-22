@@ -1,0 +1,65 @@
+---
+title: Delay calculation and applications
+description: 3 ms partial exam solution, 10 Hz wave, NOP tuning, BRA vs GOTO.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos/calculo-y-aplicaciones" locale="en" />
+
+## BRA vs GOTO (exam question)
+
+Both use **2 cycles**. **`BRA`** = relative jump for local loops. **`GOTO`** = absolute jump. Course expects **`BRA`** in delay loops.
+
+## NOP tuning
+
+Each **`NOP`** = **1 cycle**. Two `NOP`s add +2 to Σ CI to hit **3 ms** exactly after rounding **A**.
+
+## 3 ms @ 20 MHz — worked example
+
+- CM = **0.2 µs**
+- Target **3000 µs** → **Σ CI = 15,000**
+- Two loops, **N = 29**, solve **M = A**:
+
+```
+Σ CI = 3NM + 4M + 5 + 2(NOP) = 91A + 7
+91A + 7 = 15,000  →  A ≈ 165
+```
+
+Check: 91×165 + 7 = 15,022 → 15,022 × 0.2 µs ≈ **3.00 ms**
+
+```asm
+RETARDO_3MS
+    MOVLW   .29
+    MOVWF   CONTADOR_1
+    MOVLW   .165            ; A
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .29
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    NOP
+    NOP
+    RETURN
+```
+
+## 10 Hz square wave
+
+T = 100 ms → **50 ms** per half period. Use 3 nested loops + 3 `NOP` (PDF: M=2, inner values 252 and 164).
+
+## Partial checklist
+
+- [ ] CM @ 20 MHz  
+- [ ] Table 4.1  
+- [ ] DECFSZ = N+1 cycles  
+- [ ] Solve A for 3 ms  
+- [ ] Explain NOP and BRA  
+
+<TopicQuiz slug="retardos/calculo-y-aplicaciones" locale="en" />

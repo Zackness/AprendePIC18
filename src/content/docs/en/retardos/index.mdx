@@ -1,0 +1,110 @@
+---
+title: Software delays
+description: Introduction to loop-based delays — concepts, software vs hardware, and a short review quiz.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos" locale="en" />
+
+Blinking an LED every **1 second**, holding a display digit for **10 seconds** (partial exam pump problem), or debouncing a button all require **delays**. This section covers **software delays**: the MCU runs a **loop** until counter(s) in RAM reach zero.
+
+This page is the **entry point**. After reading it and passing the quiz below, you should know **what** a software delay is, **when** to use it, and how it connects to the rest of the section and Partial II.
+
+<AIExplain title="Partial exam theory">
+The exam asks about the **machine cycle** and **pipeline overlap**. You develop those in [Machine cycles](/en/retardos/ciclos-maquina/). Calculations use **Delay = CM × Σ CI**.
+</AIExplain>
+
+## Why delays exist
+
+Without an explicit wait:
+
+- An LED toggled too fast looks **always on**.
+- A display digit is **unreadable**.
+- A button **bounces** and registers multiple false presses.
+
+A delay **slows** the program for a known (or calculated) time.
+
+## Two methods
+
+| Method | How | Advantage | Limitation |
+| --- | --- | --- | --- |
+| **Software** | `DECFSZ` + `BRA` loops | Simple; partial exam focus | CPU **stays busy** in the loop |
+| **Hardware (Timer)** | Timer + optional ISR | CPU can do other work | More setup ([Timer 0](/en/timers/timer0/)) |
+
+Partial II emphasizes **software** delays and **Delay = CM × Σ CI**.
+
+## What the CPU does during a software delay
+
+The MCU **repeats** decrement-and-branch until the counter hits zero. It does not run the rest of your main code during that wait (unless interrupts intervene).
+
+- Not multitasking in the same thread.
+- Fine for LED blink, digit hold, short debounce.
+- Long waits (10 s pump problem) need nested loops or repeated `CALL`s — see [Loops](/en/retardos/bucles/).
+
+## Basic flow
+
+```
+  Start
+    |
+    v
+  Counter = N
+    |
+    v
+  +--> DECFSZ
+  |      |
+  |   zero? -- yes --> Done
+  |      |
+  |     no -> BRA back
+  +------+
+```
+
+## RAM variables
+
+```asm
+CONTADOR    RES 1    ; one byte: 0..255
+```
+
+## Subroutine + CALL pattern
+
+```asm
+    CALL    RETARDO_CORTO
+```
+
+```asm
+RETARDO_CORTO
+    MOVLW   .200
+    MOVWF   CONTADOR
+BUCLE
+    DECFSZ  CONTADOR,F
+    BRA     BUCLE
+    RETURN
+```
+
+Each **`CALL`** adds **2 cycles** when counting Σ CI.
+
+## Section path
+
+| Step | Page | Goal |
+| --- | --- | --- |
+| 1 | **This page** | Concepts + intro quiz |
+| 2 | [Machine cycles](/en/retardos/ciclos-maquina/) | CM, Table 4.1 |
+| 3 | [Delay loops](/en/retardos/bucles/) | Nested loops |
+| 4 | [Calculation](/en/retardos/calculo-y-aplicaciones/) | 3 ms exam — full quiz |
+
+<Exercise title="Think">
+Why can't a long software delay alone let you poll a sensor every 1 ms **and** refresh an LCD continuously without interrupts?
+</Exercise>
+
+## Introduction quiz
+
+Check your understanding before formulas and machine cycles.
+
+<TopicQuiz slug="retardos" locale="en" />
+
+## Next step
+
+[Machine and instruction cycles](/en/retardos/ciclos-maquina/).

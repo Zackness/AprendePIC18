@@ -1,0 +1,164 @@
+---
+title: Retardos por software
+description: Introduccion a demoras por bucles en ensamblador PIC18 — conceptos, software vs hardware y quiz de repaso.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="retardos" />
+
+Si quieres que un LED parpadee cada **1 segundo**, que un digito en un display se vea **10 segundos** (como pide el parcial con la bomba), o que un boton no rebote al instante, necesitas **retardos**. En Microcontroladores (Ing. Yoel Pire) el nucleo de esta seccion son los **retardos por software**: el PIC ejecuta un **bucle** hasta que uno o varios contadores en RAM llegan a cero.
+
+Esta pagina es la **puerta de entrada** de la seccion. Al terminarla (y el quiz de abajo) deberias saber **que es** un retardo por software, **cuando** usarlo y **como encaja** con el resto de paginas y con el Segundo Parcial.
+
+<AIExplain title="Pregunta del parcial (teoria)">
+El examen pregunta que es el **ciclo de maquina** y que es el **solapamiento** (pipeline). Aqui solo los mencionamos; los desarrollas en [Ciclos de maquina](/retardos/ciclos-maquina/). Para **calcular** tiempos usaras **Retardo = CM × Σ CI**.
+</AIExplain>
+
+## ¿Por que existen los retardos?
+
+El PIC18 ejecuta millones de instrucciones por segundo. Sin una demora explicita:
+
+- Un LED pareceria **siempre encendido** si enciendes y apagas demasiado rapido.
+- Un display **no se leeria** el digito (cambia antes de que el ojo lo vea).
+- Un boton **rebota** electricamente y el programa leeria varias pulsaciones falsas.
+
+El retardo **frena** el programa de forma controlada durante un tiempo conocido (o aproximado).
+
+## Dos formas de generar un retardo
+
+| Metodo | Como funciona | Ventaja | Limitacion |
+| --- | --- | --- | --- |
+| **Por software** | Bucles `DECFSZ` + `BRA` en ensamblador | Simple, sin configurar Timer; es lo del parcial | El CPU **queda ocupado** en el bucle |
+| **Por hardware (Timer)** | Contador hardware + opcional ISR | El programa puede hacer otras cosas | Mas registros y configuracion ([Timer 0](/timers/timer0/)) |
+
+En el **Segundo Parcial** el profesor evalua sobre todo el metodo **por software** y la formula **Retardo = CM × Σ CI**. Los Timer llegan en temas posteriores.
+
+## ¿Que hace el micro durante un retardo por software?
+
+Mientras corre el bucle, el PIC **no avanza** en el resto del programa principal (salvo que uses interrupciones, que es otro nivel). Dices que el micro esta **bucleado**: repite decrementar y saltar hasta que el contador es cero.
+
+Eso implica:
+
+- **No es multitarea:** no puedes, en el mismo hilo de codigo, leer otro sensor mientras esperas 10 s en un bucle largo.
+- **Si es valido** para parpadear LED, esperar entre digitos, antirrebote corto, etc.
+- Para **segundos largos** (bomba del parcial) se usan bucles anidados o varias llamadas a subrutinas — lo veras en [Bucles](/retardos/bucles/) y [Calculo](/retardos/calculo-y-aplicaciones/).
+
+## Idea general: el contador que baja a cero
+
+```
+  Inicio retardo
+       |
+       v
+  Contador = N        (MOVLW + MOVWF)
+       |
+       v
+  +--> DECFSZ contador
+  |         |
+  |    ¿Es cero? --- si --> Fin del retardo
+  |         |
+  |        no
+  |         |
+  |    BRA al bucle
+  +---------+
+```
+
+1. Cargas **N** en una variable (`CONTADOR` en RAM).
+2. `DECFSZ` resta 1 y pregunta si llego a 0.
+3. Si no es 0, `BRA` vuelve al bucle.
+4. Si es 0, sales del retardo.
+
+La instruccion clave es **`DECFSZ`** (decrementar y saltar si es cero). La estudiaras con detalle en [Ciclos de maquina](/retardos/ciclos-maquina/) porque **no siempre consume el mismo numero de ciclos**.
+
+## Variables en RAM
+
+Los contadores son **bytes en memoria de datos** (GPR), declarados en tu `.asm`:
+
+```asm
+CONTADOR    RES 1    ; 1 byte: valores 0 a 255
+```
+
+Cada `RES 1` reserva **un byte**, no 1 bit ni 32 bytes. Si pones `RES 0x20` por error reservas 32 bytes — error comun que ya corregimos en [Registros](/fundamentos/registros/).
+
+## Estructura tipica: subrutina + CALL
+
+En el curso los retardos casi siempre son **subrutinas** que invocas desde el programa principal:
+
+```asm
+PROGRAMA
+    CALL    RETARDO_CORTO
+    BSF     LATB,0          ; enciende LED despues de esperar
+    ; ...
+```
+
+```asm
+RETARDO_CORTO
+    MOVLW   .200
+    MOVWF   CONTADOR
+BUCLE
+    DECFSZ  CONTADOR,F
+    BRA     BUCLE
+    RETURN
+```
+
+**Detalle para el calculo:** cada `CALL` suma **2 ciclos** (Tabla 4.1). Si en el parcial cuentas el tiempo total, no olvides el `CALL` si la rutina se invoca asi.
+
+## Ejemplo minimo: parpadear un LED (concepto)
+
+Sin calcular aun los milisegundos exactos, la **forma** del programa es:
+
+```asm
+BUCLE_PRINCIPAL
+    BSF     LATB,0          ; LED on
+    CALL    RETARDO_500MS    ; espera ~medio segundo
+    BCF     LATB,0          ; LED off
+    CALL    RETARDO_500MS
+    BRA     BUCLE_PRINCIPAL
+```
+
+Periodo total ~1 s si cada `RETARDO_500MS` dura medio segundo. Los valores **N, M, P** de los bucles salen de **CM × Σ CI** — proximas paginas.
+
+## Ejemplos del curso y del parcial
+
+| Aplicacion | Tiempo tipico | Donde profundizar |
+| --- | --- | --- |
+| Parpadear LED 1 Hz | ~500 ms on / 500 ms off | [Calculo](/retardos/calculo-y-aplicaciones/) |
+| Señal cuadrada 10 Hz | 50 ms por mitad | [Calculo](/retardos/calculo-y-aplicaciones/) |
+| Display bomba 9→0 | **10 s** por digito | [Bucles](/retardos/bucles/) (3 bucles @ 20 MHz) |
+| Antirrebote boton | pocos ms | [GPIO botones](/gpio/botones/) + retardo corto |
+| Retardo 3 ms (examen) | 3 ms exactos @ 20 MHz | [Calculo](/retardos/calculo-y-aplicaciones/) |
+
+## Librerias de rutinas
+
+En proyectos reales no recalculas en cada linea. Creas un **catalogo** de subrutinas:
+
+- `RETARDO_1MS`, `RETARDO_10MS`, `RETARDO_50MS`, `RETARDO_1S`
+- Valores **N, M, P** precalculados para tu cristal (**20 MHz** en el curso)
+
+Llamas `CALL RETARDO_10MS` diez veces si necesitas 100 ms, en lugar de duplicar codigo.
+
+## Ruta de esta seccion
+
+| Orden | Pagina | Objetivo |
+| --- | --- | --- |
+| 1 | **Esta pagina** | Concepto, software vs Timer, subrutinas |
+| 2 | [Ciclos de maquina](/retardos/ciclos-maquina/) | CM, Tabla 4.1, pipeline |
+| 3 | [Bucles de retardo](/retardos/bucles/) | 1, 2 y 3 bucles, formulas |
+| 4 | [Calculo y aplicaciones](/retardos/calculo-y-aplicaciones/) | 3 ms, 10 Hz, NOP, BRA — quiz largo |
+
+<Exercise title="Reflexion">
+¿Por que un retardo por software no sirve si necesitas medir un sensor cada 1 ms **y** mostrar un LCD **al mismo tiempo** sin interrupciones? Piensa en "CPU bucleado".
+</Exercise>
+
+## Quiz de introduccion
+
+Responde el quiz de abajo para comprobar que entendiste los conceptos base **antes** de entrar en formulas y ciclos de maquina.
+
+<TopicQuiz slug="retardos" locale="es" />
+
+## Siguiente paso
+
+Continua con [Ciclos de maquina e instruccion](/retardos/ciclos-maquina/). Sin CM y la Tabla 4.1 no podras resolver el retardo de **3 ms** del parcial.
