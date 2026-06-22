@@ -67,13 +67,18 @@ export const parcialesBlocks: ParcialBlock[] = [
 		topicsEs: 'Tema 4 y 5',
 		topicsEn: 'Topics 4 and 5',
 		descriptionEs:
-			'MPLAB/Proteus, GPIO (TRIS/PORT/LAT), botones, sistema minimo y Practica 1 de operaciones matematicas.',
+			'Retardos por software (CM, bucles), comparacion de registros (C/Z), GPIO, botones y Practica 1.',
 		descriptionEn:
-			'MPLAB/Proteus, GPIO (TRIS/PORT/LAT), buttons, minimum system, and Practice 1 math operations.',
+			'Software delays (CM, loops), register comparisons (C/Z), GPIO, buttons, and Practice 1.',
 		hrefEs: '/parcial/parcial-2/',
 		hrefEn: '/en/parcial/parcial-2/',
-		sourceDocs: ['Practica 1  Operacion matematia.pdf', 'Clase Tema 2 y 3 (1).pdf'],
+		sourceDocs: [
+			'Clase Tema 4 y 5.pdf',
+			'Practica 1  Operacion matematia.pdf',
+		],
 		reviewSlugs: [
+			'fundamentos/retardos',
+			'fundamentos/comparaciones-registros',
 			'fundamentos/mplab-proteus',
 			'gpio',
 			'gpio/botones',

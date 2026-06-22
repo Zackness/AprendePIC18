@@ -1,0 +1,122 @@
+---
+title: Register comparisons (Topic 5)
+description: Equal to zero, equal, less than, and greater than with MOVF, SUBWF, and C/Z flags — Partial II UNEXPO.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/comparaciones-registros" locale="en" />
+
+Most PIC program logic involves **comparing data**: temperature vs threshold, key vs menu, `REG1` vs `REG2`. **Topic 5** defines the procedure with **`MOVF`**, **`SUBWF`**, and **`C`** / **`Z`** flags in `STATUS`.
+
+<AIExplain title="Golden rule">
+To compare **two registers**, use **subtraction** with `SUBWF`. To compare **to zero**, use **`MOVF register,F`** (move onto itself) and check **`Z`**, not `C`.
+</AIExplain>
+
+## C and Z flags (review)
+
+After `SUBWF` (and other arithmetic ops):
+
+| Flags | Meaning in subtraction A − B |
+| --- | --- |
+| **Z** | 1 if result is **zero** |
+| **C** | In subtraction: 1 if **no borrow** (unsigned result ≥ 0); 0 if borrow |
+
+On PIC18, **`C` acts as bit 9** of the unsigned result.
+
+## Equal to zero
+
+**Do not use `SUBWF` only for zero.** Partial exams ask this explicitly:
+
+```asm
+MOVF    REGISTRO,F
+BTFSS   STATUS,Z
+GOTO    NO_ES_CERO
+GOTO    ES_CERO
+```
+
+- If `REGISTRO = 0` → **Z = 1**
+- If `REGISTRO ≠ 0` → **Z = 0**
+
+The flag that matters is **`Z`**, not **`C`**.
+
+## Equal to another register (A = B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,Z
+GOTO    A_NO_IGUAL_B
+GOTO    A_IGUAL_B
+```
+
+## Less than (A &lt; B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSC   STATUS,C          ; C=0 → A < B
+GOTO    A_ES_MENOR_B
+GOTO    A_NO_ES_MENOR_B
+```
+
+## Greater than (A &gt; B)
+
+Needs **C = 1** and **Z = 0**:
+
+```asm
+MOVF    B,W
+SUBWF   A,W
+BTFSS   STATUS,C
+GOTO    A_NO_ES_MAYOR_B
+BTFSS   STATUS,Z
+GOTO    A_ES_MAYOR_B
+GOTO    A_NO_ES_MAYOR_B
+```
+
+## Summary table: operation A − B
+
+| Case | C | Z | Flags to test |
+| --- | --- | --- | --- |
+| A = B | 1 | 1 | **Z** |
+| A &gt; B | 1 | 0 | **C** and **Z** |
+| A &lt; B | 0 | 0 | **C** |
+
+**Important:** A − B is not the same as B − A for flags. Define clearly which register is A and which is B.
+
+## Partial-style exercise: REG1 &gt; REG2
+
+Exam wording: *If REG1 is greater than REG2, jump to label MAYOR.*
+
+```asm
+COMPARAR
+    MOVF    REG2,W
+    SUBWF   REG1,W
+    BTFSS   STATUS,C
+    GOTO    FIN_COMP
+    BTFSS   STATUS,Z
+    GOTO    MAYOR
+FIN_COMP
+    RETURN
+MAYOR
+    RETURN
+```
+
+## C and Z after SUBWF (partial inciso)
+
+With `MOVF B,W` then `SUBWF A,W` (computing **A − B**):
+
+| A | B | A − B | C | Z |
+| --- | --- | --- | --- | --- |
+| 10 | 10 | 0 | 1 | 1 |
+| 5 | 3 | 2 | 1 | 0 |
+| 2 | 7 | borrow | 0 | 0 |
+
+<Exercise title="Fill C/Z table">
+For A=15, B=8 and A=0, B=1, state C and Z after `MOVF B,W` / `SUBWF A,W`.
+</Exercise>
+
+<TopicQuiz slug="fundamentos/comparaciones-registros" locale="en" />

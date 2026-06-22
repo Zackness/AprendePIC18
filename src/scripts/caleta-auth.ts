@@ -4,6 +4,11 @@
  */
 
 import { isQuizAuthRequired } from '../data/quizzes';
+import { studyPathCourses } from '../data/study-path';
+import { hrefToQuizSlug } from '../data/quizzes';
+import { getSkillSeries } from '../data/skill-tutorials/index';
+import { practiceTutorials } from '../data/tutorials';
+import { getTutorialSteps } from '../data/tutorial-steps';
 import { CALETA_ORIGIN, SITE_ORIGIN, getCaletaApiOrigin } from './caleta-config';
 
 const STORAGE_TOKEN = 'aprende-pic18-caleta-token';
@@ -11,6 +16,7 @@ const STORAGE_USER = 'aprende-pic18-caleta-user';
 const STORAGE_PROGRESS = 'aprende-pic18-progress-local';
 const STORAGE_CHECKLISTS = 'aprende-pic18-checklists';
 const STORAGE_STUDY_PATH = 'aprende-pic18-study-path';
+const STORAGE_SKILL_GUIDES = 'aprende-pic18-skill-guides';
 
 export type CaletaUser = { id: string; email: string; name: string };
 export type QuizResult = {
@@ -105,11 +111,98 @@ function saveLocalProgress(data: Record<string, unknown>) {
 	localStorage.setItem(STORAGE_PROGRESS, JSON.stringify(data));
 }
 
+function normalizeQuizSlug(slug: string): string {
+	return slug.trim().replace(/^\/+|\/+$/g, '').replace(/^en\//, '').replace(/\/basico$/i, '');
+}
+
+function isQuizPassedForLesson(
+	quizzes: Record<string, QuizResult>,
+	lessonQuizSlug: string | undefined,
+): boolean {
+	if (!lessonQuizSlug) return false;
+	const target = normalizeQuizSlug(lessonQuizSlug);
+	return Object.entries(quizzes).some(([key, value]) => {
+		if (!value?.passed) return false;
+		const normalized = normalizeQuizSlug(key);
+		return (
+			normalized === target ||
+			normalized.startsWith(`${target}/`) ||
+			target.startsWith(`${normalized}/`)
+		);
+	});
+}
+
+function isPracticeComplete(
+	checklists: Record<string, Record<string, boolean>>,
+	slug: string,
+): boolean {
+	const tutorial = practiceTutorials.find((p) => p.slug === slug);
+	if (!tutorial) return false;
+	const steps = getTutorialSteps(tutorial);
+	if (steps.length === 0) return false;
+	const checklist = checklists[`practice-${slug}`];
+	if (!checklist) return false;
+	return steps.every((_, index) => checklist[String(index)] || checklist[index]);
+}
+
+function isSkillSeriesCompleteLocal(
+	skillGuides: Record<string, boolean>,
+	seriesId: string,
+): boolean {
+	const series = getSkillSeries(seriesId);
+	if (!series || series.steps.length === 0) return false;
+	return series.steps.every((step) => skillGuides[`${seriesId}/${step.id}`]);
+}
+
+function expandStudyPathForSync(
+	studyPath: Record<string, boolean>,
+	quizzes: Record<string, QuizResult>,
+	checklists: Record<string, Record<string, boolean>>,
+	skillGuides: Record<string, boolean>,
+): Record<string, boolean> {
+	const expanded = { ...studyPath };
+
+	for (const course of studyPathCourses) {
+		for (const lesson of course.lessons) {
+			const quizSlug = hrefToQuizSlug(lesson.hrefEs);
+			if (isQuizPassedForLesson(quizzes, quizSlug)) expanded[lesson.id] = true;
+			if (lesson.autoPracticeSlug && isPracticeComplete(checklists, lesson.autoPracticeSlug)) {
+				expanded[lesson.id] = true;
+			}
+			if (lesson.autoSkillSeries && isSkillSeriesCompleteLocal(skillGuides, lesson.autoSkillSeries)) {
+				expanded[lesson.id] = true;
+			}
+		}
+	}
+
+	return expanded;
+}
+
 function buildFullProgressPayload(): Record<string, unknown> {
+	const progress = loadLocalProgress();
+	const checklists = JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}') as Record<
+		string,
+		Record<string, boolean>
+	>;
+	const skillGuides = JSON.parse(localStorage.getItem(STORAGE_SKILL_GUIDES) || '{}') as Record<
+		string,
+		boolean
+	>;
+	const quizzes = (progress.quizzes as Record<string, QuizResult> | undefined) || {};
+	const studyPath = expandStudyPathForSync(
+		JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}') as Record<string, boolean>,
+		quizzes,
+		checklists,
+		skillGuides,
+	);
+
+	localStorage.setItem(STORAGE_STUDY_PATH, JSON.stringify(studyPath));
+
 	return {
-		...loadLocalProgress(),
-		checklists: JSON.parse(localStorage.getItem(STORAGE_CHECKLISTS) || '{}'),
-		studyPath: JSON.parse(localStorage.getItem(STORAGE_STUDY_PATH) || '{}'),
+		...progress,
+		checklists,
+		skillGuides,
+		studyPath,
 	};
 }
 

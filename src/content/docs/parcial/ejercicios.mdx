@@ -1,26 +1,61 @@
 ---
 title: Banco de ejercicios tipo parcial
-description: Ejercicios de clase y II parcial del curso de Microcontroladores UNEXPO (Ing. Mecatronica) con enfoque PIC18F4550.
+description: Ejercicios alineados al Segundo Parcial UNEXPO — Temas 4 y 5 (retardos, comparaciones) y problemas GPIO.
 ---
 
 import Exercise from '../../../components/Exercise.astro';
 
-## Ejercicio 1: Control de nivel
+## Parcial II — Temas 4 y 5 (modelo jun 2026)
 
-Sistema de bomba y valvula con sensores simulados por interruptores. Ver [Proyecto control de nivel](/proyectos/control-nivel/).
+Estos ejercicios reflejan la exigencia del examen real. Estudia primero [Retardos](/fundamentos/retardos/) y [Comparaciones](/fundamentos/comparaciones-registros/).
 
-<Exercise title="Conteo descendente en display 7 segmentos">
-Programa que cuenta de 0FH a 00H en display BCD catodo comun. Dos pulsadores: uno incrementa cuenta inicial, otro inicia decremento de 1 s por digito.
+<Exercise title="Teoria: MOVF vs comparacion con cero">
+Explica por que `MOVF REGISTRO,F` usa la bandera **Z** (y no C) para saber si el registro es cero. Escribe el par de instrucciones `BTFSS`/`BTFSC` para saltar si **no** es cero.
 </Exercise>
 
-<Exercise title="Intermitencia controlada por pulsador">
-Al presionar pulsador, LED intermitente 10 ciclos en 100 segundos. Si se presiona de nuevo, detener inmediatamente. Pines sugeridos: RA0, RA1, RB0-RB3.
+<Exercise title="Subrutina REG1 > REG2">
+Escribe una subrutina que, si `REG1` es mayor que `REG2`, salte a la etiqueta `MAYOR`. Usa `MOVF`, `SUBWF`, `BTFSS`/`BTFSC` sobre C y Z.
+</Exercise>
+
+<Exercise title="Tabla C y Z tras SUBWF">
+Completa C y Z despues de `MOVF B,W` / `SUBWF A,W` para: (A=10,B=10), (A=5,B=3), (A=2,B=7), (A=15,B=8).
+</Exercise>
+
+<Exercise title="Retardo 3 ms @ 20 MHz">
+Con CM = 4/20 MHz, calcula la variable del contador externo en un retardo de dos bucles (interno N=250). Completa el codigo con `NOP` de ajuste. Justifica `BRA` en el bucle interno.
+</Exercise>
+
+<Exercise title="Ciclo de maquina y pipeline">
+Con cristal 4 MHz y 20 MHz, calcula CM. Explica en una frase que es el solapamiento (pipeline) y por que igual usas la tabla de ciclos por instruccion.
+</Exercise>
+
+## Parte III — Problemas (GPIO + retardos + logica)
+
+<Exercise title="Bomba y cuenta regresiva 9→0">
+RA0: boton inicio. RA1: bomba. RB4–RB7: display BCD. Al pulsar inicio, mostrar 9 y decrementar cada **10 s** hasta 0, luego apagar bomba. Usa subrutinas de retardo de 10 s (tres bucles @ 20 MHz o valor del PDF).
+</Exercise>
+
+<Exercise title="Robot seguidor de linea">
+RB0/RB1: sensores. RD0/RD1: motores. Estructura: leer sensores → `CALL CASO_1` … `CALL CASO_4` segun combinacion → `BRA PROGRAMA`. Sin usar C aun: dibuja la tabla verdad y el diagrama de flujo antes del codigo.
+</Exercise>
+
+## Guia de clase adicional (aplicacion GPIO)
+
+El PDF `Ejercicios II parcial 20252.pdf` trae problemas de **control de nivel** (bomba/válvula) y display — utiles como practica de diagrama y pseudocodigo, aunque no son el nucleo teorico de Temas 4–5:
+
+<Exercise title="Control de nivel (guia 20252)">
+Sistema bomba + valvula con sensores simulados. Ver tambien [Proyecto control de nivel](/proyectos/control-nivel/).
+</Exercise>
+
+<Exercise title="Conteo descendente en display 7 segmentos">
+Programa que cuenta de 0FH a 00H en display BCD catodo comun. Dos pulsadores: uno incrementa cuenta inicial, otro inicia decremento de 1 s por digito (retardo Tema 4).
 </Exercise>
 
 ## Temas frecuentes en evaluacion
 
-- Pseudocodigo preciso (no necesariamente exacto)
-- Diagrama de flujo con decisiones claras
-- Codigo ensamblador modular
-- Simulacion en Proteus
-- Explicacion oral del funcionamiento
+- Pseudocodigo **preciso** (claro, sin ambiguedad)
+- Diagrama de flujo con decisiones
+- Codigo ensamblador modular (`CALL` / `RETURN`)
+- Calculo de retardos con CM × Σ CI
+- Comparaciones con tabla C/Z del Tema 5
+- Simulacion en Proteus y explicacion oral

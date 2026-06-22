@@ -1,0 +1,127 @@
+---
+title: Comparacion de registros (Tema 5)
+description: Igual a cero, igual, menor y mayor entre registros con MOVF, SUBWF y banderas C y Z — Parcial II UNEXPO.
+---
+
+import AIExplain from '../../../components/AIExplain.astro';
+import Exercise from '../../../components/Exercise.astro';
+import LessonProgress from '../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/comparaciones-registros" />
+
+Casi toda la logica de un programa PIC pasa por **comparar datos**: temperatura vs umbral, tecla presionada vs menu, `REG1` vs `REG2`. El **Tema 5** del curso define el procedimiento con **`MOVF`**, **`SUBWF`** y las banderas **`C`** y **`Z`** de `STATUS`.
+
+<AIExplain title="Regla de oro">
+Para comparar **dos registros**, la operacion base es **resta** con `SUBWF`. Para comparar **con cero**, usa **`MOVF registro,F`** (mueve el registro sobre si mismo) y mira **`Z`**, no `C`.
+</AIExplain>
+
+## Banderas C y Z (repaso)
+
+Tras `SUBWF` (y otras operaciones aritmeticas):
+
+| Banderas | Significado en resta A − B |
+| --- | --- |
+| **Z** | 1 si el resultado es **cero** |
+| **C** | En resta: 1 si **no hubo prestamo** (resultado ≥ 0 en unsigned); 0 si hubo prestamo |
+
+En el PIC18, **`C` actua como el bit 9** del resultado en operaciones unsigned.
+
+## Igual a cero
+
+**No uses `SUBWF` solo para cero.** El profesor pregunta esto en el parcial:
+
+```asm
+MOVF    REGISTRO,F       ; mueve REGISTRO sobre si mismo
+BTFSS   STATUS,Z         ; si Z=1 → era cero
+GOTO    NO_ES_CERO
+GOTO    ES_CERO
+```
+
+- Si `REGISTRO = 0` → **Z = 1**
+- Si `REGISTRO ≠ 0` → **Z = 0**
+
+La bandera que importa es **`Z`**, no **`C`**.
+
+## Igual a otro registro (A = B)
+
+```asm
+MOVF    B,W               ; W = B
+SUBWF   A,W               ; W = A - B
+BTFSS   STATUS,Z          ; Z=1 si A = B
+GOTO    A_NO_IGUAL_B
+GOTO    A_IGUAL_B
+```
+
+## Menor que (A &lt; B)
+
+```asm
+MOVF    B,W
+SUBWF   A,W               ; A - B
+BTFSC   STATUS,C          ; C=0 → A < B (hubo prestamo)
+GOTO    A_ES_MENOR_B
+GOTO    A_NO_ES_MENOR_B
+```
+
+## Mayor que (A &gt; B)
+
+Requiere **C = 1** y **Z = 0** (no son iguales):
+
+```asm
+MOVF    B,W
+SUBWF   A,W               ; A - B
+BTFSS   STATUS,C          ; C=1?
+GOTO    A_NO_ES_MAYOR_B
+BTFSS   STATUS,Z          ; Z=0? (no iguales)
+GOTO    A_ES_MAYOR_B
+GOTO    A_NO_ES_MAYOR_B
+```
+
+## Tabla resumen: operacion A − B
+
+| Caso | C | Z | Banderas a comprobar |
+| --- | --- | --- | --- |
+| A = B | 1 | 1 | **Z** |
+| A &gt; B | 1 | 0 | **C** y **Z** |
+| A &lt; B | 0 | 0 | **C** |
+
+**Importante:** A − B no es igual a B − A en las banderas. Si comparas `REG1` con `REG2`, define bien quien es A y quien es B.
+
+## Ejercicio tipo parcial: subrutina REG1 &gt; REG2
+
+Enunciado del examen: *Si REG1 es mayor que REG2, saltar a la etiqueta MAYOR.*
+
+```asm
+COMPARAR
+    MOVF    REG2,W
+    SUBWF   REG1,W          ; REG1 - REG2
+    BTFSS   STATUS,C
+    GOTO    FIN_COMP        ; C=0 → REG1 no es mayor
+    BTFSS   STATUS,Z        ; Z=0 → no son iguales
+    GOTO    MAYOR
+FIN_COMP
+    RETURN
+MAYOR
+    ; acciones si REG1 > REG2
+    RETURN
+```
+
+## Valores de C y Z tras SUBWF (inciso del parcial)
+
+Con `MOVF B,W` luego `SUBWF A,W` (calculas **A − B**):
+
+| A | B | A − B | C | Z |
+| --- | --- | --- | --- | --- |
+| 10 | 10 | 0 | 1 | 1 |
+| 5 | 3 | 2 | 1 | 0 |
+| 2 | 7 | prestamo | 0 | 0 |
+
+<Exercise title="Completar tabla C/Z">
+Para A=15, B=8 y para A=0, B=1, indica C y Z despues de `MOVF B,W` / `SUBWF A,W`.
+</Exercise>
+
+<Exercise title="Robot seguidor de linea (estructura)">
+El parcial pide subrutinas `CASO_1`, `CASO_2`, … segun sensores en RB0/RB1 y motores en RD0/RD1. Cada caso es una **comparacion de entradas** seguida de acciones en salidas. Practica el patron: leer `PORTB`, enmascarar bits, comparar con patron esperado, `CALL` al caso correspondiente, `BRA PROGRAMA` al final.
+</Exercise>
+
+<TopicQuiz slug="fundamentos/comparaciones-registros" locale="es" />

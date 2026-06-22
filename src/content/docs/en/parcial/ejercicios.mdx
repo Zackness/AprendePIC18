@@ -1,8 +1,53 @@
 ---
 title: Exam-style exercise bank
-description: In-class and II partial exercises from the UNEXPO Mechatronics Engineering Microcontrollers course.
+description: Exercises aligned with UNEXPO Partial II — Topics 4 and 5 (delays, comparisons) and GPIO problems.
 ---
 
 import Exercise from '../../../../components/Exercise.astro';
 
-Includes tank level control, countdown on 7-segment display, and LED blink sequence stopped by button press.
+## Partial II — Topics 4 and 5 (Jun 2026 model)
+
+Study [Delays](/en/fundamentos/retardos/) and [Comparisons](/en/fundamentos/comparaciones-registros/) first.
+
+<Exercise title="Theory: MOVF vs zero compare">
+Explain why `MOVF REGISTRO,F` uses flag **Z** (not C) to test zero. Write `BTFSS`/`BTFSC` to branch when the register is **not** zero.
+</Exercise>
+
+<Exercise title="REG1 > REG2 subroutine">
+Write a subroutine that jumps to `MAYOR` when `REG1` is greater than `REG2`, using `MOVF`, `SUBWF`, and C/Z tests.
+</Exercise>
+
+<Exercise title="C and Z table after SUBWF">
+Fill C and Z after `MOVF B,W` / `SUBWF A,W` for: (10,10), (5,3), (2,7), (15,8).
+</Exercise>
+
+<Exercise title="3 ms delay @ 20 MHz">
+With CM = 4/20 MHz, find the outer counter value for a two-loop delay (inner N=250). Add tuning `NOP`s. Justify `BRA` in the inner loop.
+</Exercise>
+
+## Part III — GPIO + delays + logic
+
+<Exercise title="Pump countdown 9→0">
+RA0: start button. RA1: pump. RB4–RB7: BCD display. On press, show 9 and decrement every **10 s** until 0, then turn pump off.
+</Exercise>
+
+<Exercise title="Line-following robot">
+RB0/RB1: sensors. RD0/RD1: motors. Structure: read sensors → `CALL CASO_1` … → `BRA PROGRAMA`.
+</Exercise>
+
+## Additional class guide (GPIO application)
+
+The PDF `Ejercicios II parcial 20252.pdf` has tank-level control exercises — useful for flowcharts, not core Topics 4–5 theory.
+
+<Exercise title="Tank level control">
+Pump + valve with simulated sensors. See [Level control project](/en/proyectos/control-nivel/).
+</Exercise>
+
+## Frequent exam topics
+
+- Precise pseudocode
+- Flowcharts with clear decisions
+- Modular assembly (`CALL` / `RETURN`)
+- Delay math: CM × Σ CI
+- Comparisons with Topic 5 C/Z table
+- Proteus simulation and oral explanation

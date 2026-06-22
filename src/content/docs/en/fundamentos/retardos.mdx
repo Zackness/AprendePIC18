@@ -1,0 +1,146 @@
+---
+title: Software delays (Topic 4)
+description: Machine cycles, nested-loop delay math, NOP tuning, and BRA vs GOTO — Partial II UNEXPO content.
+---
+
+import AIExplain from '../../../../components/AIExplain.astro';
+import Exercise from '../../../../components/Exercise.astro';
+import LessonProgress from '../../../../components/LessonProgress.astro';
+import TopicQuiz from '../../../../components/TopicQuiz.astro';
+
+<LessonProgress slug="fundamentos/retardos" locale="en" />
+
+Almost every PIC program needs to **wait**: blink an LED, hold a digit on a display, debounce a button. **Topic 4** (Ing. Yoel Pire) covers **software delays**: loops the MCU runs until a counter reaches zero.
+
+<AIExplain title="Two ways to wait">
+**Software:** loops with `DECFSZ` (this topic). **Hardware:** Timer modules (Topics 8+). Partial II asks you to calculate delays using Topic 4 formulas.
+</AIExplain>
+
+## Machine cycles (CM)
+
+The **machine cycle** is the PIC18 time base. With crystal frequency **f_osc**:
+
+```
+CM = 4 / f_osc
+```
+
+| Crystal | CM |
+| --- | --- |
+| 4 MHz | 1 µs |
+| 20 MHz | 0.2 µs (200 ns) |
+
+**Example (4 MHz):** CM = 4 / 4 MHz = **1 µs**. A **1-cycle** instruction takes **1 µs**.
+
+### Pipeline overlap
+
+The PIC18 uses a **pipeline**: while one instruction executes, the next may be fetched. Exams may mention **instruction overlap**. What matters for calculations is the **per-instruction cycle table** (Table 4.1): sum those cycles and multiply by CM.
+
+## Instruction cycles (CI)
+
+Memorize **Table 4.1**:
+
+| Instruction | Cycles |
+| --- | --- |
+| `MOVLW`, `MOVWF`, `NOP` | 1 |
+| `GOTO`, `BRA`, `CALL`, `RETURN` | 2 |
+| `DECFSZ` | 1 if no skip; **2 or 3** if it skips |
+
+`DECFSZ` is central: it decrements and, at zero, **skips** the next instruction (more cycles).
+
+## Delay formula
+
+```
+Delay = CM × Σ CI
+```
+
+**Σ CI** is the **sum of instruction cycles**, counting **how many times** each instruction runs in the loop.
+
+### Single-loop delay
+
+```asm
+RETARDO
+    MOVLW   .N
+    MOVWF   CONTADOR
+BUCLE
+    DECFSZ  CONTADOR,F    ; 1×(N-1) + 2×(1) on exit
+    BRA     BUCLE         ; 2×(N-1)
+    RETURN                ; 2×(1) if subroutine
+```
+
+If you `CALL RETARDO`, add **2 cycles** for the `CALL`.
+
+**Example (20 MHz, N = 200):**
+
+- CM = 4/20 MHz = **0.2 µs**
+- Σ CI = 2 + 1 + 1 + 201 + 398 + 2 = **605**
+- Delay = 0.2 × 605 = **121 µs**
+
+## Nested delays (two and three loops)
+
+For milliseconds or seconds, nest loops:
+
+| Loops | Σ CI formula (approx.) |
+| --- | --- |
+| 1 | 3N + 2 (plus `CALL`/`RETURN` overhead) |
+| 2 | 3NM + 4M + 5 |
+| 3 | 3NMP + 4MP + 4P + 5 |
+
+**Maximum duration with N=M=P=255 @ 20 MHz** (course table):
+
+| Loops | Σ CI | Max delay |
+| --- | --- | --- |
+| 1 | 770 | 0.154 ms |
+| 2 | 196,100 | 39.22 ms |
+| 3 | 50,005,250 | ~10 s |
+
+### 10 Hz square wave
+
+Period T = 1/10 = **100 ms**. Each half period needs a **50 ms** delay. Three nested loops plus three trailing `NOP`s tune the time (see Topic 4 PDF, 10 Hz exercise).
+
+## BRA vs GOTO in delays
+
+Partial exams often ask why **`BRA`** is used in the inner loop:
+
+| | `BRA` | `GOTO` |
+| --- | --- | --- |
+| Jump | **Relative** (short) | **Absolute** (any label) |
+| Cycles | 2 | 2 |
+| Typical use | Nearby loops (`BUCLE`) | Far jumps or across pages |
+
+For delays, **`BRA BUCLE`** is standard. Both use 2 cycles; the course expects **`BRA`** for local loops.
+
+## NOP for fine tuning
+
+Each **`NOP`** adds **1 instruction cycle**. If your math gives 2.997 ms and you need **3 ms** @ 20 MHz, add `NOP`s at the end until Σ CI matches.
+
+## Partial-style exercise: 3 ms delay @ 20 MHz
+
+Typical exam structure (find **A** and `NOP`s):
+
+```asm
+RETARDO_3MS
+    MOVLW   .A
+    MOVWF   CONTADOR_2
+BUCLE_2
+    MOVLW   .250
+    MOVWF   CONTADOR_1
+BUCLE_1
+    DECFSZ  CONTADOR_1,F
+    BRA     BUCLE_1
+    DECFSZ  CONTADOR_2,F
+    BRA     BUCLE_2
+    NOP
+    NOP
+    RETURN
+```
+
+**Method:** write Σ CI as a function of A, set CM × Σ CI = 3 ms = 3000 µs, solve for A.
+
+<Exercise title="3 ms delay — steps">
+1. CM = 4/20 MHz = 0.2 µs. Target: 3000 µs → need Σ CI = 15,000.
+2. Count inner loop cycles (N=250) and outer loop cycles in terms of A.
+3. Solve for A; add `NOP`s if needed.
+4. Justify `BRA` instead of `GOTO` in `BUCLE_1`.
+</Exercise>
+
+<TopicQuiz slug="fundamentos/retardos" locale="en" />
