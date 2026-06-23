@@ -10,9 +10,11 @@ import TopicQuiz from '../../../components/TopicQuiz.astro';
 
 <LessonProgress slug="retardos" />
 
-Si quieres que un LED parpadee cada **1 segundo**, que un digito en un display se vea **10 segundos** (como pide el parcial con la bomba), o que un boton no rebote al instante, necesitas **retardos**. En Microcontroladores (Ing. Yoel Pire) el nucleo de esta seccion son los **retardos por software**: el PIC ejecuta un **bucle** hasta que uno o varios contadores en RAM llegan a cero.
+Si quieres que un LED parpadee cada **1 segundo**, que un digito en un display se vea **10 segundos** (como pide el parcial con la bomba), o que un boton no rebote al instante, necesitas **retardos**.
 
-Esta pagina es la **puerta de entrada** de la seccion. Al terminarla (y el quiz de abajo) deberias saber **que es** un retardo por software, **cuando** usarlo y **como encaja** con el resto de paginas y con el Segundo Parcial.
+En esta seccion veras como generarlos **por software**: el PIC repite un **bucle** en ensamblador (`DECFSZ` + `BRA`) hasta que uno o varios contadores en RAM llegan a cero. Es el metodo que pide el **Segundo Parcial** y el que desarrolla el **Tema 4** del curso.
+
+Esta pagina es la **puerta de entrada**. Al terminarla —y el quiz de abajo— deberias saber **que es** un retardo por software, **cuando** conviene usarlo y **como encaja** con el resto de lecciones.
 
 <AIExplain title="Pregunta del parcial (teoria)">
 El examen pregunta que es el **ciclo de maquina** y que es el **solapamiento** (pipeline). Aqui solo los mencionamos; los desarrollas en [Ciclos de maquina](/retardos/ciclos-maquina/). Para **calcular** tiempos usaras **Retardo = CM × Σ CI**.
