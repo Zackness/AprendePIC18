@@ -36,7 +36,8 @@
   <line x1="190" y1="120" x2="190" y2="150" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
   <line x1="260" y1="175" x2="300" y2="175" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
   <line x1="440" y1="175" x2="480" y2="175" stroke="#14213d" stroke-width="2" marker-end="url(#arr)"/>
-  <text x="350" y="250" text-anchor="middle" class="label">Vectores PIC18F4550: 0x0008 (alta) � 0x0018 (baja)</text>
-  <text x="350" y="275" text-anchor="middle" class="small">INTCON.GIE habilita interrupciones globalmente</text>
+  <text x="350" y="245" text-anchor="middle" class="label">Vectores PIC18F4550</text>
+  <text x="350" y="265" text-anchor="middle" class="small">Prioridad alta: 0x0008 (08H)  ·  Prioridad baja: 0x0018 (18H)</text>
+  <text x="350" y="288" text-anchor="middle" class="small">INTCON.GIE habilita interrupciones globalmente</text>
   <text x="350" y="320" text-anchor="middle" class="small">UNEXPO · Ing. Mecatronica  —  Tema 6 Interrupciones</text>
 </svg>

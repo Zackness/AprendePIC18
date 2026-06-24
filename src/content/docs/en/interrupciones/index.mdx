@@ -18,7 +18,7 @@ You saw the base registers in [Registers — interrupts](/en/fundamentos/registr
 <Figure
 	src="/images/interrupciones/flujo-isr.svg"
 	alt="Flow diagram of an interrupt from event to RETFIE"
-	caption="Full sequence: detect event, save context, run ISR, clear flag, return with RETFIE."
+	caption="Full sequence: detect event, save context, run ISR, clear flag, return with RETFIE. Vectors: high **0x0008 (08H)**, low **0x0018 (18H)**."
 	credit="Topic 6 Interrupts — UNEXPO · Mechatronics · Microcontrollers"
 />
 
@@ -58,14 +58,21 @@ For a peripheral ISR to run (e.g. Timer1), turn on **three switches**:
 ### Step 3 — Flag, vector, and ISR
 
 1. The event sets a **flag** (`TMR0IF`, `RBIF`, `ADIF`…) to 1.
-2. If the source is enabled and **GIE = 1**, the CPU jumps to the **vector** (`0x0008` high or `0x0018` low).
+2. If the source is enabled and **GIE = 1**, the CPU jumps to the interrupt **vector**.
 3. Your **ISR** handles the event, **clears the flag**, and runs **RETFIE**.
+
+| Priority | Address | Assembly notation |
+| --- | --- | --- |
+| **High** | `0x0008` | `ORG 0x0008` or `ORG 08H` |
+| **Low** | `0x0018` | `ORG 0x0018` or `ORG 18H` |
+
+In the course and datasheet you will see **both forms**: `0x0008` / `0x0018` (full hex) and **08H** / **18H** (short form used by MPASM in `ORG`). Both point to the **same program memory address**.
 
 If you do not clear the flag, the PIC **re-enters** the ISR immediately.
 
 ### Step 4 — Save context
 
-The ISR may use `WREG`, `STATUS`, and other registers the main program needed. **Course minimum:** save **WREG** and **STATUS** on entry and restore **before** `RETFIE`. Details in the [practical guide — context](/en/tutoriales/guias/interrupciones/3-contexto/).
+The ISR may use `WREG`, `STATUS`, and other registers the main program needed. **Course minimum:** save **WREG** and **STATUS** on entry and restore **before** `RETFIE`. Details in the [practical guide — context](/en/tutoriales/guias/interrupciones/7-guardar-contexto/).
 
 ## Vectors in the `.ASM` — sandwich style
 
@@ -75,10 +82,10 @@ Vectors go **at the top**, after `CONFIG` and before main code:
         ORG     0x0000
         GOTO    programa         ; reset → main
 
-        ORG     0x0008
+        ORG     0x0008            ; high priority (also: ORG 08H)
         GOTO    isr_high         ; jump → high-priority vector
 
-        ORG     0x0018
+        ORG     0x0018            ; low priority (also: ORG 18H)
         GOTO    isr_low          ; jump → low-priority vector
 
 ; ── Subroutines and ISRs ──────────────────────────────
@@ -95,7 +102,7 @@ programa:
         END
 ```
 
-In the lab, many practices use **high priority only** (`ORG 0x0008`) with all sources in `isr_high`.
+In the lab, many practices use **high priority only** (`ORG 0x0008` / `ORG 08H`) with all sources in `isr_high`.
 
 ## Key registers
 
@@ -185,7 +192,7 @@ Timer setup: see [Timer 0 — 2 seconds](/en/timers/timer0/#example-2-seconds-wi
 
 ## RB4–RB7 interrupt — keyboard preview
 
-For matrix keyboard ([RB interrupt guide](/en/tutoriales/guias/interrupciones/4-rb-interrupt/)):
+For matrix keyboard ([RB interrupt guide](/en/tutoriales/guias/interrupciones/9-rb-teclado/)):
 
 ```asm
         BCF     INTCON2, RBPU    ; internal PORTB pull-ups (per lab)

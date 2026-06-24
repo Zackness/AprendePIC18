@@ -18,7 +18,7 @@ Viste los registros base en [Registros — interrupciones](/fundamentos/registro
 <Figure
 	src="/images/interrupciones/flujo-isr.svg"
 	alt="Diagrama de flujo de una interrupcion desde el evento hasta RETFIE"
-	caption="Secuencia completa: detectar evento, guardar contexto, ejecutar ISR, limpiar bandera y retornar con RETFIE."
+	caption="Secuencia completa: detectar evento, guardar contexto, ejecutar ISR, limpiar bandera y retornar con RETFIE. Vectores: alta **0x0008 (08H)**, baja **0x0018 (18H)**."
 	credit="Tema 6 Interrupciones — UNEXPO · Ing. Mecatronica · Microcontroladores"
 />
 
@@ -58,14 +58,21 @@ Para que una ISR de periferico se ejecute (ej. Timer1), enciendes **tres interru
 ### Paso 3 — Bandera, vector e ISR
 
 1. El evento pone una **bandera** (`TMR0IF`, `RBIF`, `ADIF`…) en 1.
-2. Si la fuente esta habilitada y **GIE = 1**, el CPU salta al **vector** (`0x0008` alta o `0x0018` baja).
+2. Si la fuente esta habilitada y **GIE = 1**, el CPU salta al **vector** de interrupcion.
 3. Tu codigo en la **ISR** atiende el evento, **limpia la bandera** y ejecuta **RETFIE**.
+
+| Prioridad | Direccion | Notacion en ensamblador |
+| --- | --- | --- |
+| **Alta** | `0x0008` | `ORG 0x0008` o `ORG 08H` |
+| **Baja** | `0x0018` | `ORG 0x0018` o `ORG 18H` |
+
+En el curso y en el datasheet veras **las dos formas**: `0x0008` / `0x0018` (hex completo) y **08H** / **18H** (forma corta que usa MPASM en `ORG`). Ambas apuntan a la **misma direccion** de memoria de programa.
 
 Si no limpias la bandera, el PIC **reentra** a la ISR inmediatamente.
 
 ### Paso 4 — Guardar contexto
 
-La ISR puede usar `WREG`, `STATUS` y otros registros que el programa principal necesitaba. **Minimo del curso:** guardar **WREG** y **STATUS** al entrar y restaurarlos **antes** de `RETFIE`. Detalle en la [guia practica — contexto](/tutoriales/guias/interrupciones/3-contexto/).
+La ISR puede usar `WREG`, `STATUS` y otros registros que el programa principal necesitaba. **Minimo del curso:** guardar **WREG** y **STATUS** al entrar y restaurarlos **antes** de `RETFIE`. Detalle en la [guia practica — contexto](/tutoriales/guias/interrupciones/7-guardar-contexto/).
 
 ## Vectores en el `.ASM` — estilo sandwich
 
@@ -75,10 +82,10 @@ Los vectores van **arriba**, despues de `CONFIG` y antes del codigo principal:
         ORG     0x0000
         GOTO    programa         ; reset → main
 
-        ORG     0x0008
+        ORG     0x0008            ; alta prioridad (tambien: ORG 08H)
         GOTO    isr_alta         ; salto → vector alta prioridad
 
-        ORG     0x0018
+        ORG     0x0018            ; baja prioridad (tambien: ORG 18H)
         GOTO    isr_baja         ; salto → vector baja prioridad
 
 ; ── Subrutinas e ISR ──────────────────────────────────
@@ -95,7 +102,7 @@ programa:
         END
 ```
 
-En laboratorio muchas practicas usan **solo prioridad alta** (`ORG 0x0008`) con todas las fuentes en `isr_alta`.
+En laboratorio muchas practicas usan **solo prioridad alta** (`ORG 0x0008` / `ORG 08H`) con todas las fuentes en `isr_alta`.
 
 ## Registros clave
 
@@ -185,7 +192,7 @@ Configuracion previa del timer: ver [Timer 0 — 2 segundos](/timers/timer0/#eje
 
 ## Interrupcion RB4–RB7 — vista previa teclado
 
-Para teclado matricial ([guia RB interrupt](/tutoriales/guias/interrupciones/4-rb-interrupt/)):
+Para teclado matricial ([guia RB interrupt](/tutoriales/guias/interrupciones/9-rb-teclado/)):
 
 ```asm
         BCF     INTCON2, RBPU    ; pull-ups internos PORTB (segun practica)
